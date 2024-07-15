@@ -227,6 +227,7 @@ def runOpenPoseCMD(pathOpenPose, resolutionPoseDetection, cameraDirectory,
             --render_pose 0{}".format(cameraDirectory, fileName,
                                         openposeJsonDir, cmd_hr)
     else:
+        print('"pathOpenPose" is {}', pathOpenPose)
         os.chdir(pathOpenPose)
         pathVideoOut = os.path.join(pathOutputVideo,
                                     trialPrefix + 'withKeypoints.avi')
