@@ -83,6 +83,7 @@ def runOpenPoseVideo(cameraDirectory,fileName,pathOpenPose, trialName,
     os.makedirs(pathOutputPkl, exist_ok=True)
     
     # Get number of frames.
+    print('Video full path is {}',videoFullPath)
     thisVideo = cv2.VideoCapture(videoFullPath)
     nFrameIn = int(thisVideo.get(cv2.CAP_PROP_FRAME_COUNT))
     
