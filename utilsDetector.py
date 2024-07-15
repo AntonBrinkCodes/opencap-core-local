@@ -83,6 +83,7 @@ def runOpenPoseVideo(cameraDirectory,fileName,pathOpenPose, trialName,
     os.makedirs(pathOutputPkl, exist_ok=True)
     
     # Get number of frames.
+    print('Video full path is {}',videoFullPath)
     thisVideo = cv2.VideoCapture(videoFullPath)
     nFrameIn = int(thisVideo.get(cv2.CAP_PROP_FRAME_COUNT))
     
@@ -226,6 +227,7 @@ def runOpenPoseCMD(pathOpenPose, resolutionPoseDetection, cameraDirectory,
             --render_pose 0{}".format(cameraDirectory, fileName,
                                         openposeJsonDir, cmd_hr)
     else:
+        print('"pathOpenPose" is {}', pathOpenPose)
         os.chdir(pathOpenPose)
         pathVideoOut = os.path.join(pathOutputVideo,
                                     trialPrefix + 'withKeypoints.avi')
