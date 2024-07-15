@@ -87,7 +87,7 @@ def runOpenPoseVideo(cameraDirectory,fileName,pathOpenPose, trialName,
     thisVideo = cv2.VideoCapture(videoFullPath)
     nFrameIn = int(thisVideo.get(cv2.CAP_PROP_FRAME_COUNT))
     
-    # The video is rewritten, unrotated, and downsampled. There is no
+    # The video is rewritten, unrotated, and downsamexepled. There is no
     # need to do anything specific for the rotation, just rewriting the video
     # unrotates it.
     trialPath, _ = os.path.splitext(fileName)        
@@ -232,10 +232,10 @@ def runOpenPoseCMD(pathOpenPose, resolutionPoseDetection, cameraDirectory,
         pathVideoOut = os.path.join(pathOutputVideo,
                                     trialPrefix + 'withKeypoints.avi')
         if not generateVideo:
-            command = ('bin\OpenPoseDemo.exe --video {} --write_json {} --render_threshold 0.5 --display 0 --render_pose 0{}'.format(
+            command = ('./build/examples/openpose/openpose.bin --video {} --write_json {} --render_threshold 0.5 --display 0 --render_pose 0{}'.format(
                 videoFullPath, pathOutputJsons, cmd_hr))
         else:
-            command = ('bin\OpenPoseDemo.exe --video {} --write_json {} --render_threshold 0.5 --display 0{}--write_video {}'.format(
+            command = ('./build/examples/openpose/openpose.bin --video {} --write_json {} --render_threshold 0.5 --display 0{}--write_video {}'.format(
                 videoFullPath, pathOutputJsons, cmd_hr, pathVideoOut))
 
     if command:
