@@ -68,7 +68,7 @@ session_ids = ['e1af3fc1-aa3a-4514-8636-7f0fe7798ad9']
 
 calib_id = [] # None (auto-selected trial), [] (skip), or string of specific trial_id
 static_id = [] # None (auto-selected trial), [] (skip), or string of specific trial_id
-dynamic_trialNames = ['s11_jumpingjacks_0_recording', 's11_jumpingjacks_1_recording'] # None (all dynamic trials), [] (skip), or list of trial names
+dynamic_trialNames = ['s11_jumpingjacks_0_recording', 's11-jumpingjacks_1_recording'] # None (all dynamic trials), [] (skip), or list of trial names
 
 # Select which pose estimation model to use; options are 'OpenPose' and 'hrnet'.
 # If the same pose estimation model was used when collecting data with the web
