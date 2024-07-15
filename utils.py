@@ -71,6 +71,7 @@ def getOpenPoseDirectory(isDocker=False):
     elif computername == "DESKTOP-NJMGEBG":
         openPoseDirectory = "C:/openpose/"
     elif computername == None:
+	    print("Inside None case in getOpenPoseDirectory()")
 	    openPoseDirectory = "/home/anton/openpose/"
     else:
         openPoseDirectory = "C:/openpose/"
