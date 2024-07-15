@@ -52,7 +52,7 @@ def getDataDirectory(isDocker=False):
 
 def getOpenPoseDirectory(isDocker=False):
     computername = os.environ.get('COMPUTERNAME', None)
-    
+    print('COMPUTER NAME IS {}', computername)
     # Paths to OpenPose folder for local testing.
     if computername == "DESKTOP-0UPR1OH":
         openPoseDirectory = "C:/Software/openpose-1.7.0-binaries-win64-gpu-python3.7-flir-3d_recommended/openpose"
