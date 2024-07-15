@@ -70,6 +70,8 @@ def getOpenPoseDirectory(isDocker=False):
         openPoseDirectory = "C:/openpose/"
     elif computername == "DESKTOP-NJMGEBG":
         openPoseDirectory = "C:/openpose/"
+    elif computername == None:
+	    openPoseDirectory = "/home/anton/openpose/"
     else:
         openPoseDirectory = "C:/openpose/"
     return openPoseDirectory
