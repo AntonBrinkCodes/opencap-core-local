@@ -218,7 +218,7 @@ def runOpenPoseCMD(pathOpenPose, resolutionPoseDetection, cameraDirectory,
                 raise Exception(exception, exception)   
             
     elif pathOpenPose == "docker":
-        
+        print("for some reason path is docker")
         command = "docker run --gpus=1 -v {}:/openpose/data stanfordnmbl/openpose-gpu\
             /openpose/build/examples/openpose/openpose.bin\
             --video /openpose/data/{}\
@@ -227,7 +227,7 @@ def runOpenPoseCMD(pathOpenPose, resolutionPoseDetection, cameraDirectory,
             --render_pose 0{}".format(cameraDirectory, fileName,
                                         openposeJsonDir, cmd_hr)
     else:
-        print('"pathOpenPose" is {}', pathOpenPose)
+        print('"pathOpenPose" is {}'.format(pathOpenPose))
         os.chdir(pathOpenPose)
         pathVideoOut = os.path.join(pathOutputVideo,
                                     trialPrefix + 'withKeypoints.avi')
