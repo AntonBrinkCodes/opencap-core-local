@@ -232,6 +232,7 @@ def runOpenPoseCMD(pathOpenPose, resolutionPoseDetection, cameraDirectory,
         pathVideoOut = os.path.join(pathOutputVideo,
                                     trialPrefix + 'withKeypoints.avi')
         if not generateVideo:
+            
             command = ('./build/examples/openpose/openpose.bin --video {} --write_json {} --render_threshold 0.5 --display 0 --render_pose 0{}'.format(
                 videoFullPath, pathOutputJsons, cmd_hr))
         else:
@@ -239,6 +240,7 @@ def runOpenPoseCMD(pathOpenPose, resolutionPoseDetection, cameraDirectory,
                 videoFullPath, pathOutputJsons, cmd_hr, pathVideoOut))
 
     if command:
+        print("Command is: "+ command)
         os.system(command)
     
     return
