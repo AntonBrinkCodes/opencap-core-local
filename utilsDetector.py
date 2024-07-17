@@ -108,8 +108,9 @@ def runOpenPoseVideo(cameraDirectory,fileName,pathOpenPose, trialName,
         os.system(CMD)
 
     # Run OpenPose if this file doesn't exist in outputs
-    ppPklPath = os.path.join(pathOutputPkl, trialPrefix + '_pp.pkl')    
+    ppPklPath = os.path.join(pathOutputPkl, trialPrefix + '_pp.pkl')   
     if not os.path.exists(ppPklPath):
+        print("path already exists...")
         c_path = os.getcwd()
         command = runOpenPoseCMD(
             pathOpenPose, resolutionPoseDetection, cameraDirectory,
