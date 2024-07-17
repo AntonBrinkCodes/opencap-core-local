@@ -238,9 +238,10 @@ def runOpenPoseCMD(pathOpenPose, resolutionPoseDetection, cameraDirectory,
         else:
             command = ('./build/examples/openpose/openpose.bin --video {} --write_json {} --render_threshold 0.5 --display 0{}--write_video {}'.format(
                 videoFullPath, pathOutputJsons, cmd_hr, pathVideoOut))
-
+    print(command)
     if command:
-        print("Command is: "+ command)
+        print("Command is: ")
+        print(command)
         os.system(command)
     
     return
