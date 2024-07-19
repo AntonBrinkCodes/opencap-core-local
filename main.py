@@ -332,6 +332,7 @@ def main(sessionName, trialName, trial_id, cameras_to_use=['all'],
         for camName in cameraDirectories:
             camDir = cameraDirectories[camName]
             pathVideoWithoutExtension = os.path.join(camDir, 'InputMedia', trialName, trial_id)
+            print(pathVideoWithoutExtension)
             if len(glob.glob(pathVideoWithoutExtension + '*')) == 0:
                 print(f"Camera {camName} does not have a video for trial {trial_id}")
             else:
@@ -581,6 +582,7 @@ def main(sessionName, trialName, trial_id, cameras_to_use=['all'],
             pathScaledModel = os.path.join(outputScaledModelDir, 
                                             sessionMetadata['openSimModel'] + 
                                             "_scaled.osim")
+            print(pathScaledModel)
             if os.path.exists(pathScaledModel):
                 # Path setup file.
                 genericSetupFile4IKName = 'Setup_IK{}.xml'.format(suffix_model)
@@ -591,6 +593,7 @@ def main(sessionName, trialName, trial_id, cameras_to_use=['all'],
                 # Run IK tool. 
                 logging.info('Running Inverse Kinematics')
                 try:
+                    
                     pathOutputIK, pathModelIK = runIKTool(
                         pathGenericSetupFile4IK, pathScaledModel, 
                         pathTRCFile4IK, outputIKDir)
