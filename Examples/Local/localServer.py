@@ -30,40 +30,71 @@ class sessionManager:
 
 class ConnectionManager:
     def __init__(self):
-        # Dictionary to store active connections based on client type
-        self.active_connections: Dict[str, List[WebSocket]] = {
+        # Dictionary to store active connections based on session ID and client type
+        self.session_connections: Dict[str, Dict[str, List[WebSocket]]] = {}
+        # Dictionary to store general connections (no session ID)
+        self.general_connections: Dict[str, List[WebSocket]] = {
             "web": [],
             "mobile": []
         }
 
-    async def connect(self, websocket: WebSocket, client_type: str):
+    async def connect(self, websocket: WebSocket, client_type: str, session_id: Optional[str] = None):
         await websocket.accept()
-        if client_type in self.active_connections:
-            self.active_connections[client_type].append(websocket)
+        if session_id:
+            # Handle session-specific connections
+            if session_id not in self.session_connections:
+                self.session_connections[session_id] = {
+                    "web": [],
+                    "mobile": []
+                }
+            self.session_connections[session_id][client_type].append(websocket)
         else:
-            self.active_connections[client_type] = [websocket]
+            # Handle general connections
+            self.general_connections[client_type].append(websocket)
 
-    def disconnect(self, websocket: WebSocket, client_type: str):
-        logger.debug("Removing client with type: "+client_type)
-        self.active_connections[client_type].remove(websocket)
+    def disconnect(self, websocket: WebSocket, client_type: str, session_id: Optional[str] = None):
+        if session_id:
+            # Remove from session-specific connections
+            if session_id in self.session_connections:
+                self.session_connections[session_id][client_type].remove(websocket)
+        else:
+            # Remove from general connections
+            self.general_connections[client_type].remove(websocket)
 
     async def send_personal_message(self, message: str, websocket: WebSocket):
         await websocket.send_text(message)
 
-    async def broadcast(self, message: str, client_type: str = None):
-        if client_type:
-            # Broadcast to a specific type of client
-            for connection in self.active_connections[client_type]:
-                await self.trySendMessage(connection, message)
+    async def broadcast(self, message: str, client_type: str = None, session_id: Optional[str] = None):
+        if session_id:
+            print(f"trying to broadcast to {session_id}")
+            # Broadcast to a specific session
+            print(self.session_connections)
+            if session_id in self.session_connections:
+                print(f"{session_id} is in self.session_connections!")
+                if client_type:
+                    for connection in self.session_connections[session_id][client_type]:
+                        print(f"Sending {message} to {client_type} in {session_id}")
+                        await self.trySendMessage(connection, message)
+                else:
+                    for connections in self.session_connections[session_id].values():
+                        for connection in connections:
+                            await self.trySendMessage(connection, message)
         else:
-            # Broadcast to all clients
-            for connections in self.active_connections.values():
-                for connection in connections:
+            # Broadcast to all clients in the general connections
+            if client_type:
+                for connection in self.general_connections[client_type]:
                     await self.trySendMessage(connection, message)
+            else:
+                for connections in self.general_connections.values():
+                    for connection in connections:
+                        await self.trySendMessage(connection, message)
 
-    def getNrOfClients(self, client_type: str):
-        return len(self.active_connections.get(client_type, []))
-    
+    def getNrOfClients(self, client_type: str, session_id: Optional[str] = None):
+        if session_id:
+            return len(self.session_connections.get(session_id, {}).get(client_type, []))
+        else:
+            return len(self.general_connections.get(client_type, []))
+
     async def trySendMessage(self, connection: WebSocket, message: str):
         if not connection.client_state == WebSocketState.CONNECTED:
             return
@@ -72,16 +103,22 @@ class ConnectionManager:
         except RuntimeError as e:
             print(f"Error sending message: {e}")
 
-    #   Function to find the index of a WebSocket in a given client type 
     def find_websocket_index(self, client_type: str, websocket: WebSocket) -> int:
-        if client_type in self.active_connections:
+        # Check general connections first
+        if client_type in self.general_connections:
             try:
-                # Directly access the list associated with client_type and find the index of websocket
-                return self.active_connections[client_type].index(websocket)
+                return self.general_connections[client_type].index(websocket)
             except ValueError:
-                return -1  # Return -1 if the WebSocket is not found
-        else:
-            raise KeyError(f"Client type '{client_type}' not found in active connections")
+                pass
+        
+        # Then check session connections
+        for session_id, client_types in self.session_connections.items():
+            if client_type in client_types:
+                try:
+                    return client_types[client_type].index(websocket)
+                except ValueError:
+                    pass
+        return -1
 
         
         
@@ -116,7 +153,8 @@ def testy():
 async def websocket_endpoint(websocket: WebSocket, client_type: str):
     await manager.connect(websocket, client_type)
     logger.debug(f"Clients connected: {manager.getNrOfClients(client_type)}")
-    await manager.broadcast(f"Web-apps connected: {manager.getNrOfClients("web")}\n Cameras connected: {manager.getNrOfClients("mobile")}")
+    await manager.broadcast(f"General Web-apps connected: {manager.getNrOfClients('web')}\n"
+                            f"General Cameras connected: {manager.getNrOfClients('mobile')}", client_type)
     try:
         while True:
             
@@ -157,6 +195,54 @@ async def websocket_endpoint(websocket: WebSocket, client_type: str):
         manager.disconnect(websocket, client_type)
         logger.debug("A client is disconnecting")
         await manager.broadcast(f"Web-apps connected: {manager.getNrOfClients("web")}, Cameras connected: {manager.getNrOfClients("mobile")}")
+
+@app.websocket("/ws/{session_id}/session")
+async def websocket_endpoint(websocket: WebSocket, session_id: str, client_type: str):
+    await manager.connect(websocket, client_type, session_id=session_id)
+    print(f"Clients connected: {manager.getNrOfClients(client_type)}")
+    try:
+        while True:
+            
+            data = await websocket.receive()
+            print(f"received message in {session_id}")
+            if data["type"] == "websocket.disconnect":
+                break
+
+            if data["type"] == "websocket.receive":
+                if "text" in data:
+                    message = data["text"]
+                    print(data)
+                    if client_type == "web":
+                        if message =="newSession":
+                            # Create new session
+                            print("creating new session")
+                            sessionManager.addSession(Session())
+                            sessionID = sessionManager.activeSession.getID()
+                            await manager.send_personal_message(f"New session id: {sessionID} ", websocket)
+                        else:
+                            print(f"Session {session_id} says: {message}")
+                            await manager.broadcast(f"Session {session_id} says: {message}", "mobile", session_id=session_id)
+                    else:
+                        await manager.broadcast(f"Mobile says: {message}", "web", session_id=session_id)
+
+                elif "bytes" in data:
+                    binary_data = data["bytes"]
+                    # Handle binary data here
+                    print(f"Received binary data: {len(binary_data)} bytes")
+                    # You could save the binary data to a file, process it, etc.
+                    binary_data = data["bytes"]
+                    # Save binary data to a file
+                    # TODO: Make a filemanager for this
+                    save_binary_file(binary_data, f"received_file_cam{manager.find_websocket_index(client_type,websocket)}.mov")
+                    # Optionally broadcast the receipt
+                    await manager.broadcast(f"Received binary data of size: {len(binary_data)} bytes")
+    except WebSocketDisconnect:
+        pass
+    finally:
+        manager.disconnect(websocket, client_type)
+        logger.debug("A client is disconnecting")
+        await manager.broadcast(f"Web-apps connected: {manager.getNrOfClients("web")}, Cameras connected: {manager.getNrOfClients("mobile")}")
+
 
 def save_binary_file(data: bytes, filename: str):
     with open(filename, 'wb') as file:
