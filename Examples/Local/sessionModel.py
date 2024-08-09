@@ -9,12 +9,13 @@ import uuid
 import uuid
 import yaml
 from enum import Enum
-from typing import List, Dict
+from typing import List, Dict, Optional
 from datetime import datetime
+from CheckerBoard import CheckerBoard
 
 class sex(Enum):
-    female = "f",
-    male = "m",
+    female = "f"
+    male = "m"
     other = "o"
 
 class Subject:
@@ -28,10 +29,10 @@ class Subject:
             weight (float): The weight of the subject in kilograms.
     """
     def __init__(self, name="defaultSubject", sex=sex.male, height=1.89, weight=83.2):
-        self.name=name
-        self.sex = sex
+        self.id=name
+        self.gender = sex
         self.height = height #in meters
-        self.weight = weight #in kilos
+        self.mass = weight #in kilos
 
 
 
@@ -57,29 +58,26 @@ class Session:
 
         Args:
             subject (Subject): The subject associated with the session.
-            metadata (Optional[Dict]): Metadata for the session.
+            uuid (Optional[uuid]: The uuid4 for the session. Generates new one if not passed)
     """
-    def __init__(self, subject: Subject=Subject()):
-        self.subject = subject
-        self.uuid = uuid.uuid4()
+    def __init__(self, subject: Optional[Subject]=None, session_uuid: Optional[uuid.UUID]=None, ):
+        self.subject = subject or Subject()
+        self.checkerBoard = CheckerBoard()
+        self.uuid = session_uuid or uuid.uuid4()
         self.dynamic_trials = []
         self.calibration_trial = None
         self.static_trial = None
         self.metadata = {}
         self.iphoneModel = {} # What type of cameras we have..
         self.createdAt = datetime.now()
+        self.openSimModel = 'LaiUhlrich2022'
+
         
         self.calibrationSettings : Dict[str, str] = {
             "overwriteDeployedIntrinsics": 'false',
             "saveSessionIntrinics": 'false',
         }
 
-        self.checkerBoard: Dict[str, str] = {
-            'black2BlackCornersHeight_n': 8,
-            'black2BlackCornersWidth_n': 11,
-            'placement': 'ground',
-            'squareSideLength_mm': 60
-        }
 
         self.markerAugmentationSettings: Dict[str, str] = {
               'markerAugmenterModel': 'LSTM'
@@ -127,16 +125,34 @@ class Session:
         """
         self.static_trial = trial
 
-    def save_metadata(self):
+    def save_metadata(self, metadata_file = "session_metadata.yaml"): #Double check name later.
+        """
+        Save the session metadata to a YAML file.
+        """
         metadata = {
-            'uuid': str(self.uuid),
-            'metadata': self.metadata,
-            'dynamic_trials': [trial.name for trial in self.dynamic_trials],
-            'calibration_trial': self.calibration_trial.name if self.calibration_trial else None,
-            'static_trial': self.static_trial.name if self.static_trial else None
+            'subjectID': self.subject.id,
+            'mass_kg': self.subject.mass,
+            'height_m': self.subject.height,
+            'gender_mf': self.subject.gender.value,
+            'openSimModel': self.openSimModel,
+            'checkerBoard': {
+                'black2BlackCornersHeight_n': self.checkerBoard.black2BlackCornersHeight_n,
+                'black2BlackCornersWidth_n': self.checkerBoard.black2BlackCornersWidth_n,
+                'placement': self.checkerBoard.placement,
+                'squareSideLength_mm': self.checkerBoard.squareSideLength_mm,
+            },
+            'calibrationSettings': {
+                'overwriteDeployedIntrinsics': self.metadata.get('overwriteDeployedIntrinsics', False),
+                'saveSessionIntrinsics': self.metadata.get('saveSessionIntrinsics', False),
+            },
+            'markerAugmentationSettings': {
+                'markerAugmenterModel': self.metadata.get('markerAugmenterModel', 'LSTM'),
+            },
+            'iphoneModel': self.iphoneModel,
         }
-        with open(self.metadata_file, 'w') as file:
-            yaml.dump(metadata, file)
+        
+        with open(metadata_file, 'w') as file:
+            yaml.dump(metadata, file, default_flow_style=False)
 
     def load_metadata(self):
         with open(self.metadata_file, 'r') as file:
@@ -161,23 +177,32 @@ class Session:
 # Example usage:
 if __name__=="__main__":
     # Creating trials
-    trial1 = Trial(name="Dynamic Trial 1", data={"duration": 5})
-    trial2 = Trial(name="Dynamic Trial 2", data={"duration": 10})
-    calibration_trial = Trial(name="Calibration Trial", data={"calibration_factor": 1.5})
-    static_trial = Trial(name="Static Trial", data={"static_value": 42})
+    #trial1 = Trial(name="Dynamic Trial 1", data={"duration": 5})
+    #trial2 = Trial(name="Dynamic Trial 2", data={"duration": 10})
+    #calibration_trial = Trial(name="Calibration Trial", data={"calibration_factor": 1.5})
+    #static_trial = Trial(name="Static Trial", data={"static_value": 42})
 
     # Creating a session with metadata
     session_metadata = {"experimenter": "Dr. Smith", "date": "2024-07-31"}
-    session = Session(metadata=session_metadata)
-
+    session = Session()
+    session.checkerBoard.black2BlackCornersHeight_n = 3
+    session.iphoneModel = {
+    'Cam0': 'iphone13,3',
+    'Cam1': 'iphone13,3',
+    'Cam2': 'iphone13,3',
+    'Cam3': 'iphone13,3',
+    'Cam4': 'iphone13,3',
+    }
+    #session.metadata_file = '/path/to/metadata.yaml'
+    session.save_metadata('new_session_metadata.yaml')
     # Adding trials to the session
-    session.add_dynamic_trial(trial1)
-    session.add_dynamic_trial(trial2)
-    session.set_calibration_trial(calibration_trial)
-    session.set_static_trial(static_trial)
+    #session.add_dynamic_trial(trial1)
+    #session.add_dynamic_trial(trial2)
+    #session.set_calibration_trial(calibration_trial)
+    #session.set_static_trial(static_trial)
 
     # Saving session metadata to YAML file
-    session.save_metadata()
+    #session.save_metadata()
 
     # Display the session
     print(session)

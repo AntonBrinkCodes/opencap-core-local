@@ -169,6 +169,9 @@ async def websocket_endpoint(websocket: WebSocket, client_type: str):
                         if message =="newSession":
                             # Create new session
                             print("creating new session")
+                            print(f"previous sessions are:")
+                            for session in sessionManager.sessions:
+                                print(session.getID())
                             sessionManager.addSession(Session())
                             sessionID = sessionManager.activeSession.getID()
                             await manager.send_personal_message(f"New session id: {sessionID} ", websocket)
@@ -196,10 +199,15 @@ async def websocket_endpoint(websocket: WebSocket, client_type: str):
         logger.debug("A client is disconnecting")
         await manager.broadcast(f"Web-apps connected: {manager.getNrOfClients("web")}, Cameras connected: {manager.getNrOfClients("mobile")}")
 
+
+'''
+SESSION WEBSOCKET
+'''
 @app.websocket("/ws/{session_id}/session")
 async def websocket_endpoint(websocket: WebSocket, session_id: str, client_type: str):
     await manager.connect(websocket, client_type, session_id=session_id)
-    print(f"Clients connected: {manager.getNrOfClients(client_type)}")
+    print(f"BROADCASTING: Session {session_id} mobiles connected: {manager.getNrOfClients(client_type="mobile", session_id=session_id)}")
+    await manager.broadcast(f"Session {session_id} mobiles connected: {manager.getNrOfClients(client_type="mobile", session_id=session_id)}", session_id=session_id)
     try:
         while True:
             
@@ -223,7 +231,7 @@ async def websocket_endpoint(websocket: WebSocket, session_id: str, client_type:
                             print(f"Session {session_id} says: {message}")
                             await manager.broadcast(f"Session {session_id} says: {message}", "mobile", session_id=session_id)
                     else:
-                        await manager.broadcast(f"Mobile says: {message}", "web", session_id=session_id)
+                        await manager.broadcast(f"Session {session_id} Mobile says: {message}", "web", session_id=session_id)
 
                 elif "bytes" in data:
                     binary_data = data["bytes"]
@@ -239,9 +247,9 @@ async def websocket_endpoint(websocket: WebSocket, session_id: str, client_type:
     except WebSocketDisconnect:
         pass
     finally:
-        manager.disconnect(websocket, client_type)
+        manager.disconnect(websocket, client_type, session_id=session_id)
         logger.debug("A client is disconnecting")
-        await manager.broadcast(f"Web-apps connected: {manager.getNrOfClients("web")}, Cameras connected: {manager.getNrOfClients("mobile")}")
+        await manager.broadcast(f"Session {session_id} Web-apps connected: {manager.getNrOfClients("web")}, Cameras connected: {manager.getNrOfClients("mobile")}", session_id=session_id)
 
 
 def save_binary_file(data: bytes, filename: str):
