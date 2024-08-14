@@ -6,7 +6,7 @@ import numpy as np
 import json
 import sys
 import time
-
+import platform # To check for windows/Linux
 from decouple import config
 
 from utils import getOpenPoseMarkerNames, getMMposeMarkerNames, getVideoExtension
@@ -232,13 +232,15 @@ def runOpenPoseCMD(pathOpenPose, resolutionPoseDetection, cameraDirectory,
         os.chdir(pathOpenPose)
         pathVideoOut = os.path.join(pathOutputVideo,
                                     trialPrefix + 'withKeypoints.avi')
+        
+        exe = './build/examples/openpose/openpose.bin' if platform.system() == "Linux" else r'bin\OpenPoseDemo.exe' #Assumes windows or Ubuntu
+
         if not generateVideo:
             
-            command = ('./build/examples/openpose/openpose.bin --video {} --write_json {} --render_threshold 0.5 --display 0 --render_pose 0{}'.format(
-                videoFullPath, pathOutputJsons, cmd_hr))
+            command = ('{} --video {} --write_json {} --render_threshold 0.5 --display 0 --render_pose 0{}'.format(
+                       exe, videoFullPath, pathOutputJsons, cmd_hr))
         else:
-            command = ('./build/examples/openpose/openpose.bin --video {} --write_json {} --render_threshold 0.5 --display 0{}--write_video {}'.format(
-                videoFullPath, pathOutputJsons, cmd_hr, pathVideoOut))
+            command += ' --write_video {}'.format(pathVideoOut)
     print(command)
     if command:
         print("Command is: ")

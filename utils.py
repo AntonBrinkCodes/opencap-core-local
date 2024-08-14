@@ -1616,3 +1616,6 @@ def get_entry_with_largest_number(trialList):
             continue
 
     return max_entry
+
+
+getOpenPoseDirectory()
