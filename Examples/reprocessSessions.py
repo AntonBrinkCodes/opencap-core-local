@@ -50,6 +50,7 @@ from utilsAuth import getToken
 
 API_URL = getAPIURL()
 API_TOKEN = getToken()
+import tensorflow as tf
 
 # %% User inputs.
 # Enter the identifier(s) of the session(s) you want to reprocess. This is a list of one
@@ -104,10 +105,10 @@ resolutionPoseDetection = '1x736_2scales'
 # reprocessing a session that you collected, data will get written to the database
 # regardless of your selection. If True, the local copy will be deleted.
 deleteLocalFolder = False
-      
+print(tf.config.list_physical_devices('GPU'))      
 
 # %% Process data.
-batchReprocess(session_ids,calib_id,static_id,dynamic_trialNames,
+'''batchReprocess(session_ids,calib_id,static_id,dynamic_trialNames,
                poseDetector=poseDetector,
                resolutionPoseDetection=resolutionPoseDetection,
-               deleteLocalFolder=deleteLocalFolder)
+               deleteLocalFolder=deleteLocalFolder)'''
