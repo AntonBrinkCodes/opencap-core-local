@@ -235,10 +235,12 @@ def runOpenPoseCMD(pathOpenPose, resolutionPoseDetection, cameraDirectory,
         
         exe = './build/examples/openpose/openpose.bin' if platform.system() == "Linux" else r'bin\OpenPoseDemo.exe' #Assumes windows or Ubuntu
 
-        command = ('{} --video {} --write_json {} --render_threshold 0.5 --display 0 --render_pose 0{}'.format(
+        if not generateVideo:
+            command = ('{} --video {} --write_json {} --render_threshold 0.5 --display 0 --render_pose 0{}'.format(
                        exe, videoFullPath, pathOutputJsons, cmd_hr))
-        if generateVideo:
-            command += ' --write_video {}'.format(pathVideoOut)
+        else: 
+            command = ('{} --video {} --write_json {} --render_threshold 0.5 --display 0{}--write_video {}'.format(
+                exe, videoFullPath, pathOutputJsons, cmd_hr, pathVideoOut))
     print(command)
     if command:
         print("Command is: ")
