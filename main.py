@@ -1,5 +1,5 @@
 """
-    @authors: Scott Uhlrich, Antoine Falisse, Łukasz Kidziński
+    @authors: Scott Uhlrich, Antoine Falisse, Lukasz Kidzinski
     This function calibrates the cameras, runs the pose detection algorithm, 
     reconstructs the 3D marker positions, augments the marker set,
     and runs the OpenSim pipeline.
