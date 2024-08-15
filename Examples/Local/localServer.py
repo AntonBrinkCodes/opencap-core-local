@@ -8,7 +8,7 @@ import logging
 from sessionModel import Session, Trial, Subject
 import json
 import base64
-
+from FileManager import FileManager
 
 import threading
 import time
@@ -228,6 +228,7 @@ class ConnectionManager:
 
 
 manager = ConnectionManager()
+fileManager = FileManager("./Examples/Data")
 logger = logging.getLogger('uvicorn.error')
 sessionManager = sessionManager()
 
@@ -268,10 +269,13 @@ async def websocket_endpoint(websocket: WebSocket, client_type: str):
                                 print(session.getID())
                             sessionManager.addSession(Session())
                             sessionID = sessionManager.activeSession.getID()
+
                             print(f"'{str(sessionID)}'")
                             for session in manager.session_connections:
                                 print("session")
                                 print(f"'{session}'")
+                            # Create file directory for the session
+                            fileManager.create_session_directory(sessionManager.activeSession)
                             await manager.send_personal_message(f"New session id: {sessionID} ", websocket)
                         else:
                             await manager.broadcast(f"WebApp says: {message}", "mobile")
@@ -379,11 +383,13 @@ async def websocket_endpoint(websocket: WebSocket, session_id: str, client_type:
                             metadata = message.get("metadata", {})
                             base64_data = message.get("videoData", "")
                             name = metadata.get("name")
+                            trial = activeSession.get_trial_by_name(name)
                             # Decode the Base64 string back to binary data
                             video_data = base64.b64decode(base64_data)
 
                             # Save the video to a file
-                            save_binary_file(video_data, f"{name}cam{manager.find_websocket_index(client_type, websocket)}.mov")
+                            fileManager.save_binary_file(video_data, session = activeSession, trial = trial, cam_index =manager.find_websocket_index(client_type, websocket)  )
+                            #save_binary_file(video_data, f"{name}cam{manager.find_websocket_index(client_type, websocket)}.mov")
                             
                         #await manager.broadcast(f"Session {session_id} received a message it cant deal with right now", "web", session_id=session_id)
                         #await manager.broadcast(f"Session {session_id} Mobile says: {message}", "web", session_id=session_id)
@@ -429,7 +435,6 @@ if __name__=="__main__":
     print(f"Hostname: {hostname}")
 
     #ip_address = socket.gethostbyname(hostname) #"192.168.0.48"#socket.gethostbyname(hostname)
-    #print(f"IP Address: {ip_address}")
     ip_address = "130.229.141.43" # debug
     print(f"IP Address: {ip_address}")
 
