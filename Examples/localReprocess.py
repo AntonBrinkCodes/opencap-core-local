@@ -22,7 +22,7 @@ trial_Names = "s05-treadmill_1_recording" # "calibration for extrinsic trials." 
 
 poseDetector = 'openpose'
 
-resolutionPoseDetection = '1x736'
+resolutionPoseDetection = '1x736_2scales'
 
 extrinsicTrial = False
 genericFolderNames = True
