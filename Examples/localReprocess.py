@@ -29,7 +29,7 @@ extrinsicTrial = False
 genericFolderNames = False
 scaleModel = False
 
-sessionType = "calibration" # Calibration, static, or dynamic. assumes dynamic if anything else
+sessionType = "dynamic" # Calibration, static, or dynamic. assumes dynamic if anything else
 
 
 if sessionType == "calibration":
