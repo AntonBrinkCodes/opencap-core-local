@@ -16,3 +16,7 @@ openpyxl
 ffmpeg-python
 psutil
 boto3
+# For running local server:
+fastapi
+mangum
+uvicorn

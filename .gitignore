@@ -13,7 +13,7 @@ __pycache__
 # Data
 */Data/*
 Data/
-Examples/Data/*
+# Examples/Data/* Re-enable this to be removed from here later :)
 
 # Files for re-processing
 Examples/reprocessSessionServer.py
