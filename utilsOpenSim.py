@@ -123,7 +123,8 @@ def runScaleTool(pathGenericSetupFile, pathGenericModel, subjectMass,
                 print('There were no marker pairs in {}, so this measurement \
                       is not applied.'.format(meas.getName()))
     # Run scale tool.       
-    print("running scaletool...")               
+    print("running scaletool...")     
+    print(f"to: {pathOutputSetup}")          
     scaleTool.printToXML(pathOutputSetup)            
     command = 'opensim-cmd -o error' + ' run-tool ' + pathOutputSetup
     os.system(command)
@@ -148,7 +149,7 @@ def runScaleTool(pathGenericSetupFile, pathGenericModel, subjectMass,
     if diff_scale > 1:
         exception = "Musculoskeletal model scaling failed; the segment sizes are not anthropometrically realistic. It is very likely that the camera calibration went wrong. Visit https://www.opencap.ai/best-pratices to learn more about camera calibration."
         raise Exception(exception, exception)        
-    
+    print(pathOutputModel)
     return pathOutputModel
     
 # %% Inverse kinematics.
