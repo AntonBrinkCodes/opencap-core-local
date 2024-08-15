@@ -31,7 +31,7 @@ class CheckerBoard:
         return self._black2BlackCornersHeight_n
 
     @black2BlackCornersHeight_n.setter
-    def black2BlackCornersHeight_n(self, value):
+    def black2BlackCornersHeight_n(self, value: int):
         """Set the number of black-to-black corners in the height direction."""
         if value > 0:
             self._black2BlackCornersHeight_n = value
@@ -45,7 +45,7 @@ class CheckerBoard:
         return self._black2BlackCornersWidth_n
 
     @black2BlackCornersWidth_n.setter
-    def black2BlackCornersWidth_n(self, value):
+    def black2BlackCornersWidth_n(self, value: int):
         """Set the number of black-to-black corners in the width direction."""
         if value > 0:
             self._black2BlackCornersWidth_n = value
@@ -73,9 +73,22 @@ class CheckerBoard:
         return self._squareSideLength_mm
 
     @squareSideLength_mm.setter
-    def squareSideLength_mm(self, value):
+    def squareSideLength_mm(self, value: int):
         """Set the side length of each square on the checkerboard in millimeters."""
         if value > 0:
             self._squareSideLength_mm = value
         else:
             raise ValueError("squareSideLength_mm must be a positive number")
+
+    def __str__(self):
+        """
+        Return a string representation of the CheckerBoard instance.
+
+        Returns:
+        --------
+        str: A string summarizing the key attributes of the checkerboard.
+        """
+        return (f"CheckerBoard with height: {self.black2BlackCornersHeight_n}, "
+                    f"width: {self.black2BlackCornersWidth_n}, "
+                    f"each square side length: {self.squareSideLength_mm} mm, "
+                    f"placement: {self.placement}.")

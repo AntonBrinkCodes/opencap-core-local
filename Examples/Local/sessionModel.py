@@ -39,7 +39,6 @@ class Subject:
 class Trial:
     """
         Initialize a Trial instance.
-
         Args:
             name (str): The name of the trial.
             videos (List): A list of videos associated with the trial.
@@ -125,6 +124,46 @@ class Session:
         """
         self.static_trial = trial
 
+    def set_checkerboard_params(self, checkerboard_height: int, checkerboard_width: int, checkerboard_mm: int, 
+                                checkerboard_placement: str="backwall"):
+        '''
+        Set the information about the checkerboard for the current session.
+
+        This method sets the dimensions and placement of a checkerboard used in a session by updating the corresponding
+        attributes of the `checkerBoard` object. The checkerboard is characterized by the number of black-to-black 
+        corners in both height and width, the length of the side of a square in millimeters, and the placement of 
+        the checkerboard in the session's environment.
+
+        Parameters:
+        -----------
+        checkerboard_height : int
+            The number of black-to-black corners along the height of the checkerboard.
+
+        checkerboard_width : int
+            The number of black-to-black corners along the width of the checkerboard.
+
+        checkerboard_mm : float
+            The length of a single square side on the checkerboard in millimeters.
+
+        checkerboard_placement : str
+            The placement of the checkerboard in the session's environment. This could be a string representing
+            the position or orientation, such as 'backwall', 'ground', etc.
+
+        Returns:
+        --------
+        None
+
+        Example:
+        --------
+        >>> session.set_checkerboard_params(8, 6, 25.0, 'backwall')
+        This sets a checkerboard with 8 black-to-black corners in height, 6 black-to-black corners in width, 
+        25.0 mm square side length, and places it in the backwall of the environment.       
+        '''
+        self.checkerBoard.black2BlackCornersHeight_n = checkerboard_height
+        self.checkerBoard.black2BlackCornersWidth_n = checkerboard_width
+        self.checkerBoard.squareSideLength_mm = checkerboard_mm
+        self.checkerBoard.placement = checkerboard_placement
+
     def save_metadata(self, metadata_file = "session_metadata.yaml"): #Double check name later.
         """
         Save the session metadata to a YAML file.
@@ -185,7 +224,7 @@ if __name__=="__main__":
     # Creating a session with metadata
     session_metadata = {"experimenter": "Dr. Smith", "date": "2024-07-31"}
     session = Session()
-    session.checkerBoard.black2BlackCornersHeight_n = 3
+    session.set_checkerboard_params(3,8,35,'backwall')
     session.iphoneModel = {
     'Cam0': 'iphone13,3',
     'Cam1': 'iphone13,3',
