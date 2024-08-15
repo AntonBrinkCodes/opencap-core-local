@@ -122,7 +122,8 @@ def runScaleTool(pathGenericSetupFile, pathGenericModel, subjectMass,
                 meas.setApply(False)
                 print('There were no marker pairs in {}, so this measurement \
                       is not applied.'.format(meas.getName()))
-    # Run scale tool.                      
+    # Run scale tool.       
+    print("running scaletool...")               
     scaleTool.printToXML(pathOutputSetup)            
     command = 'opensim-cmd -o error' + ' run-tool ' + pathOutputSetup
     os.system(command)
