@@ -295,7 +295,7 @@ async def websocket_endpoint(websocket: WebSocket, client_type: str):
     finally:
         manager.disconnect(websocket, client_type)
         logger.debug("A client is disconnecting")
-        await manager.broadcast(f"Web-apps connected: {manager.getNrOfClients("web")}, Cameras connected: {manager.getNrOfClients("mobile")}")
+        await manager.broadcast(f"Web-apps connected: {manager.getNrOfClients('web')}, Cameras connected: {manager.getNrOfClients('mobile')}")
 
 
 '''
