@@ -187,6 +187,7 @@ def main(sessionName, trialName, trial_id, cameras_to_use=['all'],
     # %% Camera calibration.
     if runCameraCalibration:    
         # Get checkerboard parameters from metadata.
+        print("Running camera Calibration")
         CheckerBoardParams = {
             'dimensions': (
                 sessionMetadata['checkerBoard']['black2BlackCornersWidth_n'],
