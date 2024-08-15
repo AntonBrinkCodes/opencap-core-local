@@ -305,8 +305,8 @@ SESSION WEBSOCKET
 async def websocket_endpoint(websocket: WebSocket, session_id: str, client_type: str):
     activeSession = sessionManager.findSessionByID(session_id)
     await manager.connect(websocket, client_type, session_id=session_id)
-    print(f"BROADCASTING: Session {session_id} mobiles connected: {manager.getNrOfClients(client_type="mobile", session_id=session_id)}")
-    await manager.broadcast(f"Session {session_id} mobiles connected: {manager.getNrOfClients(client_type="mobile", session_id=session_id)}", session_id=session_id)
+    print(f"BROADCASTING: Session {session_id} mobiles connected: {manager.getNrOfClients(client_type='mobile', session_id=session_id)}")
+    await manager.broadcast(f"Session {session_id} mobiles connected: {manager.getNrOfClients(client_type='mobile', session_id=session_id)}", session_id=session_id)
     try:
         while True:
             
@@ -404,7 +404,7 @@ async def websocket_endpoint(websocket: WebSocket, session_id: str, client_type:
     finally:
         manager.disconnect(websocket, client_type, session_id=session_id)
         logger.debug("A client is disconnecting")
-        await manager.broadcast(f"Session {session_id} Web-apps connected: {manager.getNrOfClients("web")}, Cameras connected: {manager.getNrOfClients("mobile")}", session_id=session_id)
+        await manager.broadcast(f"Session {session_id} Web-apps connected: {manager.getNrOfClients('web')}, Cameras connected: {manager.getNrOfClients('mobile')}", session_id=session_id)
 import os
 
 def save_binary_file(data: bytes, filename: str):
