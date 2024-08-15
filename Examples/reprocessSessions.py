@@ -50,12 +50,13 @@ from utilsAuth import getToken
 
 API_URL = getAPIURL()
 API_TOKEN = getToken()
+import tensorflow as tf
 
 # %% User inputs.
 # Enter the identifier(s) of the session(s) you want to reprocess. This is a list of one
 # or more session identifiers. The identifier is found as the 36-character string at the
 # end of the session url: app.opencap.ai/session/<session_id>
-session_ids = ['e1af3fc1-aa3a-4514-8636-7f0fe7798ad9']
+session_ids = ['4cf4bca5-7cd0-4db8-af11-5d39d485dba8']
 
 # Select which trials to reprocess. You can reprocess all trials in the session 
 # by entering None in all fields below. The correct calibration and static
@@ -66,9 +67,9 @@ session_ids = ['e1af3fc1-aa3a-4514-8636-7f0fe7798ad9']
 # select specific trials. Only one trial (str) is allowed for calib_id and
 # static_id. A list of strings is allowed for dynamic_trialNames.
 
-calib_id = None # None (auto-selected trial), [] (skip), or string of specific trial_id
-static_id = None # None (auto-selected trial), [] (skip), or string of specific trial_id
-dynamic_trialNames = ['s11_jumpingjacks_0_recording'] # None (all dynamic trials), [] (skip), or list of trial names
+calib_id = [] # None (auto-selected trial), [] (skip), or string of specific trial_id
+static_id = [] # None (auto-selected trial), [] (skip), or string of specific trial_id
+dynamic_trialNames = ['s05-treadmill_1_recording'] # None (all dynamic trials), [] (skip), or list of trial names
 
 # Select which pose estimation model to use; options are 'OpenPose' and 'hrnet'.
 # If the same pose estimation model was used when collecting data with the web
@@ -104,7 +105,8 @@ resolutionPoseDetection = '1x736'
 # reprocessing a session that you collected, data will get written to the database
 # regardless of your selection. If True, the local copy will be deleted.
 deleteLocalFolder = False
-      
+print(tf.__version__)
+print("Num GPUs Available: ", len(tf.config.experimental.list_physical_devices('GPU')))
 
 # %% Process data.
 batchReprocess(session_ids,calib_id,static_id,dynamic_trialNames,

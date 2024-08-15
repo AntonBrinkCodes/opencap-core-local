@@ -6,7 +6,7 @@ import numpy as np
 import json
 import sys
 import time
-
+import platform # To check for windows/Linux
 from decouple import config
 
 from utils import getOpenPoseMarkerNames, getMMposeMarkerNames, getVideoExtension
@@ -87,7 +87,7 @@ def runOpenPoseVideo(cameraDirectory,fileName,pathOpenPose, trialName,
     thisVideo = cv2.VideoCapture(videoFullPath)
     nFrameIn = int(thisVideo.get(cv2.CAP_PROP_FRAME_COUNT))
     
-    # The video is rewritten, unrotated, and downsampled. There is no
+    # The video is rewritten, unrotated, and downsamexepled. There is no
     # need to do anything specific for the rotation, just rewriting the video
     # unrotates it.
     trialPath, _ = os.path.splitext(fileName)        
@@ -108,8 +108,9 @@ def runOpenPoseVideo(cameraDirectory,fileName,pathOpenPose, trialName,
         os.system(CMD)
 
     # Run OpenPose if this file doesn't exist in outputs
-    ppPklPath = os.path.join(pathOutputPkl, trialPrefix + '_pp.pkl')    
+    ppPklPath = os.path.join(pathOutputPkl, trialPrefix + '_pp.pkl')   
     if not os.path.exists(ppPklPath):
+        print("path does not already exists...")
         c_path = os.getcwd()
         command = runOpenPoseCMD(
             pathOpenPose, resolutionPoseDetection, cameraDirectory,
@@ -218,7 +219,7 @@ def runOpenPoseCMD(pathOpenPose, resolutionPoseDetection, cameraDirectory,
                 raise Exception(exception, exception)   
             
     elif pathOpenPose == "docker":
-        
+        print("for some reason path is docker")
         command = "docker run --gpus=1 -v {}:/openpose/data stanfordnmbl/openpose-gpu\
             /openpose/build/examples/openpose/openpose.bin\
             --video /openpose/data/{}\
@@ -227,18 +228,23 @@ def runOpenPoseCMD(pathOpenPose, resolutionPoseDetection, cameraDirectory,
             --render_pose 0{}".format(cameraDirectory, fileName,
                                         openposeJsonDir, cmd_hr)
     else:
-        print('"pathOpenPose" is {}', pathOpenPose)
+        print('"pathOpenPose" is {}'.format(pathOpenPose))
         os.chdir(pathOpenPose)
         pathVideoOut = os.path.join(pathOutputVideo,
                                     trialPrefix + 'withKeypoints.avi')
-        if not generateVideo:
-            command = ('bin\OpenPoseDemo.exe --video {} --write_json {} --render_threshold 0.5 --display 0 --render_pose 0{}'.format(
-                videoFullPath, pathOutputJsons, cmd_hr))
-        else:
-            command = ('bin\OpenPoseDemo.exe --video {} --write_json {} --render_threshold 0.5 --display 0{}--write_video {}'.format(
-                videoFullPath, pathOutputJsons, cmd_hr, pathVideoOut))
+        
+        exe = './build/examples/openpose/openpose.bin' if platform.system() == "Linux" else r'bin\OpenPoseDemo.exe' #Assumes windows or Ubuntu
 
+        if not generateVideo:
+            command = ('{} --video {} --write_json {} --render_threshold 0.5 --display 0 --render_pose 0{}'.format(
+                       exe, videoFullPath, pathOutputJsons, cmd_hr))
+        else: 
+            command = ('{} --video {} --write_json {} --render_threshold 0.5 --display 0{}--write_video {}'.format(
+                exe, videoFullPath, pathOutputJsons, cmd_hr, pathVideoOut))
+    print(command)
     if command:
+        print("Command is: ")
+        print(command)
         os.system(command)
     
     return
