@@ -430,4 +430,5 @@ if __name__=="__main__":
 
     ip_address = socket.gethostbyname(hostname) #"192.168.0.48"#socket.gethostbyname(hostname)
     print(f"IP Address: {ip_address}")
+    ip_adress = "0.0.0.0" # debug
     uvicorn.run(app,host=ip_address,port=8080)
