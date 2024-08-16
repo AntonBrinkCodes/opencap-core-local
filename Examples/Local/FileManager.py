@@ -7,7 +7,7 @@ class FileManager:
     """
     def __init__(self, base_directory: str):
         self.base_directory = base_directory
-
+        print(base_directory)
     def create_cam_directory(self, session: Session, cam_index: int):
         cam_path = os.path.join(self.base_directory, str(session.uuid), 'Videos', f'Cam{cam_index}')
         os.makedirs(cam_path, exist_ok=True)

@@ -229,7 +229,7 @@ class ConnectionManager:
 
 manager = ConnectionManager()
 ## TODO: Get this base filepath to work correctly. Should be in Examples/data but not
-# § /Examples/Local/Examples/data like it is now
+# § /Examples/Local/Examples/data like it is now.. seems to work
 fileManager = FileManager("./Examples/Data")
 logger = logging.getLogger('uvicorn.error')
 sessionManager = sessionManager()
@@ -433,11 +433,13 @@ def save_binary_file(data: bytes, filename: str):
         print(f"Failed to save the file as {filename}.")
 
 if __name__=="__main__":
-    hostname = socket.gethostname()    
+    hostname = socket.gethostname()
+    print(os.listdir())
     print(f"Hostname: {hostname}")
 
     #ip_address = socket.gethostbyname(hostname) #"192.168.0.48"#socket.gethostbyname(hostname)
-    ip_address = "130.229.141.43" # debug
+    ip_address = "192.168.0.48"
+    #ip_address = "130.229.141.43" # debug
     print(f"IP Address: {ip_address}")
 
     uvicorn.run(app,host=ip_address,port=8080)
