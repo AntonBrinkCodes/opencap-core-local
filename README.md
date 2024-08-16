@@ -1,3 +1,23 @@
+# LocalCap (WORK IN PROGRESS
+This repository is an extension of the "regular" OpenCap repo. It allows to run OpenCap completely locally by hosting a fastAPI websocket in combination with a custom App for video collection [LocalCap](https://github.com/AntonBrinkCodes/LocalCap/tree/main) and a [custom web-app](https://github.com/AntonBrinkCodes/localcap-viewer/tree/main) to record data much like in the regular [OpenCap App](app.opencap.ai).
+
+The advantage is that no data has to be sent to other servers. The hardware requirements are as listed below.
+
+## Installation
+1. Follow the steps below for Running the pipeline locally. A good idea is to check if you can locally reprocess using the pipeline but with data collected from app.opencap.ai.
+
+2. Follow the instructions on [custom web-app](https://github.com/AntonBrinkCodes/localcap-viewer/tree/main) and install the mobile application [LocalCap](https://github.com/AntonBrinkCodes/LocalCap/tree/main)
+
+## Usage
+Open localServer.py and set your IP and port to host over.
+
+Run localServer.py
+
+Record sessions using the [custom web-app](https://github.com/AntonBrinkCodes/localcap-viewer/tree/main). Instructions are the same as for app.opencap.ai. See below.
+
+The sessions should be visible in the custom web-app, as should any sessions you've locally reprocessed using app.opencap.ai.
+
+
 # OpenCap Core
 This code takes two or more videos and estimates 3D marker positions and human movement kinematics (joint angles) in an OpenSim format. Kinetics (forces) can then be calculated using these outputs using the [opencap-processing](https://github.com/stanfordnmbl/opencap-processing) repository. Learn more about data collection at [opencap.ai](https://opencap.ai). There are three possible ways to use this code:
 1) Collect data and have it automatically processed using our web application ([app.opencap.ai](https://app.opencap.ai)) using iOS devices. We are running the pipeline in the cloud; this service is freely available for academic research use. Visit [opencap.ai/get-started](https://opencap.ai/get-started) to start collecting data. See an example session [here](https://app.opencap.ai/session/7272a71a-e70a-4794-a253-39e11cb7542c).
