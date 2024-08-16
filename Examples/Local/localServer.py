@@ -230,6 +230,10 @@ class ConnectionManager:
 manager = ConnectionManager()
 ## TODO: Get this base filepath to work correctly. Should be in Examples/data but not
 # § /Examples/Local/Examples/data like it is now.. seems to work
+current_script_directory = os.path.dirname(os.path.abspath(__file__))
+parent_directory = os.path.abspath(os.path.join(current_script_directory, '..'))
+base_directory = os.path.join(parent_directory, 'Examples')
+
 fileManager = FileManager("/Examples/")
 logger = logging.getLogger('uvicorn.error')
 sessionManager = sessionManager()
