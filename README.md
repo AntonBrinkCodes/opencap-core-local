@@ -1,4 +1,4 @@
-# LocalCap (WORK IN PROGRESS
+# LocalCap (WORK IN PROGRESS)
 This repository is an extension of the "regular" OpenCap repo. It allows to run OpenCap completely locally by hosting a fastAPI websocket in combination with a custom App for video collection [LocalCap](https://github.com/AntonBrinkCodes/LocalCap/tree/main) and a [custom web-app](https://github.com/AntonBrinkCodes/localcap-viewer/tree/main) to record data much like in the regular [OpenCap App](app.opencap.ai).
 
 The advantage is that no data has to be sent to other servers. The hardware requirements are as listed below.
