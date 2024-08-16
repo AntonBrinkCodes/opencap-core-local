@@ -9,6 +9,7 @@ from sessionModel import Session, Trial, Subject
 import json
 import base64
 from FileManager import FileManager
+import os
 
 import threading
 import time
@@ -417,7 +418,6 @@ async def websocket_endpoint(websocket: WebSocket, session_id: str, client_type:
         manager.disconnect(websocket, client_type, session_id=session_id)
         logger.debug("A client is disconnecting")
         await manager.broadcast(f"Session {session_id} Web-apps connected: {manager.getNrOfClients('web')}, Cameras connected: {manager.getNrOfClients('mobile')}", session_id=session_id)
-import os
 
 def save_binary_file(data: bytes, filename: str):
     os.listdir()
