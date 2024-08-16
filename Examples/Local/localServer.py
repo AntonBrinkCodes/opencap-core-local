@@ -230,7 +230,7 @@ class ConnectionManager:
 manager = ConnectionManager()
 ## TODO: Get this base filepath to work correctly. Should be in Examples/data but not
 # § /Examples/Local/Examples/data like it is now.. seems to work
-fileManager = FileManager("./Examples/Data")
+fileManager = FileManager("/Examples/")
 logger = logging.getLogger('uvicorn.error')
 sessionManager = sessionManager()
 
