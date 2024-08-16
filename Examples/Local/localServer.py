@@ -233,9 +233,9 @@ manager = ConnectionManager()
 # § /Examples/Local/Examples/data like it is now.. seems to work
 current_script_directory = os.path.dirname(os.path.abspath(__file__))
 parent_directory = os.path.abspath(os.path.join(current_script_directory, '..'))
-base_directory = os.path.join(parent_directory, 'Examples')
+base_directory = os.path.join(parent_directory, 'Data')
 
-fileManager = FileManager("/Examples/")
+fileManager = FileManager(base_directory)
 logger = logging.getLogger('uvicorn.error')
 sessionManager = sessionManager()
 
@@ -443,7 +443,7 @@ if __name__=="__main__":
 
     #ip_address = socket.gethostbyname(hostname) #"192.168.0.48"#socket.gethostbyname(hostname)
     #ip_address = "192.168.0.48"
-    ip_address = "130.229.141.43" # debug
+    ip_address = "130.229.141.43" # ubuntu computer
     print(f"IP Address: {ip_address}")
 
     uvicorn.run(app,host=ip_address,port=8080)
