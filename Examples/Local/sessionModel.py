@@ -2,6 +2,10 @@
 Logic to control a session and its', trials, subject and checkerboard parameters 
 when using the LocalCap webapp
 
+A Session has some custom classes:
+A Subject
+Several Trials (1 calibration, 1 neutral, 0-n dynamic)
+
 -- Anton Brink 2024-07-31
 '''
 
@@ -13,6 +17,8 @@ from enum import Enum
 from typing import List, Dict, Optional
 from datetime import datetime
 from CheckerBoard import CheckerBoard
+import pickle
+
 
 class sex(Enum):
     female = "f"
@@ -29,12 +35,48 @@ class Subject:
             height (float): The height of the subject in meters.
             weight (float): The weight of the subject in kilograms.
     """
-    def __init__(self, name="defaultSubject", sex=sex.male, height=1.89, weight=83.2):
-        self.id=name
+    def __init__(self, name="defaultSubject", sex=sex.male, height=1.89, weight=83.2, birth_year = 1989, trial_id: Optional[uuid.UUID]=None):
+        self.name=name
         self.gender = sex
         self.height = height #in meters
         self.mass = weight #in kilos
+        self.birth_year = birth_year
+        self.id = trial_id or uuid.uuid4()
+    
+    def to_dict(self):
+        """Convert the Subject instance to a dictionary."""
+        return {
+            'name': self.name,
+            'id': str(self.id),
+            'gender': self.gender,  # Serialize Enum to its value
+            'height': self.height,
+            'birth_year': self.birth_year,
+            'mass': self.mass
+            
+        }
 
+    @staticmethod
+    def from_dict(data):
+        """Create a Subject instance from a dictionary."""
+        return Subject(
+            name=data['name'],
+            sex=sex(data['gender']),
+            height=data['height'],
+            weight=data['mass'],
+            birth_year = data['birth_year'],
+            id = uuid.UUID(data['id'])
+        )
+    
+    def save_to_file(self, filename):
+        """Save the Subject instance to a file using pickle."""
+        with open(filename, 'wb') as file:
+            pickle.dump(self, file)
+
+    @staticmethod
+    def load_from_file(filename):
+        """Load a Subject instance from a file using pickle."""
+        with open(filename, 'rb') as file:
+            return pickle.load(file)
 
 
 class Trial:
@@ -66,6 +108,7 @@ class Session:
             uuid (Optional[uuid]: The uuid4 for the session. Generates new one if not passed)
     """
     def __init__(self, subject: Optional[Subject]=None, session_uuid: Optional[uuid.UUID]=None):
+        self.name = ""
         self.subject = subject or Subject()
         self.checkerBoard = CheckerBoard()
         self.uuid = session_uuid or uuid.uuid4()
@@ -210,6 +253,14 @@ class Session:
         return (f"Session(uuid={self.uuid}, dynamic_trials={self.dynamic_trials}, "
                 f"calibration_trial={self.calibration_trial}, static_trial={self.neutral_trial}, "
                 f"metadata={self.metadata})")
+    
+    def setName(self, name:str):
+        """
+        Set the name of the session.
+        Args:
+            name (str): The name to give the Session.
+        """
+        self.name=name
 
     def getID(self):
         """
