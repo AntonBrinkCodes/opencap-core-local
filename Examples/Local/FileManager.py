@@ -1,10 +1,12 @@
 import os
 from sessionModel import Session, Trial, Subject
 from typing import List, Optional
+import pickle
 class FileManager:
     """
-    Manage file organization for sessions and trials.
+    Manage file organization for sessions, subjects and trials.
     """
+
     def __init__(self, base_directory: str):
         self.base_directory = base_directory
         print(base_directory)
@@ -60,3 +62,26 @@ class FileManager:
                 print(f"File saved as {full_filename} but it is empty.")
         else:
             print(f"Failed to save the file as {full_filename}.")
+
+    def save_subjects(self, subjects: List[Subject]):
+        """
+        Save subjects to base_directoryt as a pickle file "subjects_data.pkl"
+
+        Args:
+            subjects (List[Subject]) a list of the Subjects to save to file
+        """
+        full_filename = os.path.join(self.base_directory, "subjects_data.pkl")
+        with open(full_filename, 'wb') as file:
+            pickle.dump(subjects, file)
+
+    def load_subjects(self):
+        """
+        Load the subjects from pickle file created using save_subjects.
+
+        Returns:
+            subjects (List[Subject]) a list with all the Subjects saved in the file
+        """
+        full_filename = os.path.join(self.base_directory, "subjects_data.pkl")
+        with open(full_filename, 'rb') as file:
+            loaded_subjects = pickle.load(file)
+        return loaded_subjects
