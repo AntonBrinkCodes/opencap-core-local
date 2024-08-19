@@ -133,6 +133,9 @@ class Session:
 
         self.openSimModel = 'LaiUhlrich2022'
     
+    def set_name(self, name: str):
+        self.name = name
+        
     '''
     add the type of camera used (essentially what type of iPhone/iPad)
     '''
