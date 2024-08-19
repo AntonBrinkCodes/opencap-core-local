@@ -10,7 +10,7 @@ import json
 import base64
 from FileManager import FileManager
 import os
-
+import pickle 
 import threading
 import time
 import asyncio
@@ -40,7 +40,12 @@ class sessionManager:
         self.sessions.remove(session)
         if self.activeSession == session:
             self.activeSession = None
-    
+
+    def saveSubject(self, subject: Subject):
+        loaded_subjects = fileManager.load_subjects()
+        loaded_subjects.append(subject)
+        fileManager.save_subjects(loaded_subjects)
+
     # Should do this a better way maybe
     def findSessionByID(self, session_id: str) -> Optional[Session]:
         for session in self.sessions:
@@ -284,7 +289,21 @@ async def websocket_endpoint(websocket: WebSocket, client_type: str):
                             # Create file directory for the session
                             fileManager.create_session_directory(sessionManager.activeSession)
                             await manager.send_personal_message(f"New session id: {sessionID} ", websocket)
-                        else:
+                        
+                        else: # Load data as JSON.
+                            message = json.loads(data['text'])
+                            command = message.get('command')
+
+                            if command == "get_subjects":
+                                # Load subjects from file
+                                loaded_subjects = [subject.to_dict() for subject in fileManager.load_subjects()]
+                                # Send to web
+                                message = {
+                                    "command": "subjects",
+                                    "content": loaded_subjects
+                                }
+                                await manager.send_personal_message(json.dumps(message), websocket)
+
                             await manager.broadcast(f"WebApp says: {message}", "mobile")
                     else:
                         await manager.broadcast(f"Mobile says: {message}", "web")
@@ -365,7 +384,6 @@ async def websocket_endpoint(websocket: WebSocket, session_id: str, client_type:
                                 await sessionManager.startTrial(session= activeSession, trialType = "calibration", process = False)
                                 #await manager.broadcast(f"Toast: Info: {sessionManager.activeSession.checkerBoard}", client_type="web", session_id=session_id)
 
-
                             
 
 
@@ -437,13 +455,31 @@ def save_binary_file(data: bytes, filename: str):
         print(f"Failed to save the file as {filename}.")
 
 if __name__=="__main__":
+    subjects = [
+    Subject(name="John Doe", sex="m", height=1.75, weight=70),
+    Subject(name="Jane Doe", sex="f", height=1.65, weight=60),
+    Subject(name="Alex Doe", sex="o", height=1.8, weight=75)
+]
+
+    # Save the list of subjects to a file
+    with open("subjects_data.pkl", 'wb') as file:
+        pickle.dump(subjects, file)
+
+    # Load the list of subjects from the file
+    with open("subjects_data.pkl", 'rb') as file:
+        loaded_subjects = pickle.load(file)
+
+    # Example: Print details of loaded subjects
+    for subject in loaded_subjects:
+        print(f"Name: {subject.name}, Gender: {subject.gender}, Height: {subject.height}, Weight: {subject.mass}, id: {subject.id}")
     hostname = socket.gethostname()
     print(os.listdir())
     print(f"Hostname: {hostname}")
 
     #ip_address = socket.gethostbyname(hostname) #"192.168.0.48"#socket.gethostbyname(hostname)
     #ip_address = "192.168.0.48"
-    ip_address = "130.229.141.43" # ubuntu computer
+    #ip_address = "130.229.141.43" # ubuntu computer
+    ip_address = "192.168.50.9"
     print(f"IP Address: {ip_address}")
 
     uvicorn.run(app,host=ip_address,port=8080)
