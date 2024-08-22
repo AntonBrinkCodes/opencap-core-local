@@ -78,7 +78,7 @@ class sessionManager:
         json_message = json.dumps(message)
         await manager.broadcast(message = json_message, client_type="mobile", session_id=session_id)
     
-    async def startTrial(self, session: Session, trialType: Optional[str] = "dynamic", process=True, isTrial=False):
+    async def startTrial(self, session: Session, trialType: Optional[str] = "dynamic", process=True, isTest=False):
         '''
             Creates a new trial in the Session.
             Starts the trials by:
