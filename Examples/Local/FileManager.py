@@ -79,9 +79,13 @@ class FileManager:
         Load the subjects from pickle file created using save_subjects.
 
         Returns:
-            subjects (List[Subject]) a list with all the Subjects saved in the file
+            subjects (List[Subject]) a list with all the Subjects saved in the file. Empty list if there is no file.
         """
         full_filename = os.path.join(self.base_directory, "subjects_data.pkl")
+        if not os.path.exists(full_filename):
+        # Return an empty list if the file does not exist
+            return []
+        
         with open(full_filename, 'rb') as file:
             loaded_subjects = pickle.load(file)
         return loaded_subjects

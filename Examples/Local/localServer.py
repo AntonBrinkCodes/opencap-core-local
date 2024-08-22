@@ -91,6 +91,7 @@ class sessionManager:
                 session (Session): The session that the trial is in.
                 trialType Optional[str]: The type of trial (calibration, static, dynamic). Default is dynamic.
                 process (Boolean): Whetever to process the trial immediatly or not.
+                testTrial (Boolean): whetever or not to use the actual session given or if this should run with a preset trial.
 
             Returns:
                 Some info whetever the trial successfully processed/uploaded.
@@ -398,7 +399,7 @@ async def websocket_endpoint(websocket: WebSocket, session_id: str, client_type:
                                 print(f"received start_calibration")
                                 print(f"session ID match: {session_id_msg==session_id}")
                                 print(f"session_id is of type: {type(session_id)}")
-                                await sessionManager.startTrial(session= activeSession, trialType = "calibration", process = False)
+                                await sessionManager.startTrial(session= activeSession, trialType = "calibration", process = False, isTest=isTest)
                                 #await manager.broadcast(f"Toast: Info: {sessionManager.activeSession.checkerBoard}", client_type="web", session_id=session_id)
 
                             
