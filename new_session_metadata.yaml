@@ -6,7 +6,7 @@ checkerBoard:
   black2BlackCornersWidth_n: 8
   placement: backwall
   squareSideLength_mm: 35
-gender_mf: m
+gender_mf: o
 height_m: 1.89
 iphoneModel:
   Cam0: iphone13,3
@@ -18,4 +18,5 @@ markerAugmentationSettings:
   markerAugmenterModel: LSTM
 mass_kg: 83.2
 openSimModel: LaiUhlrich2022
-subjectID: defaultSubject
+subjectID: !!python/object:uuid.UUID
+  int: 17415212502837540454855111396593151273

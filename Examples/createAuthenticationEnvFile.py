@@ -32,6 +32,7 @@ sys.path.append(os.path.abspath('./..'))
 
 from utilsAuth import getToken
 
+
 # Restart your terminal or IDE (eg Spyder) after running the script for the 
 # new environment variable to be loaded. 
 getToken(saveEnvPath=os.path.abspath(os.path.join(os.path.dirname(__file__),'../')))

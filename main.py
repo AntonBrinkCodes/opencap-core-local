@@ -552,6 +552,7 @@ def main(sessionName, trialName, trial_id, cameras_to_use=['all'],
 
                 # Run scale tool.
                 logging.info('Running Scaling')
+                
                 pathScaledModel = runScaleTool(
                     pathGenericSetupFile4Scaling, pathGenericModel4Scaling,
                     sessionMetadata['mass_kg'], pathTRCFile4Scaling, 

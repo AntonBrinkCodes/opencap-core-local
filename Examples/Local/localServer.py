@@ -45,6 +45,11 @@ class sessionManager:
         loaded_subjects = fileManager.load_subjects()
         loaded_subjects.append(subject)
         fileManager.save_subjects(loaded_subjects)
+    
+    def removeSubject(self, subject: Subject):
+        loaded_subjects = fileManager.load_subjects()
+        loaded_subjects.remove(subject)
+        fileManager.save_subjects(loaded_subjects)
 
     # Should do this a better way maybe
     def findSessionByID(self, session_id: str) -> Optional[Session]:
@@ -107,13 +112,17 @@ class sessionManager:
                 raise CustomError("Process not implemented yet")
                 #Process files
         except CustomError as e:
-            await manager.broadcast(f"Toast: error: {e}", client_type="web", session_id=session.getID())
+            await manager.broadcast(f"Toast: error: {e}", client_type="web", session_id=session_id)
         else:
             #Successfully processed trial
             sessionID = str(session.getID())
-            await manager.broadcast(f"Toast: success: BABY", client_type="web", session_id=sessionID)
-
-        # Run a trial, can be calibration. static, or dynamic.
+            await manager.broadcast(f"Toast: success: BABY", client_type="web", session_id=session_id)
+            succesCalibrationMsg = {
+                "command": "calibration",
+                "content": "success",
+                "session_id": session_id
+            }
+            await manager.broadcast(message=json.dumps(succesCalibrationMsg), client_type="web", session_id=session_id)
 
 class ConnectionManager:
     def __init__(self):
@@ -303,7 +312,15 @@ async def websocket_endpoint(websocket: WebSocket, client_type: str):
                                     "content": loaded_subjects
                                 }
                                 await manager.send_personal_message(json.dumps(message), websocket)
-
+                            
+                            elif command == "save_subject":
+                                content = message.get('content')
+                                sessionManager.saveSubject(Subject.from_dict(content))
+                            
+                            elif command == "delete_subject":
+                                content = message.get('content')
+                                sessionManager.removeSubject(Subject.from_dict(content))
+                                
                             await manager.broadcast(f"WebApp says: {message}", "mobile")
                     else:
                         await manager.broadcast(f"Mobile says: {message}", "web")

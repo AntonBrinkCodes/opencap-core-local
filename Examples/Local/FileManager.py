@@ -74,7 +74,7 @@ class FileManager:
         with open(full_filename, 'wb') as file:
             pickle.dump(subjects, file)
 
-    def load_subjects(self):
+    def load_subjects(self) -> List:
         """
         Load the subjects from pickle file created using save_subjects.
 

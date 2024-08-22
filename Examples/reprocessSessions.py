@@ -67,9 +67,9 @@ session_ids = ['4cf4bca5-7cd0-4db8-af11-5d39d485dba8']
 # select specific trials. Only one trial (str) is allowed for calib_id and
 # static_id. A list of strings is allowed for dynamic_trialNames.
 
-calib_id = [] # None (auto-selected trial), [] (skip), or string of specific trial_id
+calib_id = None # None (auto-selected trial), [] (skip), or string of specific trial_id
 static_id = [] # None (auto-selected trial), [] (skip), or string of specific trial_id
-dynamic_trialNames = ['s05-treadmill_1_recording'] # None (all dynamic trials), [] (skip), or list of trial names
+dynamic_trialNames = [] # None (all dynamic trials), [] (skip), or list of trial names
 
 # Select which pose estimation model to use; options are 'OpenPose' and 'hrnet'.
 # If the same pose estimation model was used when collecting data with the web
@@ -98,7 +98,7 @@ poseDetector = 'openpose'
 #   - '1x1008_4scales': 1x1008 resolution with 4 scales (gap = 0.25). (we were only able to run with a GPU with 24GB memory)
 #       - This is the highest resolution/settings we could use with a 24GB
 #         GPU without running into memory issues.
-resolutionPoseDetection = '1x1008_4scales'
+resolutionPoseDetection = 'default'
 
 
 # Set deleteLocalFolder to False to keep a local copy of the data. If you are 

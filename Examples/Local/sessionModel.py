@@ -35,13 +35,13 @@ class Subject:
             height (float): The height of the subject in meters.
             weight (float): The weight of the subject in kilograms.
     """
-    def __init__(self, name="defaultSubject", sex=sex.male, height=1.89, weight=83.2, birth_year = 1989, trial_id: Optional[uuid.UUID]=None):
+    def __init__(self, name="defaultSubject", sex=sex.other, height=1.89, weight=83.2, birth_year = 1989, id: Optional[uuid.UUID]=None):
         self.name=name
         self.gender = sex
         self.height = height #in meters
         self.mass = weight #in kilos
         self.birth_year = birth_year
-        self.id = trial_id or uuid.uuid4()
+        self.id = id or uuid.uuid4()
     
     def to_dict(self):
         """Convert the Subject instance to a dictionary."""
@@ -57,10 +57,11 @@ class Subject:
 
     @staticmethod
     def from_dict(data):
+        print(data['id'])
         """Create a Subject instance from a dictionary."""
         return Subject(
             name=data['name'],
-            sex=sex(data['gender']),
+            sex=sex(data['gender']) if data.get('gender') else None,
             height=data['height'],
             weight=data['mass'],
             birth_year = data['birth_year'],
@@ -334,5 +335,7 @@ if __name__=="__main__":
 
     # Display the session
     print(session)
-
+    subject = {'id': '4ff2441f-180e-4a2b-b86a-be14b60497d0', 'name': 'hej', 'mass': '88', 'height': '2', 'gender': '', 'birth_year': '1990'}
+    subject2 = Subject.from_dict(subject)
+    print(subject2.id)
     # Loading session metadata from YAML file
