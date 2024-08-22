@@ -78,7 +78,7 @@ class sessionManager:
         json_message = json.dumps(message)
         await manager.broadcast(message = json_message, client_type="mobile", session_id=session_id)
     
-    async def startTrial(self, session: Session, trialType: Optional[str] = "dynamic", process=True):
+    async def startTrial(self, session: Session, trialType: Optional[str] = "dynamic", process=True, testTrial=False):
         '''
             Creates a new trial in the Session.
             Starts the trials by:
@@ -95,7 +95,7 @@ class sessionManager:
             Returns:
                 Some info whetever the trial successfully processed/uploaded.
         '''
-        print("running {trialType} trial")
+        print(f"running {trialType} trial")
         session_id = str(session.getID())
         try:
             #Start recording
@@ -389,10 +389,10 @@ async def websocket_endpoint(websocket: WebSocket, session_id: str, client_type:
 
                                 square_size = float(message.get('squareSize'))
                                 placement = message.get('placement')  # Assuming this is a string
-                                isTest = message.get('testSession') # To give to startTrial whetever to use the recording or a pre-recorded session for debug purpose.
+                                isTest = message.get('isTest') # To give to startTrial whetever to use the recording or a pre-recorded session for debug purpose.
                                 # Send parameters to session
                                 activeSession.set_checkerboard_params(rows, cols, square_size, placement)
-                                print(type(isTest))
+                                print(f"--is test: {isTest} type is{type(isTest)}")
                                 # Start the calibration on the back end...
                                 #For now just set the checkerboard_params and notify webapp.
                                 print(f"received start_calibration")
