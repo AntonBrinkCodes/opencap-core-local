@@ -320,7 +320,7 @@ async def websocket_endpoint(websocket: WebSocket, client_type: str):
                             elif command == "delete_subject":
                                 content = message.get('content')
                                 sessionManager.removeSubject(Subject.from_dict(content))
-                                
+
                             await manager.broadcast(f"WebApp says: {message}", "mobile")
                     else:
                         await manager.broadcast(f"Mobile says: {message}", "web")
@@ -495,8 +495,8 @@ if __name__=="__main__":
 
     #ip_address = socket.gethostbyname(hostname) #"192.168.0.48"#socket.gethostbyname(hostname)
     #ip_address = "192.168.0.48"
-    #ip_address = "130.229.141.43" # ubuntu computer
-    ip_address = "192.168.50.9"
+    ip_address = "130.229.141.43" # ubuntu computer
+    #ip_address = "192.168.50.9" Landet
     print(f"IP Address: {ip_address}")
 
     uvicorn.run(app,host=ip_address,port=8080)
