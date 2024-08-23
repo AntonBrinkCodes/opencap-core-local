@@ -1,0 +1,17 @@
+calibrationSettings:
+  overwriteDeployedIntrinsics: false
+  saveSessionIntrinsics: false
+checkerBoard:
+  black2BlackCornersHeight_n: 4
+  black2BlackCornersWidth_n: 8
+  placement: backwall
+  squareSideLength_mm: 35
+gender_mf: m
+height_m: 1.89
+iphoneModel:
+  cam0: iPad8,9
+markerAugmentationSettings:
+  markerAugmenterModel: LSTM
+mass_kg: 83.2
+openSimModel: LaiUhlrich2022
+subjectID: defaultSubject

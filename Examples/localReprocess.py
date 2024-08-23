@@ -7,9 +7,32 @@ Lastly run all dynamic trials.
 """
 import os
 import sys
+
 sys.path.append(os.path.abspath('./..'))
 
 from main import main
+
+def runLocalTrial(sessionId: str, trialNames, trialId, trialType="dynamic", poseDetector='openpose', genericFolderNames=True, cameras_to_use=['all'],
+                  resolutionPoseDetection='default') -> bool:
+    sys.path.append(os.path.abspath('./..'))
+
+    extrinsicTrial = False
+    scaleModel = False
+
+    if trialType == "calibration":
+        extrinsicTrial = True
+    elif trialType == "static":
+        scaleModel = True
+
+
+    main(sessionId, trialNames, trialId, cameras_to_use=cameras_to_use,
+         intrinsicsFinalFolder='Deployed', isDocker=False,
+          extrinsicsTrial=extrinsicTrial, poseDetector=poseDetector, resolutionPoseDetection=resolutionPoseDetection,
+           scaleModel=scaleModel, genericFolderNames=genericFolderNames )
+    
+    return True
+
+
 
 session_name = "4cf4bca5-7cd0-4db8-af11-5d39d485dba8" # aka session_ids in reprocessSessions.py
 
@@ -31,12 +54,7 @@ scaleModel = False
 sessionType = "dynamic" # Calibration, static, or dynamic. assumes dynamic if anything else
 
 
-if sessionType == "calibration":
-    extrinsicTrial = True
-    genericFolderNames = True
-elif sessionType == "static":
-    scaleModel = True
-    genericFolderNames=True
+
 
 
 print(extrinsicTrial)

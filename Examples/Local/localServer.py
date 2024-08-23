@@ -14,6 +14,7 @@ import pickle
 import threading
 import time
 import asyncio
+from localReprocess import runLocalTrial
 
 from enum import Enum # Maybe or something else
 
@@ -109,7 +110,13 @@ class sessionManager:
                 await manager.broadcast(f"Toast: success: Succesfully finished recording :)")
             #Upload files
             if process:
-                
+                sessionId = str(session.getID())
+                if isTest:
+                    sessionId = "4cf4bca5-7cd0-4db8-af11-5d39d485dba8"
+                    trialNames = "s05-treadmill_1_recording"
+                    trialId = "afca93fd-9753-4bea-9130-5fdcf151d9f0" 
+
+                runLocalTrial(sessionId, trialNames, trialId, sessionType=trialType) 
                 raise CustomError("Process not implemented yet")
                 #Process files
         except CustomError as e:
