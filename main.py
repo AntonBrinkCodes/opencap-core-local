@@ -91,6 +91,7 @@ def main(sessionName, trialName, trial_id, cameras_to_use=['all'],
         sessionDir = os.path.join(baseDir, 'Data', sessionName)
     else:
         sessionDir = os.path.join(dataDir, 'Data', sessionName)
+    print(f" Session Directory is {sessionDir}")
     sessionMetadata = importMetadata(os.path.join(sessionDir,
                                                   'sessionMetadata.yaml'))
     
