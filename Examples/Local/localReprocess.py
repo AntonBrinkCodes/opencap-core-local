@@ -8,7 +8,8 @@ Lastly run all dynamic trials.
 import os
 import sys
 
-sys.path.append(os.path.abspath('./..'))
+# Dynamically calculate to get main folder.
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
 
 from main import main
 
