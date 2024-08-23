@@ -124,8 +124,8 @@ class sessionManager:
             await manager.broadcast(f"Toast: error: {e}", client_type="web", session_id=session_id)
         else:
             #Successfully processed trial
-            sessionID = str(session.getID())
-            await manager.broadcast(f"Toast: success: BABY", client_type="web", session_id=session_id)
+            await manager.broadcast(f"Toast: success: succesfully processed {trialType}", client_type="web", session_id=session_id)
+
             succesCalibrationMsg = {
                 "command": "calibration",
                 "content": "success",
