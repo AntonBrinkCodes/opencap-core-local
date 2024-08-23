@@ -84,6 +84,7 @@ def main(sessionName, trialName, trial_id, cameras_to_use=['all'],
         
     # %% Paths and metadata. This gets defined through web app.
     baseDir = os.path.dirname(os.path.abspath(__file__))
+    print(baseDir)
     if dataDir is None:
         dataDir = getDataDirectory(isDocker)
     if 'dataDir' not in locals():
