@@ -406,7 +406,7 @@ async def websocket_endpoint(websocket: WebSocket, session_id: str, client_type:
                                 print(f"received start_calibration")
                                 print(f"session ID match: {session_id_msg==session_id}")
                                 print(f"session_id is of type: {type(session_id)}")
-                                await sessionManager.startTrial(session= activeSession, trialType = "calibration", process = False, isTest=isTest)
+                                await sessionManager.startTrial(session= activeSession, trialType = "calibration", process = True, isTest=isTest)
                                 #await manager.broadcast(f"Toast: Info: {sessionManager.activeSession.checkerBoard}", client_type="web", session_id=session_id)
 
                             
