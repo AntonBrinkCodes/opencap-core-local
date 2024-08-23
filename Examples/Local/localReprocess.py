@@ -15,9 +15,11 @@ from main import main
 
 
 def runLocalTrial(sessionId: str, trialNames, trialId, trialType="dynamic", poseDetector='openpose', genericFolderNames=True, cameras_to_use=['all'],
-                  resolutionPoseDetection='default') -> bool:
-    sys.path.append(os.path.abspath('./..'))
-
+                  resolutionPoseDetection='default', dataDir = None) -> bool:
+    
+    if dataDir:
+        os.chdir(dataDir)
+    
     extrinsicTrial = False
     scaleModel = False
 
