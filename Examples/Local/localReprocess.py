@@ -19,7 +19,11 @@ def runLocalTrial(sessionId: str, trialNames, trialId, trialType="dynamic", pose
     
     if dataDir:
         os.chdir(dataDir)
-    
+        # Check if the current folder is named "Data"
+        if os.path.basename(os.getcwd()) == "Data":
+        # Change the directory one level up if it is "Data"
+            os.chdir("..")
+
     extrinsicTrial = False
     scaleModel = False
 
