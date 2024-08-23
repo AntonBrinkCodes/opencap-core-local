@@ -29,6 +29,16 @@ class FileManager:
             os.makedirs(trial_path, exist_ok=True)
         return trial_path
     
+    def save_session_metadata(self, session: Session):
+        metadata_path = os.path.join(self.base_directory, str(session.uuid), 'sessionMetadata.yaml')
+        session.save_metadata(metadata_file=metadata_path)
+
+        return metadata_path
+
+
+
+    
+    
     def save_binary_file(self, data: bytes, session: Session, cam_index: int, trial: Trial):
         """
         Save binary data to a file within the structured directories.

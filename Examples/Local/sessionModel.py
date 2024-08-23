@@ -217,7 +217,7 @@ class Session:
         self.checkerBoard.squareSideLength_mm = checkerboard_mm
         self.checkerBoard.placement = checkerboard_placement
 
-    def save_metadata(self, metadata_file = "session_metadata.yaml"): #Double check name later.
+    def save_metadata(self, metadata_file = "sessionMetadata.yaml"): #Double check name later.
         """
         Save the session metadata to a YAML file.
         """

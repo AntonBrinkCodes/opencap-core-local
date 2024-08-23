@@ -390,6 +390,7 @@ async def websocket_endpoint(websocket: WebSocket, session_id: str, client_type:
                             # Access the fields from the message
                             session_id_msg = message.get('session') #Can double check that this matches with session_id
                             command = message.get('command')
+
                             if command == "start_calibration":
                                 rows = int(message.get('rows'))
                                 print(f"rows is of type: {type(rows)}")
@@ -401,6 +402,8 @@ async def websocket_endpoint(websocket: WebSocket, session_id: str, client_type:
                                 isTest = message.get('isTest') # To give to startTrial whetever to use the recording or a pre-recorded session for debug purpose.
                                 # Send parameters to session
                                 activeSession.set_checkerboard_params(rows, cols, square_size, placement)
+                                # Save the session parameters to yaml file
+                                fileManager.save_session_metadata(activeSession)
                                 print(f"--is test: {isTest} type is{type(isTest)}")
                                 # Start the calibration on the back end...
                                 #For now just set the checkerboard_params and notify webapp.
