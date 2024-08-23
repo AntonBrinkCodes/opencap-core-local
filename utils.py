@@ -20,8 +20,23 @@ from scipy import signal
 from utilsAuth import getToken
 from utilsAPI import getAPIURL
 
-API_URL = getAPIURL()
-API_TOKEN = getToken()
+# Initialize variables to None
+API_URL = None
+API_TOKEN = None
+
+def get_api_url():
+    """Lazy initialize and return the API URL."""
+    global API_URL
+    if API_URL is None:
+        API_URL = getAPIURL()
+    return API_URL
+
+def get_api_token():
+    """Lazy initialize and return the API token."""
+    global API_TOKEN
+    if API_TOKEN is None:
+        API_TOKEN = getToken()
+    return API_TOKEN
 
 #%% Rest of utils
 
@@ -105,13 +120,13 @@ def download_file(url, file_name):
         shutil.copyfileobj(response, out_file)
         
 def getTrialJson(trial_id):
-    trialJson = requests.get(API_URL + "trials/{}/".format(trial_id),
-                         headers = {"Authorization": "Token {}".format(API_TOKEN)}).json()
+    trialJson = requests.get(get_api_url() + "trials/{}/".format(trial_id),
+                         headers = {"Authorization": "Token {}".format(get_api_token())}).json()
     return trialJson
 
 def getSessionJson(session_id):
-    sessionJson = requests.get(API_URL + "sessions/{}/".format(session_id),
-                       headers = {"Authorization": "Token {}".format(API_TOKEN)}).json()
+    sessionJson = requests.get(get_api_url() + "sessions/{}/".format(session_id),
+                       headers = {"Authorization": "Token {}".format(get_api_token())}).json()
     
     # sort trials by time recorded
     def getCreatedAt(trial):
@@ -121,8 +136,8 @@ def getSessionJson(session_id):
     return sessionJson
 
 def getSubjectJson(subject_id):
-    subjectJson = requests.get(API_URL + "subjects/{}/".format(subject_id),
-                       headers = {"Authorization": "Token {}".format(API_TOKEN)}).json()
+    subjectJson = requests.get(get_api_url() + "subjects/{}/".format(subject_id),
+                       headers = {"Authorization": "Token {}".format(get_api_token())}).json()
     return subjectJson
     
 def getTrialName(trial_id):
@@ -132,7 +147,7 @@ def getTrialName(trial_id):
     
     return trial_name
 
-def writeMediaToAPI(API_URL,media_path,trial_id,tag=None,deleteOldMedia=False):
+def writeMediaToAPI(media_path,trial_id,tag=None,deleteOldMedia=False):
     
     if deleteOldMedia:
         deleteResult(trial_id, tag=tag)
@@ -184,9 +199,9 @@ def postCalibrationOptions(session_path,session_id,overwrite=False):
         data = {
                 "meta":json.dumps({'calibration':calibOptionsJson})
             }
-        trial_url = "{}{}{}/".format(API_URL, "trials/", calibration_id)
+        trial_url = "{}{}{}/".format(get_api_url(), "trials/", calibration_id)
         r= requests.patch(trial_url, data=data,
-              headers = {"Authorization": "Token {}".format(API_TOKEN)})
+              headers = {"Authorization": "Token {}".format(get_api_token())})
         
         if r.status_code == 200:
             print('Wrote calibration selections to metadata.')
@@ -457,8 +472,8 @@ def deleteResult(trial_id, tag=None,resultNum=None):
         resultNums = [r['id'] for r in trial['results']]
 
     for rNum in resultNums:
-        requests.delete(API_URL + "results/{}/".format(rNum),
-                        headers = {"Authorization": "Token {}".format(API_TOKEN)})
+        requests.delete(get_api_url() + "results/{}/".format(rNum),
+                        headers = {"Authorization": "Token {}".format(get_api_token())})
         
 def deleteAllResults(session_id):
 
@@ -626,7 +641,7 @@ def changeSessionMetadata(session_ids,newMetaDict):
                 raise Exception('datasharing is {} but should be one of the following options: "Share processed data and identified videos", "Share processed data and de-identified videos", "Share processed data", "Share no data".'.format(newMetaDict['datasharing']))
    
     for session_id in session_ids:
-        session_url = "{}{}{}/".format(API_URL, "sessions/", session_id)
+        session_url = "{}{}{}/".format(get_api_url(), "sessions/", session_id)
         
         # get metadata
         session = getSessionJson(session_id)
@@ -687,7 +702,7 @@ def changeSessionMetadata(session_ids,newMetaDict):
         data = {"meta":json.dumps(existingMeta)}
         
         r= requests.patch(session_url, data=data,
-              headers = {"Authorization": "Token {}".format(API_TOKEN)})
+              headers = {"Authorization": "Token {}".format(get_api_token())})
         
         if r.status_code !=200:
             print('Changing metadata failed.')
@@ -729,14 +744,14 @@ def changeSessionMetadata(session_ids,newMetaDict):
         
 def makeSessionPublic(session_id,publicStatus=True):
     
-    session_url = "{}{}{}/".format(API_URL, "sessions/", session_id)
+    session_url = "{}{}{}/".format(get_api_url(), "sessions/", session_id)
     
     data = {
             "public":publicStatus
         }
         
     r= requests.patch(session_url, data=data,
-          headers = {"Authorization": "Token {}".format(API_TOKEN)})
+          headers = {"Authorization": "Token {}".format(get_api_token())})
     
     if r.status_code == 200:
         print('Successfully made ' + session_id + ' public.')
@@ -860,7 +875,7 @@ def postFileToTrial(filePath,trial_id,tag,device_id):
         
     # get S3 link
     data = {'fileName':os.path.split(filePath)[1]}
-    r = requests.get(API_URL + "sessions/null/get_presigned_url/",data=data).json()
+    r = requests.get(get_api_url() + "sessions/null/get_presigned_url/",data=data).json()
     
     # upload to S3
     files = {'file': open(filePath, 'rb')}
@@ -875,8 +890,8 @@ def postFileToTrial(filePath,trial_id,tag,device_id):
         "media_url" : r['fields']['key']
     }
     
-    rResult = requests.post(API_URL + "results/", data=data,
-                  headers = {"Authorization": "Token {}".format(API_TOKEN)})
+    rResult = requests.post(get_api_url() + "results/", data=data,
+                  headers = {"Authorization": "Token {}".format(get_api_token())})
     
     if rResult.status_code != 201:
         print('server response was + ' + str(r.status_code))
@@ -1483,8 +1498,8 @@ def checkForTrialsWithStatus(status,hours=9999999,relativeTime='newer'):
               'justNumber':1,
               'relativeTime':relativeTime}
     
-    r = requests.get(API_URL+"trials/get_trials_with_status/",params=params,
-        headers = {"Authorization": "Token {}".format(API_TOKEN)}).json()
+    r = requests.get(get_api_url()+"trials/get_trials_with_status/",params=params,
+        headers = {"Authorization": "Token {}".format(get_api_token())}).json()
     
     return r['nTrials']
 
@@ -1564,8 +1579,8 @@ def checkCudaTF():
 # %% Some functions for loading subject data
 
 def getSubjectNumber(subjectName):
-    subjects = requests.get(API_URL + "subjects/",
-                           headers = {"Authorization": "Token {}".format(API_TOKEN)}).json()
+    subjects = requests.get(get_api_url() + "subjects/",
+                           headers = {"Authorization": "Token {}".format(get_api_token())}).json()
     sNum = [s['id'] for s in subjects if s['name'] == subjectName]
     if len(sNum)>1:
         print(len(sNum) + ' subjects with the name ' + subjectName + '. Will use the first one.')   
@@ -1575,8 +1590,8 @@ def getSubjectNumber(subjectName):
     return sNum[0]
 
 def getUserSessions():
-    sessionJson = requests.get(API_URL + "sessions/valid/",
-                           headers = {"Authorization": "Token {}".format(API_TOKEN)}).json()
+    sessionJson = requests.get(get_api_url() + "sessions/valid/",
+                           headers = {"Authorization": "Token {}".format(get_api_token())}).json()
     return sessionJson
 
 def getSubjectSessions(subjectName):

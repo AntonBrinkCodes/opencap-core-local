@@ -28,9 +28,23 @@ from utilsAPI import getAPIURL
 
 from utilsAuth import getToken
 
-API_TOKEN = getToken()
-API_URL = getAPIURL()
+# Initialize variables to None
+API_URL = None
+API_TOKEN = None
 
+def get_api_url():
+    """Lazy initialize and return the API URL."""
+    global API_URL
+    if API_URL is None:
+        API_URL = getAPIURL()
+    return API_URL
+
+def get_api_token():
+    """Lazy initialize and return the API token."""
+    global API_TOKEN
+    if API_TOKEN is None:
+        API_TOKEN = getToken()
+    return API_TOKEN
 # %%
 def download_file(url, file_name):
     with urllib.request.urlopen(url) as response, open(file_name, 'wb') as out_file:
@@ -198,8 +212,8 @@ def computeAverageIntrinsics(session_path,trialIDs,CheckerBoardParams,nImages=25
     camModels = []
     
     for trial_id in trialIDs:
-        resp = requests.get(API_URL + "trials/{}/".format(trial_id),
-                         headers = {"Authorization": "Token {}".format(API_TOKEN)})
+        resp = requests.get(get_api_url() + "trials/{}/".format(trial_id),
+                         headers = {"Authorization": "Token {}".format(get_api_token())})
         trial = resp.json()
         camModels.append(trial['videos'][0]['parameters']['model'])
         trial_name = trial['name']
