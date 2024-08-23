@@ -3,7 +3,7 @@ Attempt to fully locally process trials, no uploading to server.
 First run calibration to get camera extrensics, then static trials to create opensim model,
 Lastly run all dynamic trials.
 
-
+TODO: Add some type of throw error depending on if main succeeds or not.
 """
 import os
 import sys
@@ -12,6 +12,8 @@ import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
 
 from main import main
+from utils import deleteCalibrationFiles
+from utils import getDataDirectory
 
 
 def runLocalTrial(sessionId: str, trialNames, trialId, trialType="dynamic", poseDetector='openpose', genericFolderNames=True, cameras_to_use=['all'],
@@ -28,6 +30,13 @@ def runLocalTrial(sessionId: str, trialNames, trialId, trialType="dynamic", pose
     scaleModel = False
 
     if trialType == "calibration":
+         # Get session directory and delete previous calibration files
+        session_name = sessionId 
+        data_dir = getDataDirectory(isDocker=False)
+        session_path = os.path.join(data_dir,'Data',session_name)
+        print(f"session_path is: {session_path}")    
+        deleteCalibrationFiles(session_path=session_path)
+
         extrinsicTrial = True
     elif trialType == "static":
         scaleModel = True

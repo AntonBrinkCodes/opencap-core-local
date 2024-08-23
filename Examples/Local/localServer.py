@@ -116,8 +116,9 @@ class sessionManager:
                     trialNames = "s05-treadmill_1_recording"
                     trialId = "afca93fd-9753-4bea-9130-5fdcf151d9f0" 
 
-                runLocalTrial(sessionId, trialNames, trialId, trialType=trialType, dataDir=fileManager.base_directory) 
-                raise CustomError("Process not implemented yet")
+                runLocalTrial(sessionId, trialNames, trialId, trialType=trialType, dataDir=fileManager.base_directory)
+                
+                #raise CustomError("Process not implemented yet")
                 #Process files
         except CustomError as e:
             await manager.broadcast(f"Toast: error: {e}", client_type="web", session_id=session_id)
