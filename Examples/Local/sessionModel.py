@@ -20,7 +20,7 @@ from CheckerBoard import CheckerBoard
 import pickle
 
 
-class sex(Enum):
+class Sex(Enum):
     female = "f"
     male = "m"
     other = "o"
@@ -35,9 +35,9 @@ class Subject:
             height (float): The height of the subject in meters.
             weight (float): The weight of the subject in kilograms.
     """
-    def __init__(self, name="defaultSubject", sex=sex.other, height=1.89, weight=83.2, birth_year = 1989, id: Optional[uuid.UUID]=None):
+    def __init__(self, name="defaultSubject", sex: Optional[Sex] = None, height=1.89, weight=83.2, birth_year = 1989, id: Optional[uuid.UUID]=None):
         self.name=name
-        self.gender = sex
+        self.gender = sex if sex is not None else Sex.other
         self.height = height #in meters
         self.mass = weight #in kilos
         self.birth_year = birth_year
@@ -61,7 +61,7 @@ class Subject:
         """Create a Subject instance from a dictionary."""
         return Subject(
             name=data['name'],
-            sex=sex(data['gender']) if data.get('gender') else None,
+            sex=Sex(data['gender']) if data.get('gender') else None,
             height=data['height'],
             weight=data['mass'],
             birth_year = data['birth_year'],
@@ -139,7 +139,7 @@ class Session:
         Set the subject of the session
         '''
         self.subject = subject
-        
+
     '''
     add the type of camera used (essentially what type of iPhone/iPad)
     '''

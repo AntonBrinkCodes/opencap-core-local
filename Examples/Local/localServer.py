@@ -401,7 +401,10 @@ async def websocket_endpoint(websocket: WebSocket, session_id: str, client_type:
                             command = message.get('command')
 
                             if command=="ping":
-                                await manager.broadcast("pong", "web", session_id=session_id)
+                                pongmsg = {
+                                    command: "pong"
+                                }
+                                await manager.broadcast(json.dumps(pongmsg), "web", session_id=session_id)
 
                             elif command == "start_calibration":
                                 rows = int(message.get('rows'))
