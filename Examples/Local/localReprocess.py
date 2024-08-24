@@ -30,12 +30,12 @@ def runLocalTrial(sessionId: str, trialNames, trialId, trialType="dynamic", pose
     scaleModel = False
 
     if trialType == "calibration":
-         # Get session directory and delete previous calibration files
+         # Get session directory and delete previous calibration files output
         session_name = sessionId 
         data_dir = getDataDirectory(isDocker=False)
         session_path = os.path.join(data_dir,'Data',session_name)
         print(f"session_path is: {session_path}")    
-        deleteCalibrationFiles(session_path=session_path)
+        deleteCalibrationFiles(session_path=session_path, deleteRecorded=False)
 
         extrinsicTrial = True
     elif trialType == "static":
