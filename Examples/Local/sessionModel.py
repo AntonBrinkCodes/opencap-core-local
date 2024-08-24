@@ -134,8 +134,11 @@ class Session:
 
         self.openSimModel = 'LaiUhlrich2022'
     
-    def set_name(self, name: str):
-        self.name = name
+    def set_subject(self, subject: Subject):
+        '''
+        Set the subject of the session
+        '''
+        self.subject = subject
         
     '''
     add the type of camera used (essentially what type of iPhone/iPad)
@@ -258,7 +261,7 @@ class Session:
                 f"calibration_trial={self.calibration_trial}, static_trial={self.neutral_trial}, "
                 f"metadata={self.metadata})")
     
-    def setName(self, name:str):
+    def set_name(self, name:str):
         """
         Set the name of the session.
         Args:

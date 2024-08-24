@@ -103,7 +103,7 @@ class sessionManager:
             #Start recording
             await manager.broadcast(f"Toast: info: Recording calibration...", session_id=session_id)
             await self.sendStartTrial(session_id = session_id, trialType=trialType)
-            if trialType == 'calibration' or trialType == 'static':
+            if trialType == 'calibration' or trialType == 'neutral':
                 # Stop recording automatically after 1 second.
                 await asyncio.sleep(1)
                 await self.sendStopTrial(session_id=session_id)
@@ -113,14 +113,14 @@ class sessionManager:
                 sessionId = str(session.getID())
                 if isTest:
                     sessionId = "Giota"
-                    
+
                     # Set trialNames based on the trialType
                     trialNames = (
                         trialType 
                         if (trialType == "calibration" or trialType == "neutral") 
                         else "dynamic_1"
                     )
-                    
+
                     # Set trialId based on the trialType
                     trialId = "Dynamic_1" if trialType != "neutral" else "Calib_1"
 
@@ -421,6 +421,16 @@ async def websocket_endpoint(websocket: WebSocket, session_id: str, client_type:
                                 await sessionManager.startTrial(session= activeSession, trialType = "calibration", process = True, isTest=isTest)
                                 #await manager.broadcast(f"Toast: Info: {sessionManager.activeSession.checkerBoard}", client_type="web", session_id=session_id)
 
+                            elif command =="start_neutral":
+                                print("running neutral trial")
+                                isTest = message.get("isTest")
+                                # Get the new subject from the message
+                                subject = Subject.from_dict(message.get("subject"))
+                                activeSession.set_subject(subject)
+                                #Save the subject to the metadata file. Required for processing trial.
+                                fileManager.save_session_metadata(activeSession)
+                                await sessionManager.startTrial(session=activeSession, trialType="neutral", process=True, isTest=isTest)
+                    
                             
 
 

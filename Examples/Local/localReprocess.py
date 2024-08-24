@@ -38,7 +38,7 @@ def runLocalTrial(sessionId: str, trialNames, trialId, trialType="dynamic", pose
         deleteCalibrationFiles(session_path=session_path, deleteRecorded=False)
 
         extrinsicTrial = True
-    elif trialType == "static":
+    elif trialType == "static" or trialType=="neutral":
         scaleModel = True
 
 
