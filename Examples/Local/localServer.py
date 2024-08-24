@@ -140,6 +140,7 @@ class sessionManager:
                 "session_id": session_id
             }
             await manager.broadcast(message=json.dumps(succesCalibrationMsg), client_type="web", session_id=session_id)
+        return
 
 class ConnectionManager:
     def __init__(self):
@@ -399,7 +400,10 @@ async def websocket_endpoint(websocket: WebSocket, session_id: str, client_type:
                             session_id_msg = message.get('session') #Can double check that this matches with session_id
                             command = message.get('command')
 
-                            if command == "start_calibration":
+                            if command=="ping":
+                                await manager.broadcast("pong", "web", session_id=sessionID)
+
+                            elif command == "start_calibration":
                                 rows = int(message.get('rows'))
                                 print(f"rows is of type: {type(rows)}")
                                 cols = int(message.get('cols'))
