@@ -112,9 +112,17 @@ class sessionManager:
             if process:
                 sessionId = str(session.getID())
                 if isTest:
-                    sessionId = "4cf4bca5-7cd0-4db8-af11-5d39d485dba8"
-                    trialNames = "s05-treadmill_1_recording"
-                    trialId = "afca93fd-9753-4bea-9130-5fdcf151d9f0" 
+                    sessionId = "Giota"
+                    
+                    # Set trialNames based on the trialType
+                    trialNames = (
+                        trialType 
+                        if (trialType == "calibration" or trialType == "neutral") 
+                        else "dynamic_1"
+                    )
+                    
+                    # Set trialId based on the trialType
+                    trialId = "Dynamic_1" if trialType != "neutral" else "Calib_1"
 
                 runLocalTrial(sessionId, trialNames, trialId, trialType=trialType, dataDir=fileManager.base_directory)
                 
