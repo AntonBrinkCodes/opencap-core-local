@@ -274,7 +274,7 @@ def downloadVideosFromServer(session_id,trial_id, isDocker=True,
     return trial_name
 
 
-def deleteCalibrationFiles(session_path):
+def deleteCalibrationFiles(session_path, deleteRecorded = True):
     calImagePath = os.path.join(session_path,'CalibrationImages')
     if os.path.exists(calImagePath):
         shutil.rmtree(calImagePath)
@@ -298,9 +298,10 @@ def deleteCalibrationFiles(session_path):
         if os.path.exists(extPath):
             os.remove(extPath)
         #Find extrinsic Filename
-        if extrinsicFileFound:
+        if extrinsicFileFound and deleteRecorded:
             extFolder = os.path.join(camDir,'InputMedia',extrinsicTrialName)
             if os.path.isdir(extFolder):
+                print(f"deleting {extFolder}")
                 shutil.rmtree(extFolder)
                 
 def deleteStaticFiles(session_path,staticTrialName='neutral'):
