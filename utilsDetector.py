@@ -59,7 +59,7 @@ def runOpenPoseVideo(cameraDirectory,fileName,pathOpenPose, trialName,
     
     trialPrefix, _ = os.path.splitext(os.path.basename(fileName)) 
     videoFullPath = os.path.normpath(os.path.join(cameraDirectory, fileName))
-    
+    print(f"Video path is {videoFullPath}")
     if not os.path.exists(videoFullPath):
         exception = "Video upload failed. Make sure all devices are connected to Internet and that your connection is stable."
         raise Exception(exception, exception)
