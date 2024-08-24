@@ -147,7 +147,7 @@ def getTrialName(trial_id):
     
     return trial_name
 
-def writeMediaToAPI(media_path,trial_id,tag=None,deleteOldMedia=False):
+def writeMediaToAPI(api_url, media_path,trial_id,tag=None,deleteOldMedia=False):
     
     if deleteOldMedia:
         deleteResult(trial_id, tag=tag)
