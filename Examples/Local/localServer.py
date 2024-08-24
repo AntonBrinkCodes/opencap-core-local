@@ -432,8 +432,9 @@ async def websocket_endpoint(websocket: WebSocket, session_id: str, client_type:
                                 await sessionManager.startTrial(session=activeSession, trialType="neutral", process=True, isTest=isTest)
                     
                             
-
-
+                            else:
+                                print(f"Unknown command received: {command}")
+                    
                             #print(f"Session {session_id} says: {message}")
                         #await manager.broadcast(f"Session {session_id} says: {message}", "mobile", session_id=session_id)
 
