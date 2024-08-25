@@ -79,38 +79,50 @@ class sessionManager:
         json_message = json.dumps(message)
         await manager.broadcast(message = json_message, client_type="mobile", session_id=session_id)
     
-    async def startTrial(self, session: Session, trialType: Optional[str] = "dynamic", process=True, isTest=False):
+    async def startTrial(self, session: Session, trialType: Optional[str] = "dynamic", process=True, isTest=False, trialNames: Optional[str] = ""):
         '''
-            Creates a new trial in the Session.
-            Starts the trials by:
-                Telling all mobiles in the session to start recording.
-                If trialType is static or calibration stops the recordings after 1s.
-                saves the videos.
-                if process is True then calls the backend to process the videos.
+        Creates and starts a new trial within the given session.
 
-            Parameters:
-                session (Session): The session that the trial is in.
-                trialType Optional[str]: The type of trial (calibration, static, dynamic). Default is dynamic.
-                process (Boolean): Whetever to process the trial immediatly or not.
-                testTrial (Boolean): whetever or not to use the actual session given or if this should run with a preset trial.
+        The function initiates the trial by:
+            - Commanding all mobile devices in the session to begin recording.
+            - Automatically stopping recordings after 1 second if the trial type is 'static' or 'calibration'.
+            - Saving the recorded videos.
+            - If 'process' is True, the function sends a request to the regular opencap-core main function to process the videos.
 
-            Returns:
-                Some info whetever the trial successfully processed/uploaded.
+        Parameters:
+            session (Session): The session in which the trial is being conducted.
+            trialType (Optional[str]): The type of trial to start ('calibration', 'static', 'dynamic'). Defaults to 'dynamic'.
+            process (bool): Whether to process the trial immediately after recording. Defaults to True.
+            isTest (bool): Whether to use a preset test trial instead of the actual session provided. Defaults to False.
+            trialName (Optional[str]): An optional name for the trial. Defaults to an empty string.
+
+        Returns:
+            dict: Information about whether the trial was successfully processed and/or uploaded.
         '''
         print(f"running {trialType} trial")
         session_id = str(session.getID())
         try:
             #Start recording
-            await manager.broadcast(f"Toast: info: Recording calibration...", session_id=session_id)
+            
             await self.sendStartTrial(session_id = session_id, trialType=trialType)
             if trialType == 'calibration' or trialType == 'neutral':
+                await manager.broadcast(f"Toast: info: Recording {trialType}...", session_id=session_id)
                 # Stop recording automatically after 1 second.
                 await asyncio.sleep(1)
                 await self.sendStopTrial(session_id=session_id)
                 await manager.broadcast(f"Toast: success: Succesfully finished recording :)")
+            elif trialType=='dynamic':
+                print("Trial Type is dynamic")
+                if not isTest:
+                    #Wait to ensure that all files are uploaded before proceeding
+                    # ... Should probably do that for calib and neutral too.
+                    print("this is a real trial recording")
+
             #Upload files
             if process:
                 sessionId = str(session.getID())
+
+                #If isTest then we just use a pre recorded session.
                 if isTest:
                     sessionId = "Giota"
 
@@ -120,7 +132,6 @@ class sessionManager:
                         if (trialType == "calibration" or trialType == "neutral") 
                         else "dynamic_1"
                     )
-
                     # Set trialId based on the trialType
                     trialId = "Dynamic_1" if trialType != "neutral" else "Calib_1"
 
@@ -437,6 +448,14 @@ async def websocket_endpoint(websocket: WebSocket, session_id: str, client_type:
                                 #Save the subject to the metadata file. Required for processing trial.
                                 fileManager.save_session_metadata(activeSession)
                                 await sessionManager.startTrial(session=activeSession, trialType="neutral", process=True, isTest=isTest)
+                            
+                            elif command =="start_dynamic":
+                                print("running neutral trial")
+                                isTest= message.get("isTest")
+                                trialName = message.get("trialName")
+
+                                await sessionManager.startTrial(session = activeSession, trialType="dynamic", process=True, isTest=isTest, trialnames=trialName)
+
                     
                             
                             else:
