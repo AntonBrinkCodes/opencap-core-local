@@ -130,10 +130,10 @@ class sessionManager:
                     trialNames = (
                         trialType 
                         if (trialType == "calibration" or trialType == "neutral") 
-                        else "dynamic_1"
+                        else "dynamic_2"
                     )
                     # Set trialId based on the trialType
-                    trialId = "Dynamic_1" if trialType != "neutral" else "Calib_1"
+                    trialId = "Dynamic_1" if trialType == "calibration" else "Calib_1" if trialType == "neutral" else "Dynamic_2" if trialType == "dynamic" else None
 
                 runLocalTrial(sessionId, trialNames, trialId, trialType=trialType, dataDir=fileManager.base_directory)
                 
