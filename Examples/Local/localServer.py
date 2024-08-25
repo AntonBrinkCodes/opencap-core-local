@@ -454,7 +454,7 @@ async def websocket_endpoint(websocket: WebSocket, session_id: str, client_type:
                                 isTest= message.get("isTest")
                                 trialName = message.get("trialName")
 
-                                await sessionManager.startTrial(session = activeSession, trialType="dynamic", process=True, isTest=isTest, trialnames=trialName)
+                                await sessionManager.startTrial(session = activeSession, trialType="dynamic", process=True, isTest=isTest, trialNames=trialName)
 
                     
                             
