@@ -2,6 +2,7 @@ import os
 from sessionModel import Session, Trial, Subject
 from typing import List, Optional
 import pickle
+import json
 class FileManager:
     """
     Manage file organization for sessions, subjects and trials.
@@ -60,7 +61,7 @@ class FileManager:
             >>> data = find_visualizer_json(self, session, trial)
             >>> print(data)
         """
-        visualiser_path = os.path.join(self.base_directory, str(session.uuid), 'VisualizerJsons', trial.name, f'{trial.name}.json') #TODO: Check if this needs to be .name or .uuid...
+        visualiser_path = os.path.join(self.base_directory, str(session.uuid), 'VisualizerJsons', trial.name, f'{trial.name}.json') #Should be name and not uuid. Pretty sure...
         print(f'Path to visualizer JSON is: {visualiser_path}')
     
         # Read and return the JSON content
@@ -131,3 +132,17 @@ class FileManager:
         with open(full_filename, 'rb') as file:
             loaded_subjects = pickle.load(file)
         return loaded_subjects
+    
+
+
+if __name__=="__main__": # FOR TESTING CLASS.
+    current_script_directory = os.path.dirname(os.path.abspath(__file__))
+    parent_directory = os.path.abspath(os.path.join(current_script_directory, '..'))
+    base_directory = os.path.join(parent_directory, 'Data')
+
+    fileManager = FileManager(base_directory)
+
+    session = Session(session_uuid="4cf4bca5-7cd0-4db8-af11-5d39d485dba8")
+    trial = Trial(name="s05-jumpingjacks_2_recording")
+
+    visualizerJson = fileManager.find_visualizer_json(session, trial)
