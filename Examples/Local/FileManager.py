@@ -36,6 +36,38 @@ class FileManager:
         return metadata_path
 
 
+    def find_visualizer_json(self, session: Session, trial: Trial):
+        """
+        Finds and loads the visualizer JSON file for a given trial and session.
+
+        This function constructs the path to the visualizer JSON file using the session and trial UUIDs.
+        It then reads the content of the JSON file and returns it as a dictionary.
+
+        Args:
+            session (Session): An instance of the Session class containing session details, including a UUID.
+            trial (Trial): An instance of the Trial class containing trial details, including a UUID.
+
+        Returns:
+            dict: A dictionary containing the content of the visualizer JSON file.
+
+        Raises:
+            FileNotFoundError: If the specified JSON file does not exist at the constructed path.
+            json.JSONDecodeError: If the file content is not a valid JSON.
+
+        Example:
+            >>> session = Session(uuid='12345')
+            >>> trial = Trial(uuid='67890')
+            >>> data = find_visualizer_json(self, session, trial)
+            >>> print(data)
+        """
+        visualiser_path = os.path.join(self.base_directory, str(session.uuid), 'VisualizerJsons', trial.name, f'{trial.name}.json') #TODO: Check if this needs to be .name or .uuid...
+        print(f'Path to visualizer JSON is: {visualiser_path}')
+    
+        # Read and return the JSON content
+        with open(visualiser_path, 'r') as file:
+            visualizer_data = json.load(file)
+    
+        return visualizer_data
 
     
     
