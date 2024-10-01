@@ -3,6 +3,8 @@ from sessionModel import Session, Trial, Subject
 from typing import List, Optional
 import pickle
 import json
+import yaml
+
 class FileManager:
     """
     Manage file organization for sessions, subjects and trials.
@@ -37,7 +39,7 @@ class FileManager:
         return metadata_path
 
 
-    def find_visualizer_json(self, session: Session, trial: Trial):
+    def find_visualizer_json(self, session: Session, trialName: str):
         """
         Finds and loads the visualizer JSON file for a given trial and session.
 
@@ -46,7 +48,7 @@ class FileManager:
 
         Args:
             session (Session): An instance of the Session class containing session details, including a UUID.
-            trial (Trial): An instance of the Trial class containing trial details, including a UUID.
+            trial (str): The name of the trial.
 
         Returns:
             dict: A dictionary containing the content of the visualizer JSON file.
@@ -61,8 +63,8 @@ class FileManager:
             >>> data = find_visualizer_json(self, session, trial)
             >>> print(data)
         """
-        visualiser_path = os.path.join(self.base_directory, str(session.uuid), 'VisualizerJsons', trial.name, f'{trial.name}.json') #Should be name and not uuid. Pretty sure...
-        print(f'Path to visualizer JSON is: {visualiser_path}')
+        visualiser_path = os.path.join(self.base_directory, str(session.uuid), 'VisualizerJsons', trialName, f'{trialName}.json') #Should be name and not uuid. Pretty sure...
+        #print(f'Path to visualizer JSON is: {visualiser_path}')
     
         # Read and return the JSON content
         with open(visualiser_path, 'r') as file:
@@ -70,7 +72,39 @@ class FileManager:
     
         return visualizer_data
 
-    
+    def find_sessions(self)-> dict:
+        sessions_dict = {}  # Dictionary to hold metadata for each UUID folder
+
+        # Iterate through each folder in the root directory
+        for folder_name in os.listdir(self.base_directory):
+            folder_path = os.path.join(self.base_directory, folder_name)
+
+            # Check if the folder name matches a UUID pattern
+            if os.path.isdir(folder_path):
+                # Construct the path to sessionMetadata.yaml
+                metadata_file_path = os.path.join(folder_path, 'sessionMetadata.yaml')
+
+                # Check if sessionMetadata.yaml exists
+                if os.path.isfile(metadata_file_path):
+                    # Open and read the YAML file
+                    with open(metadata_file_path, 'r') as file:
+                        metadata = yaml.safe_load(file)
+
+                        # Extract specific lines or fields (modify as per your requirements)
+                        # Assuming the YAML file has fields like 'session_name' and 'created_date'
+                        session_info = {
+                            "subjectName": metadata.get("subjectName", ""),
+                            "sessionDate": metadata.get("sessionDate", ""),
+                            "sessionID": metadata.get("sessionID", ""),
+                            "mass": metadata.get("mass_kg", ""),
+                            "height": metadata.get("height_m", "")
+                            # Add other fields here as needed
+                        }
+
+                        # Add the extracted metadata to the sessions_dict with folder_name as key
+                        sessions_dict[folder_name] = session_info
+
+        return sessions_dict
     
     def save_binary_file(self, data: bytes, session: Session, cam_index: int, trial: Trial):
         """
@@ -146,3 +180,4 @@ if __name__=="__main__": # FOR TESTING CLASS.
     trial = Trial(name="s05-jumpingjacks_2_recording")
 
     visualizerJson = fileManager.find_visualizer_json(session, trial)
+    print(fileManager.find_sessions())

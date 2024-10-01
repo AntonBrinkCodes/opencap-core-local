@@ -456,8 +456,18 @@ async def websocket_endpoint(websocket: WebSocket, session_id: str, client_type:
 
                                 await sessionManager.startTrial(session = activeSession, trialType="dynamic", process=True, isTest=isTest, trialNames=trialName)
 
-                    
-                            
+                            elif command == "get_visualizer":
+                                trialName = message.get("trialName")
+                                # Send back visualizer JSON (AND later visualizer videos as well)
+                                visualizerJson = fileManager.find_visualizer_json(session=activeSession,trialName=trialName)
+
+                                jsonMsg = {
+                                    "command": "visualizerJSON",
+                                    "content": visualizerJson,
+                                    "session_id": session_id_msg
+                                }
+                                await manager.broadcast(message=json.dumps(jsonMsg), client_type="web", session_id=session_id_msg)
+
                             else:
                                 print(f"Unknown command received: {command}")
                     
@@ -489,7 +499,8 @@ async def websocket_endpoint(websocket: WebSocket, session_id: str, client_type:
                             # Save the video to a file
                             fileManager.save_binary_file(video_data, session = activeSession, trial = trial, cam_index =manager.find_websocket_index(client_type, websocket)  )
                             #save_binary_file(video_data, f"{name}cam{manager.find_websocket_index(client_type, websocket)}.mov")
-                            
+                        
+                        
                         #await manager.broadcast(f"Session {session_id} received a message it cant deal with right now", "web", session_id=session_id)
                         #await manager.broadcast(f"Session {session_id} Mobile says: {message}", "web", session_id=session_id)
 

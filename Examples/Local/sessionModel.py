@@ -226,7 +226,11 @@ class Session:
         """
         metadata = {
             'subjectID': self.subject.id,
+            'subjectName': self.subject.name,
+            'subjectBirthyear': self.subject.birth_year,
+            'sessionDate': self.createdAt.strftime("%Y-%m-%d"),
             'mass_kg': self.subject.mass,
+            'sessionID': self.getID(),
             'height_m': self.subject.height,
             'gender_mf': self.subject.gender.value,
             'openSimModel': self.openSimModel,
