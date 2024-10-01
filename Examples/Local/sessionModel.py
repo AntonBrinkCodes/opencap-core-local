@@ -225,12 +225,12 @@ class Session:
         Save the session metadata to a YAML file.
         """
         metadata = {
-            'subjectID': self.subject.id,
+            'subjectID': str(self.subject.id),
             'subjectName': self.subject.name,
             'subjectBirthyear': self.subject.birth_year,
             'sessionDate': self.createdAt.strftime("%Y-%m-%d"),
             'mass_kg': self.subject.mass,
-            'sessionID': self.getID(),
+            'sessionID': str(self.getID()),
             'height_m': self.subject.height,
             'gender_mf': self.subject.gender.value,
             'openSimModel': self.openSimModel,
