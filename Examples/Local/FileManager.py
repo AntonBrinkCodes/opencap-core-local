@@ -15,7 +15,6 @@ class FileManager:
     def __init__(self, base_directory: str):
         self.base_directory = base_directory
         print(base_directory)
-        yaml.add_representer(uuid.UUID, uuid_representer)
 
 
     def create_cam_directory(self, session: Session, cam_index: int):
