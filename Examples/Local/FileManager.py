@@ -14,7 +14,8 @@ class FileManager:
     def __init__(self, base_directory: str):
         self.base_directory = base_directory
         print(base_directory)
-        yaml.add_constructor('tag:yaml.org,2002:python/object:uuid.UUID', uuid_constructor)
+        yaml.add_representer(uuid.UUID, uuid_representer)
+
 
     def create_cam_directory(self, session: Session, cam_index: int):
         cam_path = os.path.join(self.base_directory, str(session.uuid), 'Videos', f'Cam{cam_index}')
@@ -92,7 +93,7 @@ class FileManager:
                     # Open and read the YAML file
                     with open(metadata_file_path, 'r') as file:
                         # Add the constructor for the UUID tag in YAML
-                        yaml.add_constructor('tag:yaml.org,2002:python/object:uuid.UUID', uuid_constructor)
+                        
                         metadata = yaml.safe_load(file)
 
                         # Extract specific lines or fields (modify as per your requirements)
@@ -176,6 +177,9 @@ def uuid_constructor(loader, node):
     # Convert the YAML scalar node to a string, then create a UUID object
     value = loader.construct_scalar(node)
     return uuid.UUID(value)
+
+def uuid_representer(dumper, data):
+    return dumper.represent_scalar('tag:yaml.org,2002:str', str(data))
 
 
 if __name__=="__main__": # FOR TESTING CLASS.
