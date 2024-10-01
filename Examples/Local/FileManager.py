@@ -177,7 +177,7 @@ if __name__=="__main__": # FOR TESTING CLASS.
     fileManager = FileManager(base_directory)
 
     session = Session(session_uuid="4cf4bca5-7cd0-4db8-af11-5d39d485dba8")
-    trial = Trial(name="s05-jumpingjacks_2_recording")
+    trial = "s05-jumpingjacks_2_recording"
 
     visualizerJson = fileManager.find_visualizer_json(session, trial)
     print(fileManager.find_sessions())
