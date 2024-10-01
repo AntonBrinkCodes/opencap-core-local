@@ -94,7 +94,7 @@ class FileManager:
                     with open(metadata_file_path, 'r') as file:
                         # Add the constructor for the UUID tag in YAML
                         yaml.add_constructor(tag="tag:yaml.org,2002:python/object:uuid.UUID", constructor=uuid_constructor)
-                        metadata = yaml.load(file, Loader=yaml.FullLoader)
+                        metadata = yaml.safe_load(file)
 
                         # Extract specific lines or fields (modify as per your requirements)
                         # Assuming the YAML file has fields like 'session_name' and 'created_date'
