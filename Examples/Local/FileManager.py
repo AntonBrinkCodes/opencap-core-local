@@ -4,6 +4,7 @@ from typing import List, Optional
 import pickle
 import json
 import yaml
+import uuid
 
 class FileManager:
     """
@@ -13,6 +14,8 @@ class FileManager:
     def __init__(self, base_directory: str):
         self.base_directory = base_directory
         print(base_directory)
+        yaml.add_constructor('tag:yaml.org,2002:python/object:uuid.UUID', uuid_constructor)
+
     def create_cam_directory(self, session: Session, cam_index: int):
         cam_path = os.path.join(self.base_directory, str(session.uuid), 'Videos', f'Cam{cam_index}')
         os.makedirs(cam_path, exist_ok=True)
@@ -167,6 +170,10 @@ class FileManager:
             loaded_subjects = pickle.load(file)
         return loaded_subjects
     
+def uuid_constructor(loader, node):
+    # Convert the YAML scalar node to a string, then create a UUID object
+    value = loader.construct_scalar(node)
+    return uuid.UUID(value)
 
 
 if __name__=="__main__": # FOR TESTING CLASS.
