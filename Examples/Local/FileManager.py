@@ -176,10 +176,20 @@ class FileManager:
             loaded_subjects = pickle.load(file)
         return loaded_subjects
     
+# Define a custom constructor for UUIDs
 def uuid_constructor(loader, node):
-    # Convert the YAML scalar node to a string, then create a UUID object
-    value = loader.construct_scalar(node)
-    return uuid.UUID(value)
+    # Check if the node is a scalar (simple UUID string)
+    if isinstance(node, yaml.ScalarNode):
+        value = loader.construct_scalar(node)
+        return uuid.UUID(value)
+    # Check if the node is a mapping (complex representation)
+    elif isinstance(node, yaml.MappingNode):
+        # Extract the mapping information
+        mapping = loader.construct_mapping(node, deep=True)
+        if 'hex' in mapping:
+            return uuid.UUID(mapping['hex'])
+    raise yaml.constructor.ConstructorError("Failed to construct UUID from node", node.start_mark)
+
 
 def uuid_representer(dumper, data):
     return dumper.represent_scalar('tag:yaml.org,2002:str', str(data))
