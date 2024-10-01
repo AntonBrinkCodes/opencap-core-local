@@ -85,7 +85,7 @@ class FileManager:
         # Iterate through each folder in the root directory
         for folder_name in os.listdir(self.base_directory):
             folder_path = os.path.join(self.base_directory, folder_name)
-            CustomLoader.add_constructor(tag="tag:yaml.org,2002:python/object:uuid.UUID", constructor=uuid_constructor)
+            yaml.add_constructor(tag="tag:yaml.org,2002:python/object:uuid.UUID", constructor=uuid_constructor)
 
             # Check if the folder name matches a UUID pattern
             if os.path.isdir(folder_path):
@@ -97,7 +97,7 @@ class FileManager:
                     # Open and read the YAML file
                     with open(metadata_file_path, 'r') as file:
                         # Add the constructor for the UUID tag in YAML
-                        metadata = yaml.load(file, Loader =CustomLoader)
+                        metadata = yaml.safe_load(file)
 
                         # Extract specific lines or fields (modify as per your requirements)
                         # Assuming the YAML file has fields like 'session_name' and 'created_date'
@@ -176,19 +176,11 @@ class FileManager:
             loaded_subjects = pickle.load(file)
         return loaded_subjects
     
-# Define a custom constructor for UUIDs
+# Custom constructor for UUID
 def uuid_constructor(loader, node):
-    # Check if the node is a scalar (simple UUID string)
-    if isinstance(node, yaml.ScalarNode):
-        value = loader.construct_scalar(node)
-        return uuid.UUID(value)
-    # Check if the node is a mapping (complex representation)
-    elif isinstance(node, yaml.MappingNode):
-        # Extract the mapping information
-        mapping = loader.construct_mapping(node, deep=True)
-        if 'hex' in mapping:
-            return uuid.UUID(mapping['hex'])
-    raise yaml.constructor.ConstructorError("Failed to construct UUID from node", node.start_mark)
+    # Extract the value from the mapping node and create a UUID object
+    value = loader.construct_mapping(node)
+    return uuid.UUID(int=value['int'])
 
 
 def uuid_representer(dumper, data):
