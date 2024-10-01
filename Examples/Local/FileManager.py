@@ -5,9 +5,7 @@ import pickle
 import json
 import yaml
 import uuid
-# Create a custom loader that adds the UUID constructor
-class CustomLoader(yaml.FullLoader):
-    pass
+import shutil
 
 class FileManager:
     """
@@ -45,6 +43,27 @@ class FileManager:
 
         return metadata_path
 
+    def cleanEmptySessions(self):
+        """
+        Traverse through all subfolders of base_path, 
+        check for empty 'Videos' folders and remove them along with their contents.
+
+        :param base_path: Path to the base directory containing UUID-named folders.
+        """
+        # Iterate through each folder in the base_path
+        for folder_name in os.listdir(self.base_directory):
+            folder_path = os.path.join(self.base_directory, folder_name)
+
+            # Check if it is a directory
+            if os.path.isdir(folder_path):
+                videos_folder = os.path.join(folder_path, "Videos")
+
+                # Check if the 'Videos' folder exists
+                if os.path.exists(videos_folder):
+                    # Check if the 'Videos' folder is empty
+                    if not os.listdir(videos_folder):  # Returns True if empty
+                        print(f"Removing empty folder: {videos_folder}")
+                        shutil.rmtree(folder_path)  # Remove the folder and all its contents
 
     def find_visualizer_json(self, session: Session, trialName: str):
         """
@@ -182,12 +201,6 @@ def uuid_constructor(loader, node):
     value = loader.construct_mapping(node)
     return uuid.UUID(int=value['int'])
 
-
-def uuid_representer(dumper, data):
-    return dumper.represent_scalar('tag:yaml.org,2002:str', str(data))
-
-
-
 if __name__=="__main__": # FOR TESTING CLASS.
     current_script_directory = os.path.dirname(os.path.abspath(__file__))
     parent_directory = os.path.abspath(os.path.join(current_script_directory, '..'))
@@ -199,4 +212,5 @@ if __name__=="__main__": # FOR TESTING CLASS.
     trial = "s05-jumpingjacks_2_recording"
 
     visualizerJson = fileManager.find_visualizer_json(session, trial)
-    print(fileManager.find_sessions())
+    fileManager.cleanEmptySessions()
+    #print(fileManager.find_sessions())
