@@ -5,6 +5,9 @@ import pickle
 import json
 import yaml
 import uuid
+# Create a custom loader that adds the UUID constructor
+class CustomLoader(yaml.FullLoader):
+    pass
 
 class FileManager:
     """
@@ -82,6 +85,7 @@ class FileManager:
         # Iterate through each folder in the root directory
         for folder_name in os.listdir(self.base_directory):
             folder_path = os.path.join(self.base_directory, folder_name)
+            CustomLoader.add_constructor(tag="tag:yaml.org,2002:python/object:uuid.UUID", constructor=uuid_constructor)
 
             # Check if the folder name matches a UUID pattern
             if os.path.isdir(folder_path):
@@ -93,8 +97,7 @@ class FileManager:
                     # Open and read the YAML file
                     with open(metadata_file_path, 'r') as file:
                         # Add the constructor for the UUID tag in YAML
-                        yaml.add_constructor(tag="tag:yaml.org,2002:python/object:uuid.UUID", constructor=uuid_constructor)
-                        metadata = yaml.safe_load(file)
+                        metadata = yaml.load(file, Loader =CustomLoader)
 
                         # Extract specific lines or fields (modify as per your requirements)
                         # Assuming the YAML file has fields like 'session_name' and 'created_date'
@@ -180,6 +183,7 @@ def uuid_constructor(loader, node):
 
 def uuid_representer(dumper, data):
     return dumper.represent_scalar('tag:yaml.org,2002:str', str(data))
+
 
 
 if __name__=="__main__": # FOR TESTING CLASS.
