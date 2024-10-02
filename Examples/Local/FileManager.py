@@ -211,5 +211,5 @@ if __name__=="__main__": # FOR TESTING CLASS.
     trial = "s05-jumpingjacks_2_recording"
 
     visualizerJson = fileManager.find_visualizer_json(session, trial)
-    fileManager.cleanEmptySessions()
-    #print(fileManager.find_sessions())
+    #fileManager.cleanEmptySessions()
+    print(fileManager.find_sessions())
