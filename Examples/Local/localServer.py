@@ -350,7 +350,17 @@ async def websocket_endpoint(websocket: WebSocket, client_type: str):
                                 content = message.get('content')
                                 sessionManager.removeSubject(Subject.from_dict(content))
 
+                            elif command == "get_sessions":
+                                sessions = fileManager.find_sessions()
+                                sessions_msg = {
+                                    "command": "sessions",
+                                    "content": sessions
+                                }
+                                await manager.send_personal_message(json.dumps(sessions_msg), websocket)
+
                             await manager.broadcast(f"WebApp says: {message}", "mobile")
+
+                            
                     else:
                         await manager.broadcast(f"Mobile says: {message}", "web")
 
@@ -467,7 +477,9 @@ async def websocket_endpoint(websocket: WebSocket, session_id: str, client_type:
                                     "session_id": session_id_msg
                                 }
                                 await manager.broadcast(message=json.dumps(jsonMsg), client_type="web", session_id=session_id_msg)
-
+                                                        
+                            
+                                
                             else:
                                 print(f"Unknown command received: {command}")
                     
@@ -567,4 +579,9 @@ if __name__=="__main__":
     #ip_address = "192.168.50.9" Landet
     print(f"IP Address: {ip_address}")
 
-    uvicorn.run(app,host=ip_address,port=8080)
+    uvicorn.run(app,
+                host=ip_address,
+                port=8080,
+                ssl_certfile="cert.pem",
+                ssl_keyfile="key.pem"
+                )
