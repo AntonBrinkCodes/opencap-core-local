@@ -220,7 +220,6 @@ class FileManager:
             trial_dict[trial] = {
                 "processed": trial in processed_trials,
                 "uuid": None,
-                "mov_file": None
             }
 
             # Define the trial directory path
@@ -229,14 +228,12 @@ class FileManager:
             # Check if the directory exists
             if os.path.isdir(trial_path):
                 # Get UUID from the directory name or file (if applicable)
-                trial_uuid = trial  # Assuming UUID is the trial's directory name or change this logic as needed.
-                trial_dict[trial]['uuid'] = trial_uuid
 
                 # Find the .mov file in the trial directory
-                mov_files = [file for file in os.listdir(trial_path) if file.endswith('.mov')]
+                mov_files = [file for file in os.listdir(trial_path) if file.lower().endswith('.mov')]
                 if mov_files:
                     # Store the first .mov file found (or modify as needed if there are multiple)
-                    trial_dict[trial]['mov_file'] = mov_files[0]
+                    trial_dict[trial]['uuid'] = mov_files[0]
 
         # Return the final dictionary
         return trial_dict
