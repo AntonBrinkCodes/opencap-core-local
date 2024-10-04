@@ -196,7 +196,32 @@ class FileManager:
     
     def find_trials(self, session: Session)-> dict:
         """
-            Finds and returns a list of the trials of the session as a dict.
+        Finds and returns a dictionary containing information about the trials in a given session.
+    
+        This method scans through the specified session's directories to identify trials (excluding 'calibration') 
+        and checks if they have been processed. The function populates a dictionary with each trial's status, 
+        UUID, and associated .mov file name (without the extension).
+    
+        Args:
+            session (Session): A session object containing the UUID to locate the relevant directories.
+    
+        Returns:
+            dict: A dictionary where each key is the name of a trial (e.g., 'dynamic_1', 'neutral') and the value 
+                  is another dictionary with the following keys:
+                  - "processed" (bool): Indicates if the trial has been processed (exists in the processed trials folder).
+                  - "uuid" (str or None): The name of the .mov file (excluding extension) if found, otherwise None.
+    
+        Example output:
+            {
+                'neutral': {
+                    'processed': True,
+                    'uuid': 'neutral_trial_UUID'
+                },
+                'dynamic_1': {
+                    'processed': False,
+                    'uuid': 'dynamic_1_trial_UUID'
+                }
+            }
         """
         trials_folder_path = os.path.join(self.base_directory, str(session.uuid), 'Videos', 'Cam0', 'InputMedia') #Cam0 always exists
         processed_trials_folder_path = os.path.join(self.base_directory, str(session.uuid), 'VisualizerJsons')
@@ -204,16 +229,13 @@ class FileManager:
         trials = get_folders_in_path(trials_folder_path)
         processed_trials = get_folders_in_path(processed_trials_folder_path)
 
-        # Lists of trials
-        all_trials = ['calibration', 'neutral', 'dynamic_2', 'dynamic_1', 'dynamic_3']
-        processed_trials = ['neutral', 'dynamic_2']
 
         # Create the dictionary to store trial information
         trial_dict = {}
 
         # Iterate over all trials except 'calibration'
-        for trial in all_trials:
-            if trial == 'calibration':
+        for trial in trials:
+            if trial == 'calibration': # Skip it
                 continue
             
             # Set initial entry in the dictionary
