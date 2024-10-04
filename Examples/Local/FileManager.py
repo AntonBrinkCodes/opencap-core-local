@@ -194,6 +194,22 @@ class FileManager:
             loaded_subjects = pickle.load(file)
         return loaded_subjects
     
+    def find_trials(self, session: Session)-> dict:
+        """
+            Finds and returns a list of the trials of the session as a dict.
+        """
+        trials_folder_path = os.path.join(self.base_directory, str(session.uuid), 'Videos')
+        calibrated_trials_folder_path = os.path.join(self.base_directory, str(session.uuid), 'VisualizerJsons')
+        # Should add also for visualizerVideos.
+        trials = get_folders_in_path(trials_folder_path)
+        calibrated_trials = get_folders_in_path(calibrated_trials_folder_path)
+
+        print(trials)
+        print(calibrated_trials)
+
+def get_folders_in_path(path):
+    return [name for name in os.listdir(path) if os.path.isdir(os.path.join(path, name))]
+
 # Custom constructor for UUID
 def uuid_constructor(loader, node):
     # Extract the value from the mapping node and create a UUID object
@@ -211,5 +227,6 @@ if __name__=="__main__": # FOR TESTING CLASS.
     trial = "s05-jumpingjacks_2_recording"
 
     visualizerJson = fileManager.find_visualizer_json(session, trial)
-    #fileManager.cleanEmptySessions()
-    print(fileManager.find_sessions())
+    fileManager.cleanEmptySessions()
+    #print(fileManager.find_sessions())
+    fileManager.find_trials(session=Session(session_uuid="Giota"))
