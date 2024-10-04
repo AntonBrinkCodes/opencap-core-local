@@ -204,11 +204,41 @@ class FileManager:
         trials = get_folders_in_path(trials_folder_path)
         processed_trials = get_folders_in_path(processed_trials_folder_path)
 
-        print(trials)
-        print(processed_trials)
+        # Lists of trials
+        all_trials = ['calibration', 'neutral', 'dynamic_2', 'dynamic_1', 'dynamic_3']
+        processed_trials = ['neutral', 'dynamic_2']
 
-        # Create the dictionary
-        trial_dict = {trial: {"processed": trial in processed_trials} for trial in trials if trial != 'calibration'}
+        # Create the dictionary to store trial information
+        trial_dict = {}
+
+        # Iterate over all trials except 'calibration'
+        for trial in all_trials:
+            if trial == 'calibration':
+                continue
+            
+            # Set initial entry in the dictionary
+            trial_dict[trial] = {
+                "processed": trial in processed_trials,
+                "uuid": None,
+                "mov_file": None
+            }
+
+            # Define the trial directory path
+            trial_path = os.path.join(trials_folder_path, trial)
+
+            # Check if the directory exists
+            if os.path.isdir(trial_path):
+                # Get UUID from the directory name or file (if applicable)
+                trial_uuid = trial  # Assuming UUID is the trial's directory name or change this logic as needed.
+                trial_dict[trial]['uuid'] = trial_uuid
+
+                # Find the .mov file in the trial directory
+                mov_files = [file for file in os.listdir(trial_path) if file.endswith('.mov')]
+                if mov_files:
+                    # Store the first .mov file found (or modify as needed if there are multiple)
+                    trial_dict[trial]['mov_file'] = mov_files[0]
+
+        # Return the final dictionary
         return trial_dict
 
 def get_folders_in_path(path):
