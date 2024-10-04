@@ -199,13 +199,17 @@ class FileManager:
             Finds and returns a list of the trials of the session as a dict.
         """
         trials_folder_path = os.path.join(self.base_directory, str(session.uuid), 'Videos', 'Cam0', 'InputMedia') #Cam0 always exists
-        calibrated_trials_folder_path = os.path.join(self.base_directory, str(session.uuid), 'VisualizerJsons')
+        processed_trials_folder_path = os.path.join(self.base_directory, str(session.uuid), 'VisualizerJsons')
         # Should add also for visualizerVideos.
         trials = get_folders_in_path(trials_folder_path)
-        calibrated_trials = get_folders_in_path(calibrated_trials_folder_path)
+        processed_trials = get_folders_in_path(processed_trials_folder_path)
 
         print(trials)
-        print(calibrated_trials)
+        print(processed_trials)
+
+        # Create the dictionary
+        trial_dict = {trial: {"processed": trial in processed_trials} for trial in trials if trial != 'calibration'}
+        return trial_dict
 
 def get_folders_in_path(path):
     return [name for name in os.listdir(path) if os.path.isdir(os.path.join(path, name))]
@@ -229,4 +233,4 @@ if __name__=="__main__": # FOR TESTING CLASS.
     visualizerJson = fileManager.find_visualizer_json(session, trial)
     fileManager.cleanEmptySessions()
     #print(fileManager.find_sessions())
-    fileManager.find_trials(session=Session(session_uuid="Giota"))
+    print(fileManager.find_trials(session=Session(session_uuid="Giota")))
