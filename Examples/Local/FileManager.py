@@ -198,7 +198,7 @@ class FileManager:
         """
             Finds and returns a list of the trials of the session as a dict.
         """
-        trials_folder_path = os.path.join(self.base_directory, str(session.uuid), 'Videos')
+        trials_folder_path = os.path.join(self.base_directory, str(session.uuid), 'Videos', 'Cam0') #Cam0 always exists
         calibrated_trials_folder_path = os.path.join(self.base_directory, str(session.uuid), 'VisualizerJsons')
         # Should add also for visualizerVideos.
         trials = get_folders_in_path(trials_folder_path)
