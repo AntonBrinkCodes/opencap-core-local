@@ -233,7 +233,7 @@ class FileManager:
                 mov_files = [file for file in os.listdir(trial_path) if file.lower().endswith('.mov')]
                 if mov_files:
                     # Store the first .mov file found (or modify as needed if there are multiple)
-                    trial_dict[trial]['uuid'] = mov_files[0]
+                    trial_dict[trial]['uuid'] = mov_files[0].rsplit(".",1)[0]
 
         # Return the final dictionary
         return trial_dict
