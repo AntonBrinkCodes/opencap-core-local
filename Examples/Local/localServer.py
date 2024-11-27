@@ -365,6 +365,7 @@ async def websocket_endpoint(websocket: WebSocket, client_type: str):
                             elif command=="delete_session" :
                                 #content should be the sessionID string
                                 content = message.get('content')
+                                print("content is: ", content)
                                 fileManager.delete_session(Session(session_uuid=content))
                             
 
