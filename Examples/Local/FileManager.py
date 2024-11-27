@@ -64,6 +64,28 @@ class FileManager:
                         print(f"Removing empty folder: {videos_folder}")
                         shutil.rmtree(folder_path)  # Remove the folder and all its contents
 
+    def delete_session(self, session: Session):
+        """
+        Deletes the folder corresponding to the given session and all its subfolders and files.
+
+        Args:
+            session (Session): The session whose folder is to be deleted.
+
+        Returns:
+            bool: True if the folder was successfully deleted, False if the folder did not exist.
+        """
+        session_path = os.path.join(self.base_directory, str(session.uuid))
+
+        # Check if the session directory exists
+        if os.path.exists(session_path):
+            # Remove the session directory and its contents
+            shutil.rmtree(session_path)
+            print(f"Session folder {session_path} and all its contents have been deleted.")
+            return True
+        else:
+            print(f"Session folder {session_path} does not exist.")
+            return False
+
     def find_visualizer_json(self, session: Session, trialName: str):
         """
         Finds and loads the visualizer JSON file for a given trial and session.
@@ -103,6 +125,7 @@ class FileManager:
         # Iterate through each folder in the root directory
         for folder_name in os.listdir(self.base_directory):
             folder_path = os.path.join(self.base_directory, folder_name)
+            print(folder_path)
             yaml.add_constructor(tag="tag:yaml.org,2002:python/object:uuid.UUID", constructor=uuid_constructor)
 
             # Check if the folder name matches a UUID pattern
@@ -277,9 +300,12 @@ if __name__=="__main__": # FOR TESTING CLASS.
     fileManager = FileManager(base_directory)
 
     session = Session(session_uuid="4cf4bca5-7cd0-4db8-af11-5d39d485dba8")
+    session = Session(session_uuid="123")
     trial = "s05-jumpingjacks_2_recording"
-
-    visualizerJson = fileManager.find_visualizer_json(session, trial)
-    fileManager.cleanEmptySessions()
+    fileManager.create_session_directory(session)
+    print(fileManager.find_sessions())
+    fileManager.delete_session(session=session)
+    #visualizerJson = fileManager.find_visualizer_json(session, trial)
+    #fileManager.cleanEmptySessions()
     #print(fileManager.find_sessions())
-    print(fileManager.find_trials(session=Session(session_uuid="Giota")))
+    #print(fileManager.find_trials(session=Session(session_uuid="Giota")))

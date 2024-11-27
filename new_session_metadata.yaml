@@ -18,5 +18,8 @@ markerAugmentationSettings:
   markerAugmenterModel: LSTM
 mass_kg: 83.2
 openSimModel: LaiUhlrich2022
-subjectID: !!python/object:uuid.UUID
-  int: 17415212502837540454855111396593151273
+sessionDate: '2024-11-27'
+sessionID: a4fc750a-fbcc-4ab3-8447-9336e8f7235c
+subjectBirthyear: 1989
+subjectID: 1d30809a-e355-4b65-aeb6-5c09ea24b390
+subjectName: defaultSubject

@@ -110,12 +110,13 @@ class sessionManager:
                 # Stop recording automatically after 1 second.
                 await asyncio.sleep(1)
                 await self.sendStopTrial(session_id=session_id)
+                # TODO: Add check that the files are correctly saved.
                 await manager.broadcast(f"Toast: success: Succesfully finished recording :)")
             elif trialType=='dynamic':
                 print("Trial Type is dynamic")
                 if not isTest:
-                    #Wait to ensure that all files are uploaded before proceeding
-                    # ... Should probably do that for calib and neutral too.
+                    # TODO: Wait to ensure that all files are uploaded before proceeding
+                    # TODO: ... Should probably do that for calib and neutral too.
                     print("this is a real trial recording")
 
             #Upload files
@@ -357,6 +358,15 @@ async def websocket_endpoint(websocket: WebSocket, client_type: str):
                                     "content": sessions
                                 }
                                 await manager.send_personal_message(json.dumps(sessions_msg), websocket)
+
+                            elif command == "clean_empty_sessions":
+                                fileManager.cleanEmptySessions()
+
+                            elif command=="delete_session" :
+                                #content should be the sessionID string
+                                content = message.get('content')
+                                fileManager.delete_session(Session(session_uuid=content))
+                            
 
                             await manager.broadcast(f"WebApp says: {message}", "mobile")
 
