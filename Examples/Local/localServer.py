@@ -493,6 +493,7 @@ async def websocket_endpoint(websocket: WebSocket, session_id: str, client_type:
                                 await manager.broadcast(message=json.dumps(jsonMsg), client_type="web", session_id=session_id_msg)
                                                         
                             elif command == "get_session_trials":
+                                print("Received get_session_trials Command!")
                                 trials = fileManager.find_trials(session = Session(session_uuid=session_id_msg))
                                 trialsMsg = {
                                     "command": "sessionTrials",
