@@ -64,7 +64,7 @@ class FileManager:
                         print(f"Removing empty folder: {videos_folder}")
                         shutil.rmtree(folder_path)  # Remove the folder and all its contents
 
-    def delete_session(self, session: Session):
+    def delete_session(self, session: Session)-> bool:
         """
         Deletes the folder corresponding to the given session and all its subfolders and files.
 
@@ -265,6 +265,7 @@ class FileManager:
             trial_dict[trial] = {
                 "processed": trial in processed_trials,
                 "uuid": None,
+                "trialName": trial,
             }
 
             # Define the trial directory path
@@ -305,6 +306,7 @@ if __name__=="__main__": # FOR TESTING CLASS.
     fileManager.create_session_directory(session)
     print(fileManager.find_sessions())
     fileManager.delete_session(session=session)
+    print(fileManager.find_trials(session=Session(session_uuid="Giota")))
     #visualizerJson = fileManager.find_visualizer_json(session, trial)
     #fileManager.cleanEmptySessions()
     #print(fileManager.find_sessions())

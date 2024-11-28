@@ -140,6 +140,7 @@ class sessionManager:
                 
                 #raise CustomError("Process not implemented yet")
                 #Process files
+
         except CustomError as e:
             await manager.broadcast(f"Toast: error: {e}", client_type="web", session_id=session_id)
         else:
@@ -366,8 +367,10 @@ async def websocket_endpoint(websocket: WebSocket, client_type: str):
                                 #content should be the sessionID string
                                 content = message.get('content')
                                 print("content is: ", content)
-                                fileManager.delete_session(Session(session_uuid=content))
-                            
+                                result = fileManager.delete_session(Session(session_uuid=content))
+                                if not result:
+                                    await manager.broadcast(f"Toast: error: Could not delete session with id {content}...")
+                                    
 
                             await manager.broadcast(f"WebApp says: {message}", "mobile")
 
