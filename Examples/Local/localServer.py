@@ -495,7 +495,9 @@ async def websocket_endpoint(websocket: WebSocket, session_id: str, client_type:
                             elif command == "get_session_trials":
                                 print("Received get_session_trials Command!")
                                 isTest = message.get("isTest")
-                                print("Is test?")
+
+                                print("Is test?", isTest)
+                                print("what is the session_id? ", session_id_msg)
                                 if isTest:
                                     trials = fileManager.find_trials(session=Session(session_uuid="Giota"))
                                 else:
