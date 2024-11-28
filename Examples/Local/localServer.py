@@ -483,7 +483,7 @@ async def websocket_endpoint(websocket: WebSocket, session_id: str, client_type:
                             elif command == "get_visualizer":
                                 trialName = message.get("trialName")
                                 # Send back visualizer JSON (AND later visualizer videos as well)
-                                visualizerJson = fileManager.find_visualizer_json(session=activeSession,trialName=trialName)
+                                visualizerJson = fileManager.find_visualizer_json(session=Session(session_uuid=session_id_msg),trialName=trialName)
 
                                 jsonMsg = {
                                     "command": "visualizerJSON",
