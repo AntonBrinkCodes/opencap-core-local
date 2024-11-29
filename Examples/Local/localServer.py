@@ -209,7 +209,7 @@ class ConnectionManager:
                 if client_type:
                     print(self.session_connections)
                     for connection in self.session_connections[session_id][client_type]:
-                        print(f"Sending {message} to {client_type} in {session_id}")
+                        print(f"Sending {message[0:10]} to {client_type} in {session_id}")
                         await self.trySendMessage(connection, message)
                 else:
                     for connections in self.session_connections[session_id].values():
