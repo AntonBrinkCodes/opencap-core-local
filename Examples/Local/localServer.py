@@ -64,7 +64,7 @@ class sessionManager:
         print("checking saved sessions:")
         for session_name, session_info in saved_sessions.items():
             print(session_name)
-            if session_id == session_info.get("sessionID", ""):
+            if session_id == session_name:
                 return Session(session_uuid=session_id)
         return None
     
