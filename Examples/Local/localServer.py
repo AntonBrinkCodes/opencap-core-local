@@ -446,6 +446,7 @@ async def handle_web_message(websocket, message_json, command, active_session: S
     elif command == "get_sessions":
         sessions = fileManager.find_sessions()
         response = {"command": "sessions", "content": sessions}
+        print(response)
         await manager.send_personal_message(json.dumps(response), websocket)
     
     if command == "ping":
