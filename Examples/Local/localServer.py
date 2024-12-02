@@ -498,7 +498,7 @@ async def handle_web_message(websocket, message_json, command, active_session: S
             jsonMsg = {
                 "command": "sessionTrials",
                 "content": trials,
-                "session": active_session.uuid.toString()
+                "session": active_session.uuid
             }
             await manager.send_personal_message(message=json.dumps(jsonMsg), websocket=websocket)
 
@@ -508,7 +508,7 @@ async def handle_web_message(websocket, message_json, command, active_session: S
             jsonMsg = {
                 "command": "visualizerJSON",
                 "content": visualizerJson,
-                "session": active_session.uuid.toString()
+                "session": active_session.uuid
             }
             await manager.send_personal_message(message=json.dumps(jsonMsg), websocket=websocket)
         else:
