@@ -381,7 +381,7 @@ async def websocket_endpoint(websocket: WebSocket, client_type: str):
             if data["type"] == "websocket.receive":
                 if "text" in data:
                     message = data["text"]
-                    
+                    print(f"message received is: {message}")
                     # Parse JSON message
                     try:
                         message_json = json.loads(message)
