@@ -436,30 +436,8 @@ async def websocket_endpoint(websocket: WebSocket, client_type: str):
 
 async def handle_web_message(websocket, message_json, command, active_session: Session, session_id):
     print(f"Received command: {command}")
-    if command == "newSession":
-        sessionManager.addSession(Session())
-        session_id = sessionManager.activeSession.getID()
-        fileManager.create_session_directory(sessionManager.activeSession)
-        await manager.send_personal_message(f"New session id: {session_id}", websocket)
-
-    elif command == "get_subjects":
-        loaded_subjects = [subject.to_dict() for subject in fileManager.load_subjects()]
-        response = {"command": "subjects", "content": loaded_subjects}
-        await manager.send_personal_message(json.dumps(response), websocket)
-
-    elif command == "get_sessions":
-        sessions = fileManager.find_sessions()
-        
-        response = {"command": "sessions", "content": sessions}
-        print(response)
-        await manager.send_personal_message(json.dumps(response), websocket)
     
-    if command == "ping":
-        pongMsg = {
-            command: "pong"
-        }
-        await manager.send_personal_message(json.dumps(pongMsg), websocket=websocket)
-    elif active_session:
+    if active_session:
         # Handle session-specific commands
         if command == "start_calibration":
             rows = int(message_json.get("rows"))
@@ -512,14 +490,47 @@ async def handle_web_message(websocket, message_json, command, active_session: S
             }
             await manager.send_personal_message(message=json.dumps(jsonMsg), websocket=websocket)
         else:
+            toastMsg = {
+                "command": "Toast",
+                "type": "Error",
+                "message": "Error: Unknown session-specific command '{command}"
+            }
             await manager.send_personal_message(
-                f"Error: Unknown session-specific command '{command}'", websocket
+                json.dumps(toastMsg), websocket
             )
     else:
-        # General commands that require session_id
-        await manager.send_personal_message(
-            f"Error: Command '{command}' requires a session ID", websocket
-        )
+        if command == "newSession":
+            sessionManager.addSession(Session())
+            session_id = sessionManager.activeSession.getID()
+            fileManager.create_session_directory(sessionManager.activeSession)
+            newSessionMsg = {
+                "command": "new_session",
+                "content": session_id
+            }
+            await manager.send_personal_message(json.dumps(newSessionMsg), websocket)
+
+        elif command == "get_subjects":
+            loaded_subjects = [subject.to_dict() for subject in fileManager.load_subjects()]
+            response = {"command": "subjects", "content": loaded_subjects}
+            await manager.send_personal_message(json.dumps(response), websocket)
+
+        elif command == "get_sessions":
+            sessions = fileManager.find_sessions()
+
+            response = {"command": "sessions", "content": sessions}
+            print(response)
+            await manager.send_personal_message(json.dumps(response), websocket)
+
+        elif command == "ping":
+            pongMsg = {
+                command: "pong"
+            }
+            await manager.send_personal_message(json.dumps(pongMsg), websocket=websocket)
+            # General commands that require session_id
+
+           # await manager.send_personal_message(
+            #    f"Error: Command '{command}' requires a session ID", websocket
+            #)
 
 async def handle_mobile_message(websocket, message_json, command, active_session: Session, session_id):
     if command == "mobile_connected" and active_session:
