@@ -505,7 +505,7 @@ async def handle_web_message(websocket, message_json, command, active_session: S
             fileManager.create_session_directory(sessionManager.activeSession)
             newSessionMsg = {
                 "command": "new_session",
-                "content": session_id.toString()
+                "content": str(session_id)
             }
             await manager.send_personal_message(json.dumps(newSessionMsg), websocket)
 
