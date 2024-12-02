@@ -56,11 +56,14 @@ class sessionManager:
     def findSessionByID(self, session_id: str) -> Optional[Session]:
         # Check activate connections
         for session in self.sessions:
+            print("checking active sessions...")
             if str(session.getID()) == session_id:
                 return session
         #Otherwise check old sessions
         saved_sessions = fileManager.find_sessions()
+        print("checking saved sessions:")
         for session_name, session_info in saved_sessions.items():
+            print(session_name)
             if session_id == session_info.get("sessionID", ""):
                 return Session(session_uuid=session_id)
         return None
