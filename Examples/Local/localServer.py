@@ -364,7 +364,7 @@ def testy():
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket, client_type: str):
     await manager.connect(websocket, client_type)
-    logger.debug(f"Clients connected: {manager.getNrOfClients(client_type)}")
+    logger.debug(f"Clients connected: {manager.get_nr_of_clients(client_type)}")
 
     #await manager.broadcast(
     #    f"General Web-apps connected: {manager.getNrOfClients('web')}\n"
