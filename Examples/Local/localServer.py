@@ -489,6 +489,11 @@ async def handle_web_message(websocket, message_json, command, active_session: S
                 "session": active_session.uuid
             }
             await manager.send_personal_message(message=json.dumps(jsonMsg), websocket=websocket)
+        
+        elif command == "delete_session":
+            idToDelete = message_json.get('content')
+            fileManager.delete_session(session=Session(session_uuid=idToDelete))
+        
         else:
             toastMsg = {
                 "command": "Toast",
