@@ -427,7 +427,7 @@ async def websocket_endpoint(websocket: WebSocket, client_type: str):
     except WebSocketDisconnect:
         pass
     finally:
-        manager.disconnect(websocket, client_type, session_id=session_id if session_id else None)
+        manager.disconnect(websocket)
         logger.debug("A client is disconnecting")
        
 
