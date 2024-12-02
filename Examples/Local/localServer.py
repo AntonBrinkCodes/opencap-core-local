@@ -381,12 +381,12 @@ async def websocket_endpoint(websocket: WebSocket, client_type: str):
             if data["type"] == "websocket.receive":
                 if "text" in data:
                     message = data["text"]
-
+                    
                     # Parse JSON message
                     try:
                         message_json = json.loads(message)
                     except json.JSONDecodeError:
-                        await manager.send_personal_message("Error: Invalid JSON format.", websocket)
+                        await manager.send_personal_message("Error: You sent a Invalid JSON format.", websocket)
                         continue
 
                     command = message_json.get("command")
@@ -432,6 +432,7 @@ async def websocket_endpoint(websocket: WebSocket, client_type: str):
        
 
 async def handle_web_message(websocket, message_json, command, active_session: Session, session_id):
+    print(f"Received command: {command}")
     if command == "newSession":
         sessionManager.addSession(Session())
         session_id = sessionManager.activeSession.getID()
@@ -445,6 +446,7 @@ async def handle_web_message(websocket, message_json, command, active_session: S
 
     elif command == "get_sessions":
         sessions = fileManager.find_sessions()
+        
         response = {"command": "sessions", "content": sessions}
         print(response)
         await manager.send_personal_message(json.dumps(response), websocket)
