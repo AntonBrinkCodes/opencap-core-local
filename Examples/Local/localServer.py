@@ -194,54 +194,111 @@ class sessionManager:
             }
             await manager.send_personal_message(message=json.dumps(succesCalibrationMsg), websocket=websocket)
         return
+    
+class ConnectionInfo:
+    """
+    Represents the information associated with a web connection.
+    """
+    def __init__(self, session_id: str):
+        self.session_id = session_id  # The session ID for the web connection
+        self.mobiles: List[WebSocket] = []  # List of linked mobile connections
+
 
 class ConnectionManager:
     def __init__(self):
         # Dictionary to store connections
         # Each web connection can have a list of linked mobile connections
-        self.connections: Dict[WebSocket, List[WebSocket]] = {}
+        self.connections: Dict[WebSocket, ConnectionInfo] = {}
 
-    async def connect(self, websocket: WebSocket, client_type: str, link_to_web: Optional[WebSocket] = None):
+    async def connect(self, websocket: WebSocket, client_type: str, session_id: Optional[str] = None):
         """
-        Connect a websocket and optionally link it to an existing web connection.
+        Connect a new WebSocket. Associate session IDs for web clients and link mobile clients.
 
         Args:
-            websocket (WebSocket): The websocket connection to be added.
-            client_type (str): Type of the client ('web' or 'mobile').
-            link_to_web (Optional[WebSocket]): The web connection to which this mobile connection should be linked.
+            websocket (WebSocket): The WebSocket connection to add.
+            client_type (str): Either "web" or "mobile".
+            session_id (Optional[str]): The session ID for the web client.
         """
         await websocket.accept()
+
         if client_type == "web":
+            # Add a web client with session ID and an empty list of mobiles
             if websocket not in self.connections:
-                self.connections[websocket] = []  # Initialize an empty list for linked mobiles
-        elif client_type == "mobile" and link_to_web:
-            if link_to_web in self.connections:
-                self.connections[link_to_web].append(websocket)
+                self.connections[websocket] = ConnectionInfo(session_id=session_id or "")
             else:
-                raise ValueError("Specified web connection does not exist to link the mobile connection.")
+                raise ValueError("Web connection already exists.")
+        elif client_type == "mobile":
+            if session_id:
+                # Find the web client with the given session ID
+                web_client = self.find_web_connection_by_id(session_id)
+                if web_client:
+                    # Append the mobile connection to the linked web client
+                    self.connections[web_client].mobiles.append(websocket)
+                else:
+                    raise ValueError("Web client with the given session ID not found.")
+            else:
+                raise ValueError("Missing session ID for mobile connection.")
         else:
-            raise ValueError("Invalid client type or missing web link for mobile connection.")
+            raise ValueError("Invalid client type.")
+
+    def find_web_connection_by_id(self, session_id: str) -> Optional[WebSocket]:
+        """
+        Find a web client WebSocket by its session ID.
+
+        Args:
+            session_id (str): The session ID to search for.
+
+        Returns:
+            Optional[WebSocket]: The corresponding WebSocket if found, or None.
+        """
+        for web_socket, connection_info in self.connections.items():
+            if connection_info.session_id == session_id:
+                return web_socket
+        return None
+
+    def update_session_id(self, websocket: WebSocket, new_session_id: str):
+        """
+        Update the session ID for a given web client.
+
+        Args:
+            websocket (WebSocket): The WebSocket connection to update.
+            new_session_id (str): The new session ID.
+        """
+        if websocket in self.connections:
+            self.connections[websocket].session_id = new_session_id
+        else:
+            raise ValueError("WebSocket connection not found.")
+
+    def get_session_mobiles(self, session_id: str) -> Optional[List[WebSocket]]:
+        """
+        Get all mobile WebSockets linked to a specific session ID.
+
+        Args:
+            session_id (str): The session ID of the web client.
+
+        Returns:
+            Optional[List[WebSocket]]: The list of mobile WebSockets, or None if session not found.
+        """
+        web_client = self.find_web_connection_by_id(session_id)
+        if web_client:
+            return self.connections[web_client].mobiles  # Return the list of mobiles
+        return None
 
     def disconnect(self, websocket: WebSocket):
         """
-        Disconnect a websocket and clean up any references.
+        Remove a WebSocket connection.
 
         Args:
-            websocket (WebSocket): The websocket connection to be removed.
+            websocket (WebSocket): The WebSocket to remove.
         """
-        # If it's a web connection, remove all linked mobiles
+        # If the WebSocket is a web client, remove it and its associated mobiles
         if websocket in self.connections:
-            linked_mobiles = self.connections.pop(websocket)
-            for mobile in linked_mobiles:
-                try:
-                    mobile.close()
-                except Exception as e:
-                    print(f"Error closing mobile connection: {e}")
+            del self.connections[websocket]
         else:
-            # If it's a mobile connection, remove it from any linked web connections
-            for web_connection, linked_mobiles in self.connections.items():
-                if websocket in linked_mobiles:
-                    linked_mobiles.remove(websocket)
+            # If it's a mobile client, remove it from the linked mobiles list
+            for web_socket, connection_info in self.connections.items():
+                if websocket in connection_info.mobiles:
+                    connection_info.mobiles.remove(websocket)
                     break
 
     async def send_personal_message(self, message: str, websocket: WebSocket):
@@ -291,9 +348,10 @@ class ConnectionManager:
             int: The number of connected clients.
         """
         if client_type == "web":
-            return len(self.connections)
+            return len(self.connections) # Count of web connections
         elif client_type == "mobile":
-            return sum(len(mobiles) for mobiles in self.connections.values())
+            return sum(len(info.mobiles) for info in self.connections.values())  # Count of mobile clients
+
         else:
             raise ValueError("Invalid client type. Must be 'web' or 'mobile'.")
 
@@ -308,10 +366,10 @@ class ConnectionManager:
             int: The index of the mobile websocket within its linked web connection's list of connections.
                  Returns -1 if the websocket is not linked to any web connection.
         """
-        for web_connection, linked_mobiles in self.connections.items():
-            if websocket in linked_mobiles:
-                return linked_mobiles.index(websocket)
-        return -1  # Not found
+        for web_socket, info in self.connections.items():
+            if websocket in info.mobiles:
+                return info.mobiles.index(websocket)  # Get the index of the mobile websocket
+        return -1  # Return -1 if the websocket is not found
 
     async def try_send_message(self, connection: WebSocket, message: str):
         """
@@ -375,8 +433,8 @@ def testy():
 
 
 @app.websocket("/ws")
-async def websocket_endpoint(websocket: WebSocket, client_type: str):
-    await manager.connect(websocket, client_type)
+async def websocket_endpoint(websocket: WebSocket, client_type: str, link_to_web: Optional[str] = None ):
+    await manager.connect(websocket, client_type, link_to_web)
     logger.debug(f"Clients connected: {manager.get_nr_of_clients(client_type)}")
 
     #await manager.broadcast(
@@ -518,12 +576,17 @@ async def handle_web_message(websocket, message_json, command, active_session: S
         if command == "newSession":
             sessionManager.addSession(Session())
             session_id = sessionManager.activeSession.getID()
+            manager.update_session_id(websocket=websocket, new_session_id=session_id)
             fileManager.create_session_directory(sessionManager.activeSession)
             newSessionMsg = {
                 "command": "new_session",
                 "content": str(session_id)
             }
             await manager.send_personal_message(json.dumps(newSessionMsg), websocket)
+
+        if command == "change_session_id":
+            session_id = message_json.get("session")
+            manager.update_session_id(websocket=websocket, new_session_id=session_id)
 
         elif command == "get_subjects":
             loaded_subjects = [subject.to_dict() for subject in fileManager.load_subjects()]
