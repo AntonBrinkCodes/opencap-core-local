@@ -203,6 +203,11 @@ class ConnectionInfo:
         self.session_id = session_id  # The session ID for the web connection
         self.mobiles: List[WebSocket] = []  # List of linked mobile connections
 
+    def __str__(self):
+        """
+        Return a string representation of the ConnectionInfo instance.
+        """
+        return f"Session ID: {self.session_id}, Linked Mobile Connections: {len(self.mobiles)}"
 
 class ConnectionManager:
     def __init__(self):
@@ -686,6 +691,7 @@ if __name__=="__main__":
     print(os.listdir())
     print(f"Hostname: {hostname}")
 
+    fileManager.cleanEmptySessions()
     #ip_address = socket.gethostbyname(hostname) #"192.168.0.48"#socket.gethostbyname(hostname)
     #ip_address = "192.168.0.48"
     ip_address = "130.229.141.43" # ubuntu computer
