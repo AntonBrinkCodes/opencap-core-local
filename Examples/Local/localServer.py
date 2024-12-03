@@ -494,7 +494,7 @@ async def websocket_endpoint(websocket: WebSocket, client_type: str, link_to_web
                     print(f"Received binary data: {len(binary_data)} bytes")
                     save_binary_file(
                         binary_data,
-                        f"received_file_cam{manager.find_websocket_index(client_type, websocket)}.mov"
+                        f"received_file_cam{manager.find_websocket_index(websocket)}.mov"
                     )
                     await manager.broadcast(
                         f"Received binary data of size: {len(binary_data)} bytes",
@@ -622,8 +622,8 @@ async def handle_mobile_message(websocket, message_json, command, active_session
     if command == "mobile_connected" and active_session:
         print("MOBILE CONNECTED")
         camera_model = str(message_json.get("content"))
-        camera_index = manager.find_websocket_index('mobile', websocket)
-        active_session.iphoneModel[f"cam{manager.find_websocket_index('mobile', websocket)}"] = camera_model
+        camera_index = manager.find_websocket_index(websocket)
+        active_session.iphoneModel[f"cam{manager.find_websocket_index(websocket)}"] = camera_model
         message = {
             "command": "mobile_connected",
             "content": camera_index,
@@ -641,7 +641,7 @@ async def handle_mobile_message(websocket, message_json, command, active_session
 
         video_data = base64.b64decode(base64_data)
         fileManager.save_binary_file(
-            video_data, session=active_session, trial=trial, cam_index=manager.find_websocket_index('mobile', websocket)
+            video_data, session=active_session, trial=trial, cam_index=manager.find_websocket_index(websocket)
         )
 
     elif not active_session:
