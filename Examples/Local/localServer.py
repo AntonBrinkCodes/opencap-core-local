@@ -159,11 +159,15 @@ class sessionManager:
                 runLocalTrial(sessionId, trialNames, trialId, trialType=trialType, dataDir=fileManager.base_directory)
                 
                 if trialType == "dynamic":
-                    sessions = fileManager.find_sessions()
+                    trials = fileManager.find_trials(session=Session(session_uuid=sessionId))
 
-                    response = {"command": "sessions", "content": sessions}
+                    jsonMsg = {
+                                "command": "sessionTrials",
+                                "content": trials,
+                                "session": sessionId
+                                }
                     #print(response)
-                    await manager.send_personal_message(json.dumps(response), websocket)
+                    await manager.send_personal_message(json.dumps(jsonMsg), websocket)
                 #raise CustomError("Process not implemented yet")
                 #Process files
 
@@ -505,7 +509,7 @@ async def handle_web_message(websocket, message_json, command, active_session: S
             toastMsg = {
                 "command": "Toast",
                 "type": "Error",
-                "content": "Error: Unknown session-specific command '{command}"
+                "content": f"Error: Unknown session-specific command '{command}"
             }
             await manager.send_personal_message(
                 json.dumps(toastMsg), websocket
