@@ -18,7 +18,20 @@ from utils import getDataDirectory
 
 def runLocalTrial(sessionId: str, trialNames, trialId, trialType="dynamic", poseDetector='openpose', genericFolderNames=True, cameras_to_use=['all'],
                   resolutionPoseDetection='default', dataDir = None) -> bool:
-    
+    '''
+    Runs the trial Locally.
+
+    Args:
+        sessionID (str): The name of the session, usually a UUID.
+        trialNames (any): # "calibration for extrinsic trials." neutral for static trials. # Trial name for dynamic trials
+        trialId (any): None (all dynamic trials), [] (skip), or list of trial names. Trial names are the folder the trials are inside.
+        trialType (str): "calibration" for calibration trials. "static" or "neutral" for neutral pose trials. "dynamic" for dynamic trials.
+        poseDetector (str): "openpose" to use openpose. NB: Only openpose supported currently.
+        genericFolderNames (bool): Defaults to True. Whetever to use generic folder names or not.
+        resolutionPoseDetection (str): Defaults to 'default'. The resolution to run openpose with. 
+                                       NB: Higher resolutions than hardware supports will crash on Ubuntu and take a very long time on Windows (or maybe also crash).
+        dataDir (str): Defaults to nullable.
+    '''
     if dataDir:
         os.chdir(dataDir)
         # Check if the current folder is named "Data"

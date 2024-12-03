@@ -88,7 +88,7 @@ class sessionManager:
         json_message = json.dumps(message)
         await manager.broadcast(message = json_message, source = websocket)
     
-    async def startTrial(self, websocket: WebSocket, session: Session, trialType: Optional[str] = "dynamic", process=True, isTest=False,  trialNames: Optional[str] = ""):
+    async def startTrial(self, websocket: WebSocket, session: Session, trialId: str, trialType: Optional[str] = "dynamic", process=True, isTest=False,  trialNames: Optional[str] = ""):
         '''
         Creates and starts a new trial within the given session.
 
@@ -119,7 +119,7 @@ class sessionManager:
                 toastMsg = {
                     "command": "Toast",
                     "type": "Info",
-                    "content": "Recording {trialType}"
+                    "content": f"Recording {trialType}"
                 }
                 await manager.send_personal_message(json.dumps(toastMsg), websocket = websocket)
                 # Stop recording automatically after 1 second.
@@ -129,7 +129,7 @@ class sessionManager:
                 toastMsg = {
                     "command": "Toast",
                     "type": "Success",
-                    "content": "succesfully finished recording {trialType}"
+                    "content": f"succesfully finished recording {trialType}"
                 }
                 await manager.send_personal_message(json.dumps(toastMsg), websocket=websocket)
             elif trialType=='dynamic':
@@ -158,6 +158,12 @@ class sessionManager:
 
                 runLocalTrial(sessionId, trialNames, trialId, trialType=trialType, dataDir=fileManager.base_directory)
                 
+                if trialType == "dynamic":
+                    sessions = fileManager.find_sessions()
+
+                    response = {"command": "sessions", "content": sessions}
+                    #print(response)
+                    await manager.send_personal_message(json.dumps(response), websocket)
                 #raise CustomError("Process not implemented yet")
                 #Process files
 
@@ -445,11 +451,11 @@ async def handle_web_message(websocket, message_json, command, active_session: S
             square_size = float(message_json.get("squareSize"))
             placement = message_json.get("placement")
             is_test = message_json.get("isTest")
-
+            trialId = "calibration"
             active_session.set_checkerboard_params(rows, cols, square_size, placement)
             fileManager.save_session_metadata(active_session)
             await sessionManager.startTrial( websocket=websocket,
-                session=active_session, trialType="calibration", process=True, isTest=is_test
+                session=active_session, trialId=trialId, trialType="calibration", process=True, isTest=is_test
             )
 
         elif command == "start_neutral":
@@ -457,15 +463,16 @@ async def handle_web_message(websocket, message_json, command, active_session: S
             subject = Subject.from_dict(message_json.get("subject"))
             active_session.set_subject(subject)
             fileManager.save_session_metadata(active_session)
+            trialId = "neutral"
             await sessionManager.startTrial( websocket=websocket,
-                session=active_session, trialType="neutral", process=True, isTest=is_test
+                session=active_session, trialId=trialId, trialType="neutral", process=True, isTest=is_test
             )
         elif command == "start_dynamic":
             is_test = message_json.get("isTest")
             trialName = message_json.get("trialName")       
-
+            trialId = message_json.get("trialID")
             await sessionManager.startTrial( websocket=websocket,
-                 session = active_session, trialType="dynamic", process = True, isTest=is_test, trialNames=trialName)                          
+                 session = active_session, trialId = trialId,trialType="dynamic", process = True, isTest=is_test, trialNames=trialName)                          
 
         elif command == "get_session_trials":
             isTest = message_json.get("isTest")
@@ -523,7 +530,7 @@ async def handle_web_message(websocket, message_json, command, active_session: S
             sessions = fileManager.find_sessions()
 
             response = {"command": "sessions", "content": sessions}
-            print(response)
+            #print(response)
             await manager.send_personal_message(json.dumps(response), websocket)
 
         elif command == "ping":
