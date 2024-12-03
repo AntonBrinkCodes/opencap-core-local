@@ -294,7 +294,7 @@ class FileManager:
         shutil.make_archive(zip_file_path.replace(".zip", ""), 'zip', session_folder_path)
         return zip_file_path
     
-    def encode_zip_to_base64(zip_file_path: str) -> str:
+    def encode_zip_to_base64(self, zip_file_path: str) -> str:
         # Encode the zip file in base64
         with open(zip_file_path, "rb") as file:
             return base64.b64encode(file.read()).decode("utf-8")
