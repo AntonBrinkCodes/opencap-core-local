@@ -630,7 +630,7 @@ async def handle_mobile_message(websocket, message_json, command, active_session
             "session_id": session_id
             }
         json_message = json.dumps(message)
-        manager.broadcast(json_message, websocket)
+        await manager.broadcast(json_message, websocket)
         
 
     elif command == "save_video" and active_session:
