@@ -498,7 +498,7 @@ async def handle_web_message(websocket, message_json, command, active_session: S
             toastMsg = {
                 "command": "Toast",
                 "type": "Error",
-                "message": "Error: Unknown session-specific command '{command}"
+                "content": "Error: Unknown session-specific command '{command}"
             }
             await manager.send_personal_message(
                 json.dumps(toastMsg), websocket
