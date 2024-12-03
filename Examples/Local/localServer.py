@@ -208,6 +208,12 @@ class ConnectionInfo:
         Return a string representation of the ConnectionInfo instance.
         """
         return f"Session ID: {self.session_id}, Linked Mobile Connections: {len(self.mobiles)}"
+    
+    def __iter__(self):
+        """
+        Allow iteration over the list of linked mobile connections.
+        """
+        return iter(self.mobiles)
 
 class ConnectionManager:
     def __init__(self):
