@@ -575,6 +575,15 @@ async def handle_web_message(websocket, message_json, command, active_session: S
             idToDelete = message_json.get('content')
             fileManager.delete_session(session=Session(session_uuid=idToDelete))
         
+        elif command == "download_session":
+            data = fileManager.send_session_zip(session_id=active_session.uuid)
+            downloadMsg = {
+                 "command": "download_session",
+                 "filename": f"{active_session.uuid}.zip",
+                "filedata": data
+            }
+            await manager.send_personal_message(message=json.dumps(downloadMsg), websocket=websocket)
+
         else:
             toastMsg = {
                 "command": "Toast",
@@ -584,6 +593,7 @@ async def handle_web_message(websocket, message_json, command, active_session: S
             await manager.send_personal_message(
                 json.dumps(toastMsg), websocket
             )
+
     else:
         if command == "newSession":
             sessionManager.addSession(Session())

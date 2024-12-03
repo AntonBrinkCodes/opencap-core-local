@@ -6,6 +6,7 @@ import json
 import yaml
 import uuid
 import shutil
+import base64
 
 class FileManager:
     """
@@ -283,6 +284,37 @@ class FileManager:
 
         # Return the final dictionary
         return trial_dict
+    
+    def zip_session_folder(self, session_id: str) -> str:
+        # Path to the session folder
+        session_folder_path = os.path.join(self.base_directory, str(session.uuid))
+        zip_file_path = f"/path/to/temp/{session_id}.zip"
+
+        # Create a zip file
+        shutil.make_archive(zip_file_path.replace(".zip", ""), 'zip', session_folder_path)
+        return zip_file_path
+    
+    def encode_zip_to_base64(zip_file_path: str) -> str:
+        # Encode the zip file in base64
+        with open(zip_file_path, "rb") as file:
+            return base64.b64encode(file.read()).decode("utf-8")
+
+    def send_session_zip(self, session_id: str)-> str:
+
+        # Zip the session folder
+        zip_file_path = FileManager.zip_session_folder(session_id)
+        # Encode the zip file
+        zip_data_base64 = FileManager.encode_zip_to_base64(zip_file_path)
+        
+        # Send the zip file data over WebSocket
+        # await websocket.send_json({
+        #    "command": "download",
+        #    "filename": f"{session_id}.zip",
+        #    "filedata": zip_data_base64
+        #})
+        # Clean up the temporary zip file
+        os.remove(zip_file_path)
+        return zip_data_base64
 
 def get_folders_in_path(path):
     return [name for name in os.listdir(path) if os.path.isdir(os.path.join(path, name))]
