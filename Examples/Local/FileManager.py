@@ -302,9 +302,9 @@ class FileManager:
     def send_session_zip(self, session_id: str)-> str:
 
         # Zip the session folder
-        zip_file_path = FileManager.zip_session_folder(session_id=session_id)
+        zip_file_path = self.zip_session_folder(session_id)
         # Encode the zip file
-        zip_data_base64 = FileManager.encode_zip_to_base64(zip_file_path=zip_file_path)
+        zip_data_base64 = self.encode_zip_to_base64(zip_file_path)
         
         # Send the zip file data over WebSocket
         # await websocket.send_json({
