@@ -287,7 +287,7 @@ class FileManager:
     
     def zip_session_folder(self, session_id: str) -> str:
         # Path to the session folder
-        session_folder_path = os.path.join(self.base_directory, str(session.uuid))
+        session_folder_path = os.path.join(self.base_directory, session_id)
         zip_file_path = f"/path/to/temp/{session_id}.zip"
 
         # Create a zip file
