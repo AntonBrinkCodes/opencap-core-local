@@ -73,7 +73,7 @@ class sessionManager:
             "command": "start",
             "trialType": trialType,
             "content": '',
-            "session_id": session_id
+            "session": session_id
             }
         json_message = json.dumps(message)
         await manager.broadcast(message=json_message, source= websocket)
@@ -83,7 +83,7 @@ class sessionManager:
             "command": "stop",
             "content": '',
             "trialType": '',
-            "session_id": ''
+            "session": ''
         }
         json_message = json.dumps(message)
         await manager.broadcast(message = json_message, source = websocket)
