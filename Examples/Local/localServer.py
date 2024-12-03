@@ -578,7 +578,7 @@ async def handle_web_message(websocket, message_json, command, active_session: S
             session_id = sessionManager.activeSession.getID()
             manager.update_session_id(websocket=websocket, new_session_id=session_id)
             fileManager.create_session_directory(sessionManager.activeSession)
-            print("Connections are:", manager.connections)
+            print("Connection is now:", manager.connections[websocket])
             newSessionMsg = {
                 "command": "new_session",
                 "content": str(session_id)
