@@ -257,6 +257,7 @@ class ConnectionManager:
             Optional[WebSocket]: The corresponding WebSocket if found, or None.
         """
         for web_socket, connection_info in self.connections.items():
+            print(connection_info.session_id)
             if connection_info.session_id == session_id:
                 return web_socket
         return None
