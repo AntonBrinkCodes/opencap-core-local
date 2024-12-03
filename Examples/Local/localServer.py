@@ -550,6 +550,7 @@ async def handle_web_message(websocket, message_json, command, active_session: S
 
 async def handle_mobile_message(websocket, message_json, command, active_session: Session, session_id):
     if command == "mobile_connected" and active_session:
+        print("MOBILE CONNECTED")
         camera_model = str(message_json.get("content"))
         camera_index = manager.find_websocket_index('mobile', websocket)
         active_session.iphoneModel[f"cam{manager.find_websocket_index('mobile', websocket)}"] = camera_model
@@ -560,6 +561,7 @@ async def handle_mobile_message(websocket, message_json, command, active_session
             }
         json_message = json.dumps(message)
         manager.broadcast(json_message, websocket)
+        
 
     elif command == "save_video" and active_session:
         metadata = message_json.get("metadata", {})
