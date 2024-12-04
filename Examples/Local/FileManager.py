@@ -7,6 +7,8 @@ import yaml
 import uuid
 import shutil
 import base64
+import zipfile
+
 
 class FileManager:
     """
@@ -291,7 +293,8 @@ class FileManager:
         zip_file_path = os.path.join(self.base_directory, "tmp.zip")
 
         # Create a zip file
-        shutil.make_archive(zip_file_path.replace(".zip", ""), 'zip', session_folder_path)
+        zip_with_progress(session_folder_path, zip_file_path)
+        ##shutil.make_archive(zip_file_path.replace(".zip", ""), 'zip', session_folder_path)
         return zip_file_path
     
     def encode_zip_to_base64(self, zip_file_path: str) -> str:
@@ -310,6 +313,37 @@ class FileManager:
             total_chunks = (file_size + chunk_size - 1) // chunk_size
         return zip_file_path, total_chunks
     
+
+def zip_with_progress(source_folder, output_zip):
+    """
+    Create a ZIP archive of a folder and display progress.
+
+    Args:
+        source_folder (str): Path to the folder to zip.
+        output_zip (str): Path to the output ZIP file.
+    """
+    # Get a list of all files to be zipped
+    file_paths = []
+    for root, _, files in os.walk(source_folder):
+        for file in files:
+            file_paths.append(os.path.join(root, file))
+
+    total_files = len(file_paths)
+    print(f"Total files to zip: {total_files}")
+
+    # Create the ZIP archive
+    with zipfile.ZipFile(output_zip, 'w', zipfile.ZIP_DEFLATED) as zipf:
+        for index, file_path in enumerate(file_paths, 1):
+            # Add file to the archive
+            archive_name = os.path.relpath(file_path, source_folder)
+            zipf.write(file_path, arcname=archive_name)
+            
+            # Print progress
+            print(f"Zipping file {index}/{total_files}: {archive_name}")
+
+    print(f"ZIP archive created: {output_zip}")
+
+
     def removePath(self, path):
         '''
         Removes the files in the path using os.remove()

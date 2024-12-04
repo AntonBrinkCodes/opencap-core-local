@@ -582,6 +582,7 @@ async def handle_web_message(websocket, message_json, command, active_session: S
                 # Get chunk size and info egarding download. Send to web app
                 chunk_size = message_json.get('chunk_size')
                 dataPath,total_chunks = fileManager.send_session_zip(session_id=active_session.uuid, chunk_size = chunk_size)
+                print("zipped file")
                 start_message = {
                         "command": "download_start",
                         "filename": os.path.basename(dataPath),
