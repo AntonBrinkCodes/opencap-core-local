@@ -24,6 +24,8 @@ app = FastAPI()
 handler = Mangum(app)
 
 import socket
+
+
                 
                 
 class CustomError(Exception):
@@ -444,6 +446,17 @@ def health_status():
 def testy():
     return {"Start": "Recording"}
 
+@app.get("/download/{file_path}")
+async def download_file(file_path: str):
+    #file_path = os.path.join(fileManager.base_directory, filename)
+    
+    # Check if the file exists
+    if os.path.exists(file_path):
+        # Return the file as a response, setting the filename for the download prompt
+        return FileResponse(file_path, media_type="application/zip", headers={"Content-Disposition": f"attachment; filename={os.path.basename(file_path)}"})
+    else:
+        return {"error": "File not found"}
+
 
 
 @app.websocket("/ws")
@@ -578,19 +591,28 @@ async def handle_web_message(websocket, message_json, command, active_session: S
             fileManager.delete_session(session=Session(session_uuid=idToDelete))
         #TODO: TODO: Add someinformation sends to the web app so that the user sees how the download is progressing
         elif command == "download_session":
-            try:
-                # Get chunk size and info egarding download. Send to web app
-                chunk_size = message_json.get('chunk_size')
-                dataPath,total_chunks = fileManager.send_session_zip(session_id=active_session.uuid, chunk_size = chunk_size)
-                print("zipped file")
-                start_message = {
-                        "command": "download_start",
-                        "filename": os.path.basename(dataPath),
-                        "total_chunks": total_chunks
-                    }
-                await manager.send_personal_message(message=json.dumps(start_message), websocket=websocket)
-                # open the zipped file
-                with open(dataPath, "rb") as file:
+            #try:
+            # Get chunk size and info egarding download. Send to web app
+            chunk_size = message_json.get('chunk_size')
+            dataPath,total_chunks = fileManager.send_session_zip(session_id=active_session.uuid, chunk_size = chunk_size)
+            print("zipped file")
+            start_message = {
+                    "command": "download_start",
+                    "filename": os.path.basename(dataPath),
+                    "total_chunks": total_chunks
+                }
+            await manager.send_personal_message(message=json.dumps(start_message), websocket=websocket)
+            # open the zipped file
+            # Assuming you're sending this message via a WebSocket
+            download_link = f"http://{ip_address}:8080/download/{dataPath}"
+
+            message = {
+                "command": "download_link",
+                "link": download_link
+            }
+
+            await manager.send_personal_message(message=json.dumps(message), websocket=websocket)
+            ''' with open(dataPath, "rb") as file:
                     while chunk := file.read(chunk_size):
                         if not chunk:
                             break
@@ -603,7 +625,7 @@ async def handle_web_message(websocket, message_json, command, active_session: S
                     await manager.send_personal_message(message=json.dumps({"command": "download_complete"}), websocket=websocket)
             except Exception as e:
                 print(f"Error sending file: {e}")
-                await manager.send_personal_message(message = json.dumps({"command": "download_error", "error": str(e)}), websocket=websocket)
+                await manager.send_personal_message(message = json.dumps({"command": "download_error", "error": str(e)}), websocket=websocket)'''
                         
 
         else:
