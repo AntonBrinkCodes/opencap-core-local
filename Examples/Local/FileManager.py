@@ -295,7 +295,7 @@ class FileManager:
         # Create a zip file
         #zip_with_progress(session_folder_path, zip_file_path)
         shutil.make_archive(zip_file_path, 'zip', session_folder_path)
-        return zip_file_path
+        return zip_file_path + '.zip'
     
     def encode_zip_to_base64(self, zip_file_path: str) -> str:
         # Encode the zip file in base64
