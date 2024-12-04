@@ -1,6 +1,6 @@
 import os
 from sessionModel import Session, Trial, Subject
-from typing import List, Optional
+from typing import List, Optional, Tuple
 import pickle
 import json
 import yaml
@@ -299,22 +299,27 @@ class FileManager:
         with open(zip_file_path, "rb") as file:
             return base64.b64encode(file.read()).decode("utf-8")
 
-    def send_session_zip(self, session_id: str)-> str:
-
+    def send_session_zip(self, session_id: str, chunk_size: Optional[int] = None)-> Tuple[str, int]:
+        total_chunks = 0
         # Zip the session folder
         zip_file_path = self.zip_session_folder(session_id)
         # Encode the zip file
-        zip_data_base64 = self.encode_zip_to_base64(zip_file_path)
+        #zip_data_base64 = self.encode_zip_to_base64(zip_file_path)
+        if chunk_size:
+            file_size = os.path.getsize(zip_file_path)
+            total_chunks = (file_size + chunk_size - 1) // chunk_size
+        return zip_file_path, total_chunks
+    
+    def removePath(self, path):
+        '''
+        Removes the files in the path using os.remove()
+
+        Args:
+            path (str): The path to remove
+        '''
         
-        # Send the zip file data over WebSocket
-        # await websocket.send_json({
-        #    "command": "download",
-        #    "filename": f"{session_id}.zip",
-        #    "filedata": zip_data_base64
-        #})
-        # Clean up the temporary zip file
-        os.remove(zip_file_path)
-        return zip_data_base64
+        os.remove(path)
+
 
 def get_folders_in_path(path):
     return [name for name in os.listdir(path) if os.path.isdir(os.path.join(path, name))]

@@ -15,6 +15,8 @@ import threading
 import time
 import asyncio
 from localReprocess import runLocalTrial
+from fastapi.responses import FileResponse
+
 
 from enum import Enum # Maybe or something else
 
@@ -574,15 +576,32 @@ async def handle_web_message(websocket, message_json, command, active_session: S
         elif command == "delete_session":
             idToDelete = message_json.get('content')
             fileManager.delete_session(session=Session(session_uuid=idToDelete))
-        
+        #TODO: TODO: Add someinformation sends to the web app so that the user sees how the download is progressing
         elif command == "download_session":
-            data = fileManager.send_session_zip(session_id=active_session.uuid)
-            downloadMsg = {
-                 "command": "download_session",
-                 "filename": f"{active_session.uuid}.zip",
-                "filedata": data
-            }
-            await manager.send_personal_message(message=json.dumps(downloadMsg), websocket=websocket)
+            try:
+                # Get chunk size and info egarding download. Send to web app
+                chunk_size = message_json.get('chunk_size')
+                dataPath,total_chunks = fileManager.send_session_zip(session_id=active_session.uuid, chunk_size = chunk_size)
+                start_message = {
+                        "command": "download_start",
+                        "filename": os.path.basename(dataPath),
+                        "total_chunks": total_chunks
+                    }
+                await manager.send_personal_message(message=json.dumps(start_message), websocket=websocket)
+                # open the zipped file
+                with open(dataPath, "rb") as file:
+                    while chunk := file.read(chunk_size):
+                        encoded_chunk = base64.b64encode(chunk).decode("utf-8")
+                        chunk_json = {"command": "download_chunk", "chunk": encoded_chunk}
+                        await manager.send_personal_message(message = json.dumps(chunk_json), websocket=websocket)
+                        await asyncio.sleep(0.01)  # Avoid flooding the WebSocket
+                        
+                    # Notify client of completion
+                    await manager.send_personal_message(message=json.dumps({"command": "download_complete"}), websocket=websocket)
+            except Exception as e:
+                print(f"Error sending file: {e}")
+                await manager.send_personal_message(message = json.dumps({"command": "download_error", "error": str(e)}), websocket=websocket)
+                        
 
         else:
             toastMsg = {
