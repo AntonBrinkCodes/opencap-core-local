@@ -293,8 +293,8 @@ class FileManager:
         zip_file_path = os.path.join(self.base_directory, "tmp.zip")
 
         # Create a zip file
-        zip_with_progress(session_folder_path, zip_file_path)
-        ##shutil.make_archive(zip_file_path.replace(".zip", ""), 'zip', session_folder_path)
+        #zip_with_progress(session_folder_path, zip_file_path)
+        shutil.make_archive(zip_file_path.replace(".zip", ""), 'zip', session_folder_path)
         return zip_file_path
     
     def encode_zip_to_base64(self, zip_file_path: str) -> str:
