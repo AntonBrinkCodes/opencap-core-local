@@ -592,6 +592,8 @@ async def handle_web_message(websocket, message_json, command, active_session: S
                 # open the zipped file
                 with open(dataPath, "rb") as file:
                     while chunk := file.read(chunk_size):
+                        if not chunk:
+                            break
                         encoded_chunk = base64.b64encode(chunk).decode("utf-8")
                         chunk_json = {"command": "download_chunk", "chunk": encoded_chunk}
                         await manager.send_personal_message(message = json.dumps(chunk_json), websocket=websocket)
