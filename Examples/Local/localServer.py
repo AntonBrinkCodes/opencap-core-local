@@ -489,9 +489,9 @@ async def websocket_endpoint(websocket: WebSocket, client_type: str, link_to_web
 
                     # Route the message
                     if client_type == "web":
-                        await handle_web_message(
+                         asyncio.create_task( handle_web_message(
                             websocket, message_json, command, active_session, session_id
-                        )
+                        ))
                     else:
                         await handle_mobile_message(
                             websocket, message_json, command, active_session, session_id
@@ -595,7 +595,7 @@ async def handle_web_message(websocket, message_json, command, active_session: S
                         chunk_json = {"command": "download_chunk", "chunk": encoded_chunk}
                         await manager.send_personal_message(message = json.dumps(chunk_json), websocket=websocket)
                         await asyncio.sleep(0.01)  # Avoid flooding the WebSocket
-                        
+
                     # Notify client of completion
                     await manager.send_personal_message(message=json.dumps({"command": "download_complete"}), websocket=websocket)
             except Exception as e:
