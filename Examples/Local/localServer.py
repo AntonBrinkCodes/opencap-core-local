@@ -410,7 +410,7 @@ class ConnectionManager:
         Args:
             message (str): The message to send.
         '''        
-        for web_connection, mobil_connection in self.connections.items:
+        for web_connection, mobile_connection in self.connections.items:
             await self.try_send_message(message=message, connection=web_connection)
 
         
@@ -446,16 +446,17 @@ def health_status():
 def testy():
     return {"Start": "Recording"}
 
-@app.get("/download/{file_path}")
-async def download_file(file_path: str):
-    #file_path = os.path.join(fileManager.base_directory, filename)
+#TODO: CHANGE BACK TO FILE NAME...
+@app.get("/download/{file_name}")
+async def download_file(file_name: str):
+    file_path = os.path.join(fileManager.base_directory, file_name)
     
     # Check if the file exists
     if os.path.exists(file_path):
         # Return the file as a response, setting the filename for the download prompt
-        return FileResponse(file_path, media_type="application/zip", headers={"Content-Disposition": f"attachment; filename={os.path.basename(file_path)}"})
+        return FileResponse(file_path, media_type="application/zip", headers={"Content-Disposition": f"attachment; filename={file_name}"})
     else:
-        return {"error": "File not found"}
+        return {"error": "File not found dummy"}
 
 
 
