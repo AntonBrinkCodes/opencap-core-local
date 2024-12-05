@@ -683,11 +683,11 @@ async def handle_mobile_message(websocket, message_json, command, active_session
         print("MOBILE CONNECTED")
         camera_model = str(message_json.get("content"))
         camera_index = manager.find_websocket_index(websocket)
-        active_session.iphoneModel[f"cam{manager.find_websocket_index(websocket)}"] = camera_model
+        active_session.iphoneModel[f"cam{camera_index}"] = camera_model
         message = {
             "command": "mobile_connected",
             "content": camera_index,
-            "session_id": session_id
+            "session": session_id
             }
         json_message = json.dumps(message)
         await manager.broadcast(json_message, websocket)
@@ -698,11 +698,17 @@ async def handle_mobile_message(websocket, message_json, command, active_session
         base64_data = message_json.get("videoData", "")
         trial_name = metadata.get("name")
         trial = active_session.get_trial_by_name(trial_name)
-
+        camera_index = manager.find_websocket_index(websocket)
         video_data = base64.b64decode(base64_data)
         fileManager.save_binary_file(
-            video_data, session=active_session, trial=trial, cam_index=manager.find_websocket_index(websocket)
+            video_data, session=active_session, trial=trial, cam_index=camera_index
         )
+        videoUploadedMsg = {
+            "command": "video_uploaded",
+            "session": session_id,
+            "camera_index": camera_index
+        }
+        await manager.broadcast(json.dumps(videoUploadedMsg), websocket=websocket)
 
     elif not active_session:
         await manager.send_personal_message(
