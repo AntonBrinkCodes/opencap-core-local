@@ -533,6 +533,13 @@ async def websocket_endpoint(websocket: WebSocket, client_type: str, link_to_web
     except WebSocketDisconnect:
         pass
     finally:
+        if client_type == "mobile":
+            # Inform the web app that a mobile disconnected.
+            disconnectMsg = {
+                command: "mobile_disconnect",
+            }
+            await manager.broadcast(json.dumps(disconnectMsg), websocket=websocket)
+        # Disconnect the websocket.
         manager.disconnect(websocket)
         logger.debug("A client is disconnecting")
        
