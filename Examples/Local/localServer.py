@@ -1,8 +1,7 @@
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, BackgroundTasks
 from fastapi.websockets import WebSocketState
 from mangum import Mangum
 import uvicorn
-from fastapi.responses import HTMLResponse
 from typing import List, Dict, Optional
 import logging
 from sessionModel import Session, Trial, Subject
@@ -446,17 +445,25 @@ def health_status():
 def testy():
     return {"Start": "Recording"}
 
-#TODO: CHANGE BACK TO FILE NAME...
 @app.get("/download/{file_name}")
-async def download_file(file_name: str):
+async def download_file(file_name: str, background_tasks: BackgroundTasks):
     file_path = os.path.join(fileManager.base_directory, file_name)
     
     # Check if the file exists
     if os.path.exists(file_path):
+        # Add a background task to delete the file after the response is sent
+        background_tasks.add_task(fileManager.removePath, file_path)
+        
         # Return the file as a response, setting the filename for the download prompt
-        return FileResponse(file_path, media_type="application/zip", headers={"Content-Disposition": f"attachment; filename={file_name}"})
+        return FileResponse(
+            file_path,
+            media_type="application/zip",
+            headers={"Content-Disposition": f"attachment; filename={file_name}"},
+            background=background_tasks
+        )
     else:
         return {"error": "File not found dummy"}
+
 
 
 

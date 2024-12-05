@@ -310,6 +310,15 @@ class FileManager:
        
         return zip_file_path
     
+    def removePath(self, path):
+        '''
+        Removes the files in the path using os.remove()
+
+        Args:
+            path (str): The path to remove
+        '''
+        
+        os.remove(path)
 
 def zip_with_progress(source_folder, output_zip):
     """
@@ -341,15 +350,7 @@ def zip_with_progress(source_folder, output_zip):
     print(f"ZIP archive created: {output_zip}")
 
 
-    def removePath(self, path):
-        '''
-        Removes the files in the path using os.remove()
-
-        Args:
-            path (str): The path to remove
-        '''
-        
-        os.remove(path)
+    
 
 
 def get_folders_in_path(path):
