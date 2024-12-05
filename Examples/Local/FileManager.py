@@ -317,7 +317,7 @@ class FileManager:
         Args:
             path (str): The path to remove
         '''
-        
+        print(f"removing {path}")
         os.remove(path)
 
 def zip_with_progress(source_folder, output_zip):
