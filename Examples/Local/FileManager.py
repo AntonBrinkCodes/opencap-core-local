@@ -290,7 +290,7 @@ class FileManager:
     def zip_session_folder(self, session_id: str) -> str:
         # Path to the session folder
         session_folder_path = os.path.join(self.base_directory, session_id)
-        zip_file_path = os.path.join(self.base_directory, "tmp")
+        zip_file_path = os.path.join(self.base_directory, session_id)
 
         # Create a zip file
         #zip_with_progress(session_folder_path, zip_file_path)
