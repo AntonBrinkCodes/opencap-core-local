@@ -90,6 +90,57 @@ class sessionManager:
         }
         json_message = json.dumps(message)
         await manager.broadcast(message = json_message, source = websocket)
+
+    async def startRecording(self, websocket: WebSocket, session: Session, trialId: str, trialType: str = "dynamic", trialName: Optional[str] = "defaultName"):
+        '''
+        Sends messages to the connected mobile websockets to start recording.
+
+        Args:
+            session (Session): The corresponding recording Session.
+            trialId (str): the trialId of the recording/trial.
+            trialType (str): dynamic, neutral or calibration.
+            trialName: (str): Optional. Only required for dynamic trials (TODO: Implement this...)
+
+        '''
+        session_id = str(session.getID())
+        try:
+            #Start recording
+            
+            await self.sendStartTrial(websocket=websocket, session_id = session_id, trialType=trialType)
+            if trialType == 'calibration' or trialType == 'neutral':
+                toastMsg = {
+                    "command": "Toast",
+                    "type": "Info",
+                    "content": f"Recording {trialType}"
+                }
+                await manager.send_personal_message(json.dumps(toastMsg), websocket = websocket)
+                # Stop recording automatically after 1 second.
+                await asyncio.sleep(1)
+                await self.sendStopTrial(websocket=websocket)
+                # TODO: Add check that the files are correctly saved.
+                toastMsg = {
+                    "command": "Toast",
+                    "type": "Success",
+                    "content": f"succesfully finished recording {trialType}"
+                }
+                #await manager.send_personal_message(json.dumps(toastMsg), websocket=websocket)
+            
+            else: #If dynamic, just send to start and the user sends to stop through web app.
+
+                toastMsg = {
+                    "command": "Toast",
+                    "type": "Info",
+                    "content": f"Recording {trialType}"
+                }
+                await manager.send_personal_message(json.dumps(toastMsg), websocket = websocket)
+
+        except CustomError as e:
+            toastMsg = {
+                    "command": "Toast",
+                    "type": "Error",
+                    "content": "error: {e}"
+                }
+            await manager.send_personal_message(message=json.dumps(toastMsg), websocket=websocket)
     
     async def startTrial(self, websocket: WebSocket, session: Session, trialId: str, trialType: Optional[str] = "dynamic", process=True, isTest=False,  trialNames: Optional[str] = ""):
         '''
@@ -487,7 +538,7 @@ async def websocket_endpoint(websocket: WebSocket, client_type: str, link_to_web
             if data["type"] == "websocket.receive":
                 if "text" in data:
                     message = data["text"]
-                    print(f"message received is: {message}")
+                    #print(f"message received is: {message}")
                     # Parse JSON message
                     try:
                         message_json = json.loads(message)
@@ -536,9 +587,9 @@ async def websocket_endpoint(websocket: WebSocket, client_type: str, link_to_web
         if client_type == "mobile":
             # Inform the web app that a mobile disconnected.
             disconnectMsg = {
-                command: "mobile_disconnect",
+                "command": "mobile_disconnect",
             }
-            await manager.broadcast(json.dumps(disconnectMsg), websocket=websocket)
+            await manager.broadcast(json.dumps(disconnectMsg), source=websocket)
         # Disconnect the websocket.
         manager.disconnect(websocket)
         logger.debug("A client is disconnecting")
@@ -548,8 +599,24 @@ async def handle_web_message(websocket, message_json, command, active_session: S
     print(f"Received command: {command}")
     
     if active_session:
-        # Handle session-specific commands
-        if command == "start_calibration":
+
+        if command == "start_recording":
+            trialType = message_json.get("trialType")
+            is_test = message_json.get("isTest")
+            trialId = message_json.get("trialId")
+            if trialType == "calibration":
+                # Add checkerboard info.
+                rows = int(message_json.get("rows"))
+                cols = int(message_json.get("cols"))
+                square_size = float(message_json.get("squareSize"))
+                placement = message_json.get("placement")
+                active_session.set_checkerboard_params(rows, cols, square_size, placement)
+                fileManager.save_session_metadata(active_session)
+
+            await sessionManager.startRecording(websocket = websocket, session = active_session, trialId = trialId, trialType = trialType)
+
+        # Handle session-specific commands TODO: CHANGE THESE TO ABOVE THING UNDER START_RECORDING COMMAND.
+        elif command == "start_calibration":
             rows = int(message_json.get("rows"))
             cols = int(message_json.get("cols"))
             square_size = float(message_json.get("squareSize"))
@@ -558,6 +625,7 @@ async def handle_web_message(websocket, message_json, command, active_session: S
             trialId = "calibration"
             active_session.set_checkerboard_params(rows, cols, square_size, placement)
             fileManager.save_session_metadata(active_session)
+            
             await sessionManager.startTrial( websocket=websocket,
                 session=active_session, trialId=trialId, trialType="calibration", process=True, isTest=is_test
             )
@@ -604,7 +672,7 @@ async def handle_web_message(websocket, message_json, command, active_session: S
         elif command == "delete_session":
             idToDelete = message_json.get('content')
             fileManager.delete_session(session=Session(session_uuid=idToDelete))
-        #TODO: TODO: Add someinformation sends to the web app so that the user sees how the download is progressing
+
         elif command == "download_session":
             #try:
             # Get chunk size and info egarding download. Send to web app
@@ -613,7 +681,7 @@ async def handle_web_message(websocket, message_json, command, active_session: S
                     "command": "download_start",
                 }
             await manager.send_personal_message(message=json.dumps(start_message), websocket=websocket)
-            dataPath = fileManager.send_session_zip(session_id=active_session.uuid)
+            dataPath = fileManager.send_session_zip(session_id=str(active_session.uuid))
             fileName = os.path.basename(dataPath)
             
             # open the zipped file
@@ -708,7 +776,7 @@ async def handle_mobile_message(websocket, message_json, command, active_session
             "session": session_id,
             "camera_index": camera_index
         }
-        await manager.broadcast(json.dumps(videoUploadedMsg), websocket=websocket)
+        await manager.broadcast(json.dumps(videoUploadedMsg), source=websocket)
 
     elif not active_session:
         await manager.send_personal_message(
@@ -760,9 +828,9 @@ if __name__=="__main__":
 
     fileManager.cleanEmptySessions()
     #ip_address = socket.gethostbyname(hostname) #"192.168.0.48"#socket.gethostbyname(hostname)
-    #ip_address = "192.168.0.48"
-    ip_address = "130.229.141.43" # ubuntu computer
-    #ip_address = "192.168.50.9" Landet
+    ip_address = "192.168.0.2"
+    #ip_address = "130.229.141.43" # ubuntu computer
+    #ip_address = "192.168.50.9" Landet//
     print(f"IP Address: {ip_address}")
 
     uvicorn.run(app,
