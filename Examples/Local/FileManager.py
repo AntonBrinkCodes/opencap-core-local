@@ -302,16 +302,13 @@ class FileManager:
         with open(zip_file_path, "rb") as file:
             return base64.b64encode(file.read()).decode("utf-8")
 
-    def send_session_zip(self, session_id: str, chunk_size: Optional[int] = None)-> Tuple[str, int]:
-        total_chunks = 0
+    def send_session_zip(self, session_id: str)-> str:
         # Zip the session folder
         zip_file_path = self.zip_session_folder(session_id)
         # Encode the zip file
         #zip_data_base64 = self.encode_zip_to_base64(zip_file_path)
-        if chunk_size:
-            file_size = os.path.getsize(zip_file_path)
-            total_chunks = (file_size + chunk_size - 1) // chunk_size
-        return zip_file_path, total_chunks
+       
+        return zip_file_path
     
 
 def zip_with_progress(source_folder, output_zip):

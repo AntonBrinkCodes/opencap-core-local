@@ -594,16 +594,14 @@ async def handle_web_message(websocket, message_json, command, active_session: S
         elif command == "download_session":
             #try:
             # Get chunk size and info egarding download. Send to web app
-            chunk_size = message_json.get('chunk_size')
-            dataPath,total_chunks = fileManager.send_session_zip(session_id=active_session.uuid, chunk_size = chunk_size)
-            fileName = os.path.basename(dataPath)
             print("zipped file")
             start_message = {
                     "command": "download_start",
-                    "filename": fileName,
-                    "total_chunks": total_chunks
                 }
             await manager.send_personal_message(message=json.dumps(start_message), websocket=websocket)
+            dataPath = fileManager.send_session_zip(session_id=active_session.uuid)
+            fileName = os.path.basename(dataPath)
+            
             # open the zipped file
             # Assuming you're sending this message via a WebSocket
             download_link = f"http://{ip_address}:8080/download/{fileName}"
@@ -614,20 +612,6 @@ async def handle_web_message(websocket, message_json, command, active_session: S
             }
 
             await manager.send_personal_message(message=json.dumps(message), websocket=websocket)
-            ''' with open(dataPath, "rb") as file:
-                    while chunk := file.read(chunk_size):
-                        if not chunk:
-                            break
-                        encoded_chunk = base64.b64encode(chunk).decode("utf-8")
-                        chunk_json = {"command": "download_chunk", "chunk": encoded_chunk}
-                        await manager.send_personal_message(message = json.dumps(chunk_json), websocket=websocket)
-                        await asyncio.sleep(0.01)  # Avoid flooding the WebSocket
-
-                    # Notify client of completion
-                    await manager.send_personal_message(message=json.dumps({"command": "download_complete"}), websocket=websocket)
-            except Exception as e:
-                print(f"Error sending file: {e}")
-                await manager.send_personal_message(message = json.dumps({"command": "download_error", "error": str(e)}), websocket=websocket)'''
                         
 
         else:
