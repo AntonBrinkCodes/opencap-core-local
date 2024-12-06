@@ -63,12 +63,12 @@ class sessionManager:
             if str(session.getID()) == session_id:
                 return session
         #Otherwise check old sessions
-        saved_sessions = fileManager.find_sessions()
+        saved_sessions = fileManager.load_sessions()
         print("checking saved sessions:")
         for session_name, session_info in saved_sessions.items():
             print(session_name)
             if session_id == session_name:
-                return Session(session_uuid=session_id)
+                return session_info
         return None
     
     async def sendStartTrial(self, websocket: WebSocket, session_id: str, trialType: Optional[str] = "dynamic"):
@@ -180,19 +180,32 @@ class sessionManager:
             )
 
         # Run the trial locally TODO: Add some kind of check here or maybe a "try" to prevent crashes :)
-        runLocalTrial(sessionId, trialNames, trialId, trialType=trialType, dataDir=fileManager.base_directory)
-
-        # Handle "dynamic" trial type
-        if trialType == "dynamic":
-            trials = fileManager.find_trials(session=Session(session_uuid=sessionId))
-
-            # Prepare and send JSON message
-            jsonMsg = {
-                "command": "sessionTrials",
-                "content": trials,
+        res = None
+        try:
+           res = runLocalTrial(sessionId, trialNames, trialId, trialType=trialType, dataDir=fileManager.base_directory)
+        except Exception as inst:
+            print(f"Error: {type(inst)}! Args: {inst.args} ")
+            print(inst)
+        if res!=None:
+            print("Succesfully processed trial")
+            successMsg = {
+                "command": "process_succeded",
+                "trialType": trialType,
+                "trialId": trialId,
                 "session": sessionId
             }
-            await manager.send_personal_message(json.dumps(jsonMsg), websocket)
+            await manager.send_personal_message(json.dumps(successMsg), websocket)
+            # Handle "dynamic" trial type
+            if trialType == "dynamic":
+                trials = fileManager.find_trials(session=Session(session_uuid=sessionId))
+
+                # Prepare and send JSON message
+                jsonMsg = {
+                    "command": "sessionTrials",
+                    "content": trials,
+                    "session": sessionId
+                }
+                await manager.send_personal_message(json.dumps(jsonMsg), websocket)
 
     
 class ConnectionInfo:
@@ -549,7 +562,7 @@ async def handle_web_message(websocket, message_json, command, active_session: S
         if command == "start_recording":
             trialType = message_json.get("trialType")
             is_test = message_json.get("isTest")
-            
+           
             if trialType == "calibration":
                 # Add checkerboard info.
                 rows = int(message_json.get("rows"))
@@ -578,8 +591,13 @@ async def handle_web_message(websocket, message_json, command, active_session: S
                 }
                 await manager.send_personal_message(message=json.dumps(informWebAppMsg), websocket=websocket)
 
+            if is_test:
+                print("running test recording which means I process a trial of the same type that would be recorded :)")
+                #await sessionManager.processTrial(websocket=websocket, session=active_session, trialId=trialId, trialType = None, isTest=is_test, trialNames=None)
             await sessionManager.startRecording(websocket = websocket, session = active_session, trialId = trialId, trialType = trialType)
 
+        elif command == "stop_recording":
+            await sessionManager.sendStopTrial(websocket=websocket) # Should only come from dynamic trials.
         elif command == "process_trial":
             trialType = message_json.get("trialType")
             trialName = message_json.get("trialName")
@@ -670,7 +688,8 @@ async def handle_web_message(websocket, message_json, command, active_session: S
         elif command == "get_subjects":
             loaded_subjects = [subject.to_dict() for subject in fileManager.load_subjects()]
             response = {"command": "subjects", "content": loaded_subjects}
-            await manager.send_personal_message(json.dumps(response), websocket)
+            print(loaded_subjects)
+            await manager.send_personal_message(json.dumps(response, default=str), websocket)
 
         elif command == "get_sessions":
             sessions = fileManager.find_sessions()
@@ -678,6 +697,9 @@ async def handle_web_message(websocket, message_json, command, active_session: S
             response = {"command": "sessions", "content": sessions}
             #print(response)
             await manager.send_personal_message(json.dumps(response), websocket)
+        elif command == "save_subject":
+            subject = Subject.from_dict(message_json.get("content"))
+            sessionManager.saveSubject(subject=subject)
 
         elif command == "ping":
             pongMsg = {
@@ -695,7 +717,7 @@ async def handle_mobile_message(websocket, message_json, command, active_session
         print("MOBILE CONNECTED")
         camera_model = str(message_json.get("content"))
         camera_index = manager.find_websocket_index(websocket)
-        active_session.iphoneModel[f"cam{camera_index}"] = camera_model
+        active_session.iphoneModel[f"Cam{camera_index}"] = camera_model
         message = {
             "command": "mobile_connected",
             "content": camera_index,
@@ -772,8 +794,8 @@ if __name__=="__main__":
 
     fileManager.cleanEmptySessions()
     #ip_address = socket.gethostbyname(hostname) #"192.168.0.48"#socket.gethostbyname(hostname)
-    #ip_address = "192.168.0.2"
-    ip_address = "130.229.141.43" # ubuntu computer
+    ip_address = "192.168.0.2"
+    #ip_address = "130.229.141.43" # ubuntu computer
     #ip_address = "192.168.50.9" Landet//
     print(f"IP Address: {ip_address}")
 

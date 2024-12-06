@@ -142,7 +142,6 @@ class FileManager:
                     with open(metadata_file_path, 'r') as file:
                         # Add the constructor for the UUID tag in YAML
                         metadata = yaml.safe_load(file)
-
                         # Extract specific lines or fields (modify as per your requirements)
                         # Assuming the YAML file has fields like 'session_name' and 'created_date'
                         session_info = {
@@ -157,6 +156,31 @@ class FileManager:
                         # Add the extracted metadata to the sessions_dict with folder_name as key
                         sessions_dict[folder_name] = session_info
 
+        return sessions_dict
+    
+    def load_sessions(self) -> dict:
+        sessions_dict = {}  # Dictionary to hold sessions for each UUID folder
+
+        # Iterate through each folder in the root directory
+        for folder_name in os.listdir(self.base_directory):
+            folder_path = os.path.join(self.base_directory, folder_name)
+            print(folder_path)
+            yaml.add_constructor(tag="tag:yaml.org,2002:python/object:uuid.UUID", constructor=uuid_constructor)
+
+            # Check if the folder name matches a UUID pattern
+            if os.path.isdir(folder_path):
+                # Construct the path to sessionMetadata.yaml
+                metadata_file_path = os.path.join(folder_path, 'sessionMetadata.yaml')
+
+                # Check if sessionMetadata.yaml exists
+                if os.path.isfile(metadata_file_path):
+                    # Open and read the YAML file
+                    with open(metadata_file_path, 'r') as file:
+                        # Add the constructor for the UUID tag in YAML
+                        metadata = yaml.safe_load(file)
+                        session = Session.from_dict(metadata=metadata, fallbackID=folder_name)
+                        # Add the extracted metadata to the sessions_dict with folder_name as key
+                        sessions_dict[folder_name] = session
         return sessions_dict
     
     def save_binary_file(self, data: bytes, session: Session, cam_index: int, trial: Trial):

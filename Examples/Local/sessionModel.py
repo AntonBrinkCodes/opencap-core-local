@@ -14,7 +14,7 @@ import uuid
 import uuid
 import yaml
 from enum import Enum
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Any
 from datetime import datetime
 from CheckerBoard import CheckerBoard
 import pickle
@@ -24,6 +24,42 @@ class Sex(Enum):
     female = "f"
     male = "m"
     other = "o"
+
+    def __str__(self):
+        return self.value  # Serialize to the value of the enum
+    
+    @classmethod
+    def from_string(cls, input_str: str) -> 'Sex':
+        """
+        Parse a string and return the corresponding Sex enum value.
+
+        Args:
+            input_str (str): Input string representing the gender.
+
+        Returns:
+            Sex: The corresponding Sex enum value.
+
+        Raises:
+            ValueError: If the input string does not match any value.
+        """
+        normalized_str = input_str.strip().lower()
+        mapping = {
+            "f": cls.female,
+            "female": cls.female,
+            "woman": cls.female,
+            "girl": cls.female,
+            "m": cls.male,
+            "male": cls.male,
+            "man": cls.male,
+            "boy": cls.male,
+            "o": cls.other,
+            "other": cls.other,
+            "non-binary": cls.other,
+            "nb": cls.other,
+        }
+        if normalized_str in mapping:
+            return mapping[normalized_str]
+        raise ValueError(f"Invalid gender input: {input_str}")
 
 class Subject:
     """
@@ -61,7 +97,7 @@ class Subject:
         """Create a Subject instance from a dictionary."""
         return Subject(
             name=data['name'],
-            sex=Sex(data['gender']) if data.get('gender') else None,
+            sex=Sex.from_string(data['gender']) if data.get('gender') else None,
             height=data['height'],
             weight=data['mass'],
             birth_year = data['birth_year'],
@@ -171,14 +207,14 @@ class Session:
         """
         self.calibration_trial = trial
 
-    def set_static_trial(self, trial: Trial):
+    def set_neutral_trial(self, trial: Trial):
         """
         Set the static trial for the session.
 
         Args:
             trial (Trial): The static trial to be set.
         """
-        self.static_trial = trial
+        self.neutral_trial = trial
 
     def set_checkerboard_params(self, checkerboard_height: int, checkerboard_width: int, checkerboard_mm: int, 
                                 checkerboard_placement: str="backwall"):
@@ -297,8 +333,8 @@ class Session:
         if name.lower() in ['calibration', 'neutral']:
             if name.lower() == 'calibration' and self.calibration_trial:
                 return self.calibration_trial
-            elif name.lower() == 'neutral' and self.static_trial:
-                return self.static_trial
+            elif name.lower() == 'neutral' and self.neutral_trial:
+                return self.neutral_trial
             else:
                 print(f"No trial found with name '{name}'")
                 return None
@@ -310,6 +346,65 @@ class Session:
 
         print(f"No trial found with name '{name}'")
         return None
+    
+    @classmethod
+    def from_dict(cls, metadata: Dict[str, Any], fallbackID: Optional[str]) -> 'Session':
+        """
+        Create a Session instance from a metadata dictionary.
+
+        Args:
+            metadata (Dict[str, Any]): Dictionary containing session metadata.
+
+        Returns:
+            Session: A new Session instance populated with the given metadata.
+        """
+        # Create the subject
+        subject = Subject(
+            id=metadata.get('subjectID'),
+            name=metadata.get('subjectName'),
+            birth_year=metadata.get('subjectBirthyear'),
+            weight=metadata.get('mass_kg'),
+            height=metadata.get('height_m'),
+            sex=Sex(metadata.get('gender_mf'))
+        )
+
+        # Create the checkerboard
+        checkerBoard = CheckerBoard(
+            black2BlackCornersHeight_n=metadata['checkerBoard'].get('black2BlackCornersHeight_n'),
+            black2BlackCornersWidth_n=metadata['checkerBoard'].get('black2BlackCornersWidth_n'),
+            placement=metadata['checkerBoard'].get('placement'),
+            squareSideLength_mm=metadata['checkerBoard'].get('squareSideLength_mm')
+        )
+
+        # Initialize the session
+        session = cls(
+            subject=subject,
+            session_uuid=metadata.get('sessionID', fallbackID)
+        )
+
+        # Populate session attributes
+        session.name =metadata.get('sessionName', "DefaultSessionName")  # Or another default name logic
+        session.openSimModel = metadata.get('openSimModel', 'LaiUhlrich2022')
+        session.iphoneModel = metadata.get('iphoneModel', {})
+
+        # Populate calibration settings
+        session.calibrationSettings.update(metadata.get('calibrationSettings', {}))
+
+        # Populate marker augmentation settings
+        session.markerAugmentationSettings.update(metadata.get('markerAugmentationSettings', {}))
+
+        # Update checkerBoard
+        session.checkerBoard = checkerBoard
+
+        # Set metadata
+        session.metadata = metadata
+
+        # Set creation date
+        session_date_str = metadata.get('sessionDate', datetime.now().strftime("%Y-%m-%d"))
+        session.createdAt = datetime.strptime(session_date_str, "%Y-%m-%d")
+
+
+        return session
 # Example usage:
 if __name__=="__main__":
     # Creating trials
