@@ -572,6 +572,11 @@ async def handle_web_message(websocket, message_json, command, active_session: S
                 active_session.add_dynamic_trial(newTrial)
                # fileManager.create_trial_directory(session=active_session, trial=newTrial) Maybe not necessary.
                 trialId = str(newTrial.uuid)
+                informWebAppMsg = {
+                    "command": "new_dynamic_trialId",
+                    "content": str(newTrial.uuid)
+                }
+                await manager.send_personal_message(message=json.dumps(informWebAppMsg), websocket=websocket)
 
             await sessionManager.startRecording(websocket = websocket, session = active_session, trialId = trialId, trialType = trialType)
 
