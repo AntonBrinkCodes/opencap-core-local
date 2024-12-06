@@ -142,112 +142,58 @@ class sessionManager:
                 }
             await manager.send_personal_message(message=json.dumps(toastMsg), websocket=websocket)
     
-    async def startTrial(self, websocket: WebSocket, session: Session, trialId: str, trialType: Optional[str] = "dynamic", process=True, isTest=False,  trialNames: Optional[str] = ""):
-        '''
-        Creates and starts a new trial within the given session.
+    async def processTrial(self, websocket: WebSocket, session: Session, trialId: str, trialType: Optional[str] = "dynamic", isTest=False,  trialNames: Optional[str] = ""):
+        """
+        Process a trial based on the given session, trial type, and testing flag.
 
-        The function initiates the trial by:
-            - Commanding all mobile devices in the session to begin recording.
-            - Automatically stopping recordings after 1 second if the trial type is 'static' or 'calibration'.
-            - Saving the recorded videos.
-            - If 'process' is True, the function sends a request to the regular opencap-core main function to process the videos.
-
-        Parameters:
-            websocket: (WebSocket): The websocket to communicate through.
-            session (Session): The session in which the trial is being conducted.
-            trialType (Optional[str]): The type of trial to start ('calibration', 'static', 'dynamic'). Defaults to 'dynamic'.
-            process (bool): Whether to process the trial immediately after recording. Defaults to True.
-            isTest (bool): Whether to use a preset test trial instead of the actual session provided. Defaults to False.
-            trialName (Optional[str]): An optional name for the trial. Defaults to an empty string.
+        Args:
+            session: The session object containing session information.
+            trialType (str): The type of trial (e.g., "calibration", "neutral", "dynamic").
+            isTest (bool): Whether the process is a test or not.
+            fileManager: The file manager instance to handle file-related operations.
+            manager: The manager instance for handling WebSocket communication.
+            websocket: The WebSocket connection for sending messages.
 
         Returns:
-            dict: Information about whether the trial was successfully processed and/or uploaded.
-        '''
-        print(f"running {trialType} trial")
-        session_id = str(session.getID())
-        try:
-            #Start recording
-            
-            await self.sendStartTrial(websocket=websocket, session_id = session_id, trialType=trialType)
-            if trialType == 'calibration' or trialType == 'neutral':
-                toastMsg = {
-                    "command": "Toast",
-                    "type": "Info",
-                    "content": f"Recording {trialType}"
-                }
-                await manager.send_personal_message(json.dumps(toastMsg), websocket = websocket)
-                # Stop recording automatically after 1 second.
-                await asyncio.sleep(1)
-                await self.sendStopTrial(websocket=websocket)
-                # TODO: Add check that the files are correctly saved.
-                toastMsg = {
-                    "command": "Toast",
-                    "type": "Success",
-                    "content": f"succesfully finished recording {trialType}"
-                }
-                await manager.send_personal_message(json.dumps(toastMsg), websocket=websocket)
-            elif trialType=='dynamic':
-                print("Trial Type is dynamic")
-                if not isTest:
-                    # TODO: Wait to ensure that all files are uploaded before proceeding
-                    # TODO: ... Should probably do that for calib and neutral too.
-                    print("this is a real trial recording")
+            None
+        """
+        # Initialize session ID
+        sessionId = str(session.getID())
 
-            #Upload files
-            if process:
-                sessionId = str(session.getID())
+        # If isTest, use pre-recorded session data
+        if isTest:
+            sessionId = "Giota"
 
-                #If isTest then we just use a pre recorded session.
-                if isTest:
-                    sessionId = "Giota"
+            # Set trialNames based on the trialType
+            trialNames = (
+                trialType
+                if trialType in {"calibration", "neutral"}
+                else "dynamic_2"
+            )
 
-                    # Set trialNames based on the trialType
-                    trialNames = (
-                        trialType 
-                        if (trialType == "calibration" or trialType == "neutral") 
-                        else "dynamic_2"
-                    )
-                    # Set trialId based on the trialType
-                    trialId = "Dynamic_1" if trialType == "calibration" else "Calib_1" if trialType == "neutral" else "Dynamic_2" if trialType == "dynamic" else None
+            # Set trialId based on the trialType
+            trialId = (
+                "Dynamic_1" if trialType == "calibration" else
+                "Calib_1" if trialType == "neutral" else
+                "Dynamic_2" if trialType == "dynamic" else
+                None
+            )
 
-                runLocalTrial(sessionId, trialNames, trialId, trialType=trialType, dataDir=fileManager.base_directory)
-                
-                if trialType == "dynamic":
-                    trials = fileManager.find_trials(session=Session(session_uuid=sessionId))
+        # Run the trial locally TODO: Add some kind of check here or maybe a "try" to prevent crashes :)
+        runLocalTrial(sessionId, trialNames, trialId, trialType=trialType, dataDir=fileManager.base_directory)
 
-                    jsonMsg = {
-                                "command": "sessionTrials",
-                                "content": trials,
-                                "session": sessionId
-                                }
-                    #print(response)
-                    await manager.send_personal_message(json.dumps(jsonMsg), websocket)
-                #raise CustomError("Process not implemented yet")
-                #Process files
+        # Handle "dynamic" trial type
+        if trialType == "dynamic":
+            trials = fileManager.find_trials(session=Session(session_uuid=sessionId))
 
-        except CustomError as e:
-            toastMsg = {
-                    "command": "Toast",
-                    "type": "Error",
-                    "content": "error: {e}"
-                }
-            await manager.send_personal_message(message=json.dumps(toastMsg), websocket=websocket)
-        else:
-            #Successfully processed trial
-            toastMsg = {
-                    "command": "Toast",
-                    "type": "Success",
-                    "content": "success: succesfully processed {trialType}"
-                }
-            await manager.send_personal_message(message=json.dumps(toastMsg), websocket=websocket)
-
-            succesCalibrationMsg = {
-                "command": "calibration",
-                "content": "success",
-                "session": session_id
+            # Prepare and send JSON message
+            jsonMsg = {
+                "command": "sessionTrials",
+                "content": trials,
+                "session": sessionId
             }
-            await manager.send_personal_message(message=json.dumps(succesCalibrationMsg), websocket=websocket)
-        return
+            await manager.send_personal_message(json.dumps(jsonMsg), websocket)
+
     
 class ConnectionInfo:
     """
@@ -603,48 +549,41 @@ async def handle_web_message(websocket, message_json, command, active_session: S
         if command == "start_recording":
             trialType = message_json.get("trialType")
             is_test = message_json.get("isTest")
-            trialId = message_json.get("trialId")
+            
             if trialType == "calibration":
                 # Add checkerboard info.
                 rows = int(message_json.get("rows"))
                 cols = int(message_json.get("cols"))
                 square_size = float(message_json.get("squareSize"))
                 placement = message_json.get("placement")
+                trialId = message_json.get("trialId")
                 active_session.set_checkerboard_params(rows, cols, square_size, placement)
                 fileManager.save_session_metadata(active_session)
 
+            elif trialType == "neutral":
+                subject = Subject.from_dict(message_json.get("subject"))
+                active_session.set_subject(subject)
+                trialId = message_json.get("trialId")
+                fileManager.save_session_metadata(active_session)
+
+            elif trialType == "dynamic":
+                trialName = message_json.get("trialName")
+                newTrial = Trial(name=trialName) # Create new trial for the session.
+                active_session.add_dynamic_trial(newTrial)
+               # fileManager.create_trial_directory(session=active_session, trial=newTrial) Maybe not necessary.
+                trialId = str(newTrial.uuid)
+
             await sessionManager.startRecording(websocket = websocket, session = active_session, trialId = trialId, trialType = trialType)
 
-        # Handle session-specific commands TODO: CHANGE THESE TO ABOVE THING UNDER START_RECORDING COMMAND.
-        elif command == "start_calibration":
-            rows = int(message_json.get("rows"))
-            cols = int(message_json.get("cols"))
-            square_size = float(message_json.get("squareSize"))
-            placement = message_json.get("placement")
+        elif command == "process_trial":
+            trialType = message_json.get("trialType")
+            trialName = message_json.get("trialName")
             is_test = message_json.get("isTest")
-            trialId = "calibration"
-            active_session.set_checkerboard_params(rows, cols, square_size, placement)
-            fileManager.save_session_metadata(active_session)
-            
-            await sessionManager.startTrial( websocket=websocket,
-                session=active_session, trialId=trialId, trialType="calibration", process=True, isTest=is_test
-            )
+            trialId = message_json.get("trialId")
 
-        elif command == "start_neutral":
-            is_test = message_json.get("isTest")
-            subject = Subject.from_dict(message_json.get("subject"))
-            active_session.set_subject(subject)
-            fileManager.save_session_metadata(active_session)
-            trialId = "neutral"
-            await sessionManager.startTrial( websocket=websocket,
-                session=active_session, trialId=trialId, trialType="neutral", process=True, isTest=is_test
-            )
-        elif command == "start_dynamic":
-            is_test = message_json.get("isTest")
-            trialName = message_json.get("trialName")       
-            trialId = message_json.get("trialID")
-            await sessionManager.startTrial( websocket=websocket,
-                 session = active_session, trialId = trialId,trialType="dynamic", process = True, isTest=is_test, trialNames=trialName)                          
+
+            await sessionManager.processTrial(websocket=websocket, session=active_session, trialId=trialId, trialType=trialType, isTest=is_test, trialNames=trialName)
+                        
 
         elif command == "get_session_trials":
             isTest = message_json.get("isTest")

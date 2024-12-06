@@ -88,9 +88,9 @@ class Trial:
             videos (List): A list of videos associated with the trial.
             trial_uuid (Optional[uuid.UUID]): The UUID for the trial, generates new one if not passed.
     """
-    def __init__(self, name, videos: Optional[List]= [], session_uuid: Optional[uuid.UUID]=None):
+    def __init__(self, name, videos: Optional[List]= [], trial_uuid: Optional[uuid.UUID]=None):
         self.name = name
-        self.uuid = session_uuid or uuid.uuid4()
+        self.uuid = trial_uuid or uuid.uuid4()
         self.videos = videos
 
     def __repr__(self):
@@ -114,8 +114,8 @@ class Session:
         self.checkerBoard = CheckerBoard()
         self.uuid = session_uuid or uuid.uuid4()
         self.dynamic_trials = []
-        self.calibration_trial = Trial(name="calibration")
-        self.neutral_trial = Trial(name="neutral")
+        self.calibration_trial = Trial(name="calibration", trial_uuid= "calibration" )
+        self.neutral_trial = Trial(name="neutral", trial_uuid= "neutral")
         self.metadata = {}
         self.iphoneModel = {} # What type of cameras we have..
         self.createdAt = datetime.now()
