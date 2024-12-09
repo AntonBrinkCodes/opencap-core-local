@@ -182,10 +182,17 @@ class sessionManager:
         # Run the trial locally TODO: Add some kind of check here or maybe a "try" to prevent crashes :)
         res = None
         try:
-           res = runLocalTrial(sessionId, trialNames, trialId, trialType=trialType, dataDir=fileManager.base_directory)
+            print(f"processing trial: {trialNames}, with id: {trialId}. Type: {trialType}")
+            res = runLocalTrial(sessionId, trialNames, trialId, trialType=trialType, dataDir=fileManager.base_directory)
         except Exception as inst:
             print(f"Error: {type(inst)}! Args: {inst.args} ")
             print(inst)
+            toastMsg = {
+                "command": "Toast",
+                "type": "Error",
+                "content": f"Error from server: {inst}"
+            }
+            await manager.send_personal_message(json.dumps(toastMsg), websocket)
         if res!=None:
             print("Succesfully processed trial")
             successMsg = {
@@ -556,10 +563,21 @@ async def websocket_endpoint(websocket: WebSocket, client_type: str, link_to_web
 
 async def handle_web_message(websocket, message_json, command, active_session: Session, session_id):
     print(f"Received command: {command}")
-    
+    print(f"command == 'process_trial: {command == 'process_trial'}")
     if active_session:
 
-        if command == "start_recording":
+        if command == 'process_trial':
+            print("processing trial: ")
+            trialType = message_json.get("trialType")
+            trialName = message_json.get("trialName")
+            is_test = message_json.get("isTest")
+            trialId = message_json.get("trialId")
+            print("processing trial: ")
+
+
+            await sessionManager.processTrial(websocket=websocket, session=active_session, trialId=trialId, trialType=trialType, isTest=is_test, trialNames=trialName)
+
+        elif command == "start_recording":
             trialType = message_json.get("trialType")
             is_test = message_json.get("isTest")
            
@@ -598,14 +616,8 @@ async def handle_web_message(websocket, message_json, command, active_session: S
 
         elif command == "stop_recording":
             await sessionManager.sendStopTrial(websocket=websocket) # Should only come from dynamic trials.
-        elif command == "process_trial":
-            trialType = message_json.get("trialType")
-            trialName = message_json.get("trialName")
-            is_test = message_json.get("isTest")
-            trialId = message_json.get("trialId")
 
-
-            await sessionManager.processTrial(websocket=websocket, session=active_session, trialId=trialId, trialType=trialType, isTest=is_test, trialNames=trialName)
+       
                         
 
         elif command == "get_session_trials":
@@ -617,7 +629,7 @@ async def handle_web_message(websocket, message_json, command, active_session: S
             jsonMsg = {
                 "command": "sessionTrials",
                 "content": trials,
-                "session": active_session.uuid
+                "session": str(active_session.uuid)
             }
             await manager.send_personal_message(message=json.dumps(jsonMsg), websocket=websocket)
 
@@ -627,7 +639,7 @@ async def handle_web_message(websocket, message_json, command, active_session: S
             jsonMsg = {
                 "command": "visualizerJSON",
                 "content": visualizerJson,
-                "session": active_session.uuid
+                "session": str(active_session.uuid)
             }
             await manager.send_personal_message(message=json.dumps(jsonMsg), websocket=websocket)
         
@@ -794,8 +806,8 @@ if __name__=="__main__":
 
     fileManager.cleanEmptySessions()
     #ip_address = socket.gethostbyname(hostname) #"192.168.0.48"#socket.gethostbyname(hostname)
-    #ip_address = "192.168.0.2"
-    ip_address = "130.229.141.43" # ubuntu computer
+    ip_address = "192.168.0.2"
+    #ip_address = "130.229.141.43" # ubuntu computer
     #ip_address = "192.168.50.9" Landet//
     print(f"IP Address: {ip_address}")
 
