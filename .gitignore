@@ -24,3 +24,5 @@ Examples/reprocessSessionServer.py
 tests/
 
 newsletter.py
+subjects_data.pkl
+Examples/subjects_data.pkl
