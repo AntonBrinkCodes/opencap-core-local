@@ -200,6 +200,7 @@ def main(sessionName, trialName, trial_id, cameras_to_use=['all'],
         # Camera directories and models.
         cameraDirectories = {}
         cameraModels = {}
+        print(sessionMetadata['iphoneModel'])
         for pathCam in glob.glob(os.path.join(sessionDir, 'Videos', 'Cam*')):
             if os.name == 'nt': # windows
                 camName = pathCam.split('\\')[-1]
@@ -207,6 +208,7 @@ def main(sessionName, trialName, trial_id, cameras_to_use=['all'],
                 camName = pathCam.split('/')[-1]
             cameraDirectories[camName] = os.path.join(sessionDir, 'Videos',
                                                       pathCam)
+            print(f"Camera name is: {camName}")
             cameraModels[camName] = sessionMetadata['iphoneModel'][camName]        
         
         # Get cameras' intrinsics and extrinsics.     
@@ -258,7 +260,8 @@ def main(sessionName, trialName, trial_id, cameras_to_use=['all'],
                 extension = getVideoExtension(pathVideoWithoutExtension)
                 extrinsicPath = os.path.join(camDir, 'InputMedia', trialName, 
                                              trial_id + extension) 
-                                              
+                print(extrinsicPath)
+                print(os.path.exists(extrinsicPath))                              
                 # Modify intrinsics if camera view is rotated
                 CamParams = rotateIntrinsics(CamParams,extrinsicPath)
                 

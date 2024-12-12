@@ -8,6 +8,7 @@ import uuid
 import shutil
 import base64
 import zipfile
+import cv2
 
 
 class FileManager:
@@ -216,6 +217,42 @@ class FileManager:
                 print(f"File saved as {full_filename} but it is empty.")
         else:
             print(f"Failed to save the file as {full_filename}.")
+    
+    def mirror_recording(self, session: Session, trialName: str, trialId: str, cam_index: int):
+        '''
+        Mirrors recording and saves it as a recording from cam_index+1.
+        Used for debugging (simulating additional camera)
+
+        '''
+        original_video_path =  os.path.join(self.base_directory, str(session.uuid), 'Videos', f'Cam{cam_index}', 'InputMedia', trialName, f"{trialId}.mov")
+        
+        cap = cv2.VideoCapture(original_video_path)
+        if not cap.isOpened():
+            print("ERROR: CANNOT OPEN FILE")
+            exit()
+        
+        frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        fps = cap.get(cv2.CAP_PROP_FPS)
+        fourcc = cv2.VideoWriter_fourcc(*'jpeg')
+
+        #output file
+        folder_path =  os.path.join(self.base_directory, str(session.uuid), 'Videos', f'Cam{cam_index+1}', 'InputMedia', trialName)
+        output_path = os.path.join(folder_path, f"{trialId}.mov")
+        os.makedirs(folder_path, exist_ok=True)
+        out = cv2.VideoWriter(output_path, fourcc, fps, (frame_width, frame_height))
+
+        while True:
+            ret, frame = cap.read()
+            if not ret:
+                break
+            mirrored_frame = cv2.flip(frame,1)
+            out.write(mirrored_frame)
+        
+        cap.release()
+        out.release()
+        cv2.destroyAllWindows()
+        print("Saved file!")
 
     def save_subjects(self, subjects: List[Subject]):
         """
@@ -311,6 +348,15 @@ class FileManager:
         # Return the final dictionary
         return trial_dict
     
+    def get_visualizer_videos(self, session: Session, trialName: str) -> List:
+        video_list = []
+        visualizer_video_path = os.path.join(self.base_directory, str(session.uuid), "VisualizerVideos", trialName)
+        if os.path.isdir(visualizer_video_path):
+            files = os.listdir(visualizer_video_path)
+            video_list = [os.path.join(visualizer_video_path, file) for file in files]
+        return video_list
+
+    
     def zip_session_folder(self, session_id: str) -> str:
         # Path to the session folder
         session_folder_path = os.path.join(self.base_directory, session_id)
@@ -374,6 +420,7 @@ def zip_with_progress(source_folder, output_zip):
     print(f"ZIP archive created: {output_zip}")
 
 
+
     
 
 
@@ -400,6 +447,12 @@ if __name__=="__main__": # FOR TESTING CLASS.
     print(fileManager.find_sessions())
     fileManager.delete_session(session=session)
     print(fileManager.find_trials(session=Session(session_uuid="Giota")))
+    flipSession = Session(session_uuid="Giota2")
+    name="calibration" 
+    trial_uuid="Dynamic_1"
+
+    fileManager.mirror_recording(session=flipSession, trialName=name, trialId=trial_uuid, cam_index=0)
+
     #visualizerJson = fileManager.find_visualizer_json(session, trial)
     #fileManager.cleanEmptySessions()
     #print(fileManager.find_sessions())

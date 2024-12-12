@@ -64,7 +64,8 @@ def augmentTRC(pathInputTRCFile, subject_mass, subject_height,
                                          augmenterModelType)
         
         # %% Pre-process inputs.
-        # Step 1: import .trc file with OpenPose marker trajectories.  
+        # Step 1: import .trc file with OpenPose marker trajectories.
+        print(pathInputTRCFile)
         trc_data = TRC2numpy(pathInputTRCFile, feature_markers)
         trc_data_data = trc_data[:,1:]
         
@@ -81,6 +82,8 @@ def augmentTRC(pathInputTRCFile, subject_mass, subject_height,
             
         # Step 3: Normalize with subject's height.
         norm2_trc_data_data = copy.deepcopy(norm_trc_data_data)
+        print(f"Subject height: {subject_height} {type(subject_height)}")
+        print(f"trc_data: {norm2_trc_data_data.shape}{type(norm2_trc_data_data)}")
         norm2_trc_data_data = norm2_trc_data_data / subject_height
         
         # Step 4: Add remaining features.

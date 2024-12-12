@@ -1,4 +1,4 @@
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, BackgroundTasks
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, BackgroundTasks, UploadFile, Request
 from fastapi.websockets import WebSocketState
 from mangum import Mangum
 import uvicorn
@@ -81,12 +81,14 @@ class sessionManager:
         json_message = json.dumps(message)
         await manager.broadcast(message=json_message, source= websocket)
     
-    async def sendStopTrial(self, websocket: WebSocket):
+    async def sendStopTrial(self, websocket: WebSocket, session_id :str, trialName: str, trialId: str, trialType: str):
         message = {
             "command": "stop",
+            "trialId": trialId,
+            "trialName": trialName,
             "content": '',
-            "trialType": '',
-            "session": ''
+            "trialType": trialType,
+            "session": session_id
         }
         json_message = json.dumps(message)
         await manager.broadcast(message = json_message, source = websocket)
@@ -114,9 +116,9 @@ class sessionManager:
                     "content": f"Recording {trialType}"
                 }
                 await manager.send_personal_message(json.dumps(toastMsg), websocket = websocket)
-                # Stop recording automatically after 1 second.
-                await asyncio.sleep(1)
-                await self.sendStopTrial(websocket=websocket)
+                # Stop recording automatically after 1.5 second.
+                await asyncio.sleep(1.5)
+                await self.sendStopTrial(websocket=websocket, session_id=session_id, trialName=trialName, trialId=trialId, trialType=trialType)
                 # TODO: Add check that the files are correctly saved.
                 toastMsg = {
                     "command": "Toast",
@@ -481,8 +483,38 @@ async def download_file(file_name: str, background_tasks: BackgroundTasks):
     else:
         return {"error": "File not found dummy"}
 
+@app.post("/upload/")
+async def upload_file(request: Request, file: UploadFile):
+    # Parse form data manually
+    form = await request.form()
+    session_uuid = form.get("session_uuid")
+    trial_uuid = form.get("trial_uuid")
+    trial_name = form.get("trial_name")
+    cam_index = int(form.get("cam_index", 0))  # Default to 0 if not provided
+    print(f"camera index is: {cam_index}")
+    if trial_name == "calibration" or trial_name == "neutral":
+        trial_uuid = trial_name
+    session = sessionManager.findSessionByID(session_uuid)
+    trial = Trial(name=trial_name, trial_uuid=trial_uuid)
+    
+    # Save file in chunks
+    file_data = bytearray()
+    while chunk := await file.read(1024 * 1024):  # Read 1 MB at a time
+        file_data.extend(chunk)
 
+    saved_path = fileManager.save_binary_file(data=bytes(file_data), session=session, cam_index=cam_index, trial=trial)
+    print(f"Large file uploaded to {saved_path}")
 
+    websocket = manager.find_web_connection_by_id(session_id=session_uuid)
+    videoUploadedMsg = {
+            "command": "video_uploaded",
+            "session": session_uuid,
+            "camera_index": cam_index
+        }
+    if websocket:
+        await manager.send_personal_message(json.dumps(videoUploadedMsg), websocket=websocket)
+    else:
+        print("ERROR: Video uploaded but could not find web app websocket.")
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket, client_type: str, link_to_web: Optional[str] = None ):
@@ -531,9 +563,9 @@ async def websocket_endpoint(websocket: WebSocket, client_type: str, link_to_web
                             websocket, message_json, command, active_session, session_id
                         ))
                     else:
-                        await handle_mobile_message(
+                        asyncio.create_task( handle_mobile_message(
                             websocket, message_json, command, active_session, session_id
-                        )
+                        ))
 
                 elif "bytes" in data:
                     binary_data = data["bytes"]
@@ -563,7 +595,6 @@ async def websocket_endpoint(websocket: WebSocket, client_type: str, link_to_web
 
 async def handle_web_message(websocket, message_json, command, active_session: Session, session_id):
     print(f"Received command: {command}")
-    print(f"command == 'process_trial: {command == 'process_trial'}")
     if active_session:
 
         if command == 'process_trial':
@@ -572,6 +603,16 @@ async def handle_web_message(websocket, message_json, command, active_session: S
             trialName = message_json.get("trialName")
             is_test = message_json.get("isTest")
             trialId = message_json.get("trialId")
+            should_mirror = message_json.get("shouldMirror") # DEBUG!
+
+            if should_mirror:
+                if trialType == "calibration":
+                    active_session.add_camera(camera=active_session.iphoneModel["Cam0"], idx=1)
+                    fileManager.save_session_metadata(active_session)
+                print(f"{active_session}, trial: {trialName}, id: {trialId}")
+                fileManager.mirror_recording(session=active_session, trialName=trialName, trialId=trialId, cam_index=0) #For debug!
+
+
             print("processing trial: ")
 
 
@@ -580,7 +621,7 @@ async def handle_web_message(websocket, message_json, command, active_session: S
         elif command == "start_recording":
             trialType = message_json.get("trialType")
             is_test = message_json.get("isTest")
-           
+            trialName = message_json.get("trialName")
             if trialType == "calibration":
                 # Add checkerboard info.
                 rows = int(message_json.get("rows"))
@@ -598,7 +639,7 @@ async def handle_web_message(websocket, message_json, command, active_session: S
                 fileManager.save_session_metadata(active_session)
 
             elif trialType == "dynamic":
-                trialName = message_json.get("trialName")
+                
                 newTrial = Trial(name=trialName) # Create new trial for the session.
                 active_session.add_dynamic_trial(newTrial)
                # fileManager.create_trial_directory(session=active_session, trial=newTrial) Maybe not necessary.
@@ -612,13 +653,13 @@ async def handle_web_message(websocket, message_json, command, active_session: S
             if is_test:
                 print("running test recording which means I process a trial of the same type that would be recorded :)")
                 #await sessionManager.processTrial(websocket=websocket, session=active_session, trialId=trialId, trialType = None, isTest=is_test, trialNames=None)
-            await sessionManager.startRecording(websocket = websocket, session = active_session, trialId = trialId, trialType = trialType)
+            await sessionManager.startRecording(websocket = websocket, session = active_session, trialId = trialId, trialType = trialType, trialName=trialName)
 
         elif command == "stop_recording":
-            await sessionManager.sendStopTrial(websocket=websocket) # Should only come from dynamic trials.
-
-       
-                        
+            trialName = message_json.get("trialName")
+            trialId = message_json.get("trialId")
+            trialType = message_json.get("trialType")
+            await sessionManager.sendStopTrial(websocket=websocket, session_id=str(active_session.uuid),trialName=trialName, trialType=trialType, trialId=trialId) # Should only come from dynamic trials.
 
         elif command == "get_session_trials":
             isTest = message_json.get("isTest")
@@ -668,7 +709,22 @@ async def handle_web_message(websocket, message_json, command, active_session: S
             }
 
             await manager.send_personal_message(message=json.dumps(message), websocket=websocket)
-                        
+
+        elif command == "get_visualizer_videos":
+            trialName = message_json.get("trialName")
+            video_paths = fileManager.get_visualizer_videos(session = active_session, trialName=trialName)
+            videos = []
+            for video_path in video_paths:
+                with open(video_path, "rb") as video:
+                    encoded_video = base64.b64encode(video.read()).decode("utf-8")
+                    videos.append({
+                        "data": encoded_video
+                    })
+            message = {
+                "command": "visualizer_videos",
+                "content": videos
+            }
+            await manager.send_personal_message(json.dumps(message), websocket=websocket)
 
         else:
             toastMsg = {
@@ -737,13 +793,23 @@ async def handle_mobile_message(websocket, message_json, command, active_session
             }
         json_message = json.dumps(message)
         await manager.broadcast(json_message, websocket)
+ 
+        answer = {
+            "command": "new_camera_idx",
+            "trialType": "", #Required by
+            "camera_idx": camera_index,
+            "session": session_id,
+        }
+        await manager.send_personal_message(json.dumps(answer), websocket=websocket)
         
 
     elif command == "save_video" and active_session:
         metadata = message_json.get("metadata", {})
         base64_data = message_json.get("videoData", "")
         trial_name = metadata.get("name")
-        trial = active_session.get_trial_by_name(trial_name)
+        trialId = metadata.get("trialId") 
+        trial = Trial(name=trial_name, trial_uuid=trialId)
+        print(f"Saving video for trial: {trial}")
         camera_index = manager.find_websocket_index(websocket)
         video_data = base64.b64decode(base64_data)
         fileManager.save_binary_file(
