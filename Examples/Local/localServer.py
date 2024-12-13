@@ -13,7 +13,6 @@ import pickle
 import threading
 import time
 import asyncio
-import GPUtil
 from localReprocess import runLocalTrial
 from fastapi.responses import FileResponse
 
@@ -894,8 +893,8 @@ if __name__=="__main__":
 
     fileManager.cleanEmptySessions()
     #ip_address = socket.gethostbyname(hostname) #"192.168.0.48"#socket.gethostbyname(hostname)
-    ip_address = "192.168.0.2"
-    #ip_address = "130.229.135.163" # ubuntu computer
+    #ip_address = "192.168.0.2"
+    ip_address = "130.229.135.163" # ubuntu computer
     #ip_address = "192.168.50.9" Landet//
     print(f"IP Address: {ip_address}")
 
