@@ -356,6 +356,19 @@ class ConnectionManager:
                     connection_info.mobiles.remove(websocket)
                     break
 
+    def disconnect_mobiles(self, websocket: WebSocket):
+        # Check if the websocket is a web connection in the connections dictionary
+        if websocket in self.connections:
+            # Get the ConnectionInfo for the given web connection
+            connection_info = self.connections[websocket]
+
+            # Iterate over the mobiles associated with this connection
+            for mobilesocket in connection_info.mobiles:
+                self.disconnect(mobilesocket)  # Disconnect each mobile websocket
+
+            #  clear the list of mobiles
+            connection_info.mobiles.clear()
+
     async def send_personal_message(self, message: str, websocket: WebSocket):
         """
         Send a personal message to a specific websocket.
@@ -763,6 +776,7 @@ async def handle_web_message(websocket, message_json, command, active_session: S
             session_id = sessionManager.activeSession.getID()
             manager.update_session_id(websocket=websocket, new_session_id=session_id)
             fileManager.create_session_directory(sessionManager.activeSession)
+            manager.disconnect_mobiles(websocket=websocket)
             print("Connection is now:", manager.connections[websocket])
             newSessionMsg = {
                 "command": "new_session",
@@ -893,8 +907,8 @@ if __name__=="__main__":
 
     fileManager.cleanEmptySessions()
     #ip_address = socket.gethostbyname(hostname) #"192.168.0.48"#socket.gethostbyname(hostname)
-    #ip_address = "192.168.0.2"
-    ip_address = "130.229.135.163" # ubuntu computer
+    ip_address = "192.168.0.2"
+    #ip_address = "130.229.135.163" # ubuntu computer
     #ip_address = "192.168.50.9" Landet//
     print(f"IP Address: {ip_address}")
 
