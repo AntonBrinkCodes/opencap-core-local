@@ -13,6 +13,7 @@ import pickle
 import threading
 import time
 import asyncio
+import GPUtil
 from localReprocess import runLocalTrial
 from fastapi.responses import FileResponse
 
@@ -35,6 +36,7 @@ class sessionManager:
     def __init__(self):
         self.sessions: List[Session] = []
         self.activeSession: Optional[Session] = None
+        self.isProcessing = False
     
     def addSession(self, session: Session):
         self.sessions.append(session)
@@ -143,6 +145,19 @@ class sessionManager:
                     "content": "error: {e}"
                 }
             await manager.send_personal_message(message=json.dumps(toastMsg), websocket=websocket)
+
+    async def wait_for_gpu(self, interval=20):
+        """
+        Wait until the computer is no longer processing a trial
+
+        Args:
+            interval (int): How often to check (in seconds).
+
+        Returns:
+            int: The ID of the GPU that meets the criteria.
+        """
+        while self.isProcessing:
+            await asyncio.sleep(interval)
     
     async def processTrial(self, websocket: WebSocket, session: Session, trialId: str, trialType: Optional[str] = "dynamic", isTest=False,  trialNames: Optional[str] = ""):
         """
@@ -183,9 +198,34 @@ class sessionManager:
 
         # Run the trial locally TODO: Add some kind of check here or maybe a "try" to prevent crashes :)
         res = None
+        print("Checking for avaiable GPU")
+        gpu_id = await self.wait_for_gpu() #
+        print(f"processing trial: {trialNames}, with id: {trialId}. Type: {trialType} with gpu: {gpu_id}")
+        self.isProcessing = True
         try:
-            print(f"processing trial: {trialNames}, with id: {trialId}. Type: {trialType}")
-            res = runLocalTrial(sessionId, trialNames, trialId, trialType=trialType, dataDir=fileManager.base_directory)
+
+            
+            res = await asyncio.to_thread(runLocalTrial, str(session.getID()), trialNames, trialId, trialType=trialType, dataDir=fileManager.base_directory)
+            if res!=None:
+                print("Succesfully processed trial")
+                successMsg = {
+                    "command": "process_succeded",
+                    "trialType": trialType,
+                    "trialId": trialId,
+                    "session": sessionId
+                }
+                await manager.send_personal_message(json.dumps(successMsg), websocket)
+                # Handle "dynamic" trial type
+                if trialType == "dynamic":
+                    trials = fileManager.find_trials(session=Session(session_uuid=sessionId))
+
+                    # Prepare and send JSON message
+                    jsonMsg = {
+                        "command": "sessionTrials",
+                        "content": trials,
+                        "session": sessionId
+                    }
+                    await manager.send_personal_message(json.dumps(jsonMsg), websocket)
         except Exception as inst:
             print(f"Error: {type(inst)}! Args: {inst.args} ")
             print(inst)
@@ -195,26 +235,8 @@ class sessionManager:
                 "content": f"Error from server: {inst}"
             }
             await manager.send_personal_message(json.dumps(toastMsg), websocket)
-        if res!=None:
-            print("Succesfully processed trial")
-            successMsg = {
-                "command": "process_succeded",
-                "trialType": trialType,
-                "trialId": trialId,
-                "session": sessionId
-            }
-            await manager.send_personal_message(json.dumps(successMsg), websocket)
-            # Handle "dynamic" trial type
-            if trialType == "dynamic":
-                trials = fileManager.find_trials(session=Session(session_uuid=sessionId))
-
-                # Prepare and send JSON message
-                jsonMsg = {
-                    "command": "sessionTrials",
-                    "content": trials,
-                    "session": sessionId
-                }
-                await manager.send_personal_message(json.dumps(jsonMsg), websocket)
+        finally:
+            self.isProcessing = False
 
     
 class ConnectionInfo:
@@ -639,11 +661,11 @@ async def handle_web_message(websocket, message_json, command, active_session: S
                 fileManager.save_session_metadata(active_session)
 
             elif trialType == "dynamic":
-                
                 newTrial = Trial(name=trialName) # Create new trial for the session.
                 active_session.add_dynamic_trial(newTrial)
                # fileManager.create_trial_directory(session=active_session, trial=newTrial) Maybe not necessary.
                 trialId = str(newTrial.uuid)
+                print(f"new trial has ID: {trialId}")
                 informWebAppMsg = {
                     "command": "new_dynamic_trialId",
                     "content": str(newTrial.uuid)
@@ -872,8 +894,8 @@ if __name__=="__main__":
 
     fileManager.cleanEmptySessions()
     #ip_address = socket.gethostbyname(hostname) #"192.168.0.48"#socket.gethostbyname(hostname)
-    #ip_address = "192.168.0.2"
-    ip_address = "130.229.135.163" # ubuntu computer
+    ip_address = "192.168.0.2"
+    #ip_address = "130.229.135.163" # ubuntu computer
     #ip_address = "192.168.50.9" Landet//
     print(f"IP Address: {ip_address}")
 
