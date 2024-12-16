@@ -36,6 +36,7 @@ class sessionManager:
         self.sessions: List[Session] = []
         self.activeSession: Optional[Session] = None
         self.isProcessing = False
+        self.processingTrials = {} # Dict with key: uuid as a string, and values are either: 'processing' or 'queued'
     
     def addSession(self, session: Session):
         self.sessions.append(session)
@@ -56,6 +57,19 @@ class sessionManager:
         loaded_subjects.remove(subject)
         fileManager.save_subjects(loaded_subjects)
 
+    def get_trials(self, session: Session):
+        # Get the trials saved to files
+        trials = fileManager.find_trials(session=session)
+        print(self.processingTrials)
+        for key, subdict in trials.items():
+            print(subdict.get("uuid"))
+            if subdict.get("uuid") in self.processingTrials:
+                print("found uuid match in giota!")
+                subdict["processed"] = self.processingTrials[subdict["uuid"]]
+        
+        print(trials)
+        return trials
+
     # Should do this a better way maybe
     def findSessionByID(self, session_id: str) -> Optional[Session]:
         # Check activate connections
@@ -71,6 +85,16 @@ class sessionManager:
             if session_id == session_name:
                 return session_info
         return None
+    
+    async def sendUpdatedTrials(self, websocket: WebSocket, session_id: str):
+        trials = self.get_trials(session=Session(session_uuid=session_id))
+        # Prepare and send JSON message
+        jsonMsg = {
+            "command": "sessionTrials",
+            "content": trials,
+            "session": session_id
+        }
+        await manager.send_personal_message(json.dumps(jsonMsg), websocket)
     
     async def sendStartTrial(self, websocket: WebSocket, session_id: str, trialType: Optional[str] = "dynamic"):
         message = {
@@ -120,13 +144,13 @@ class sessionManager:
                 # Stop recording automatically after 1.5 second.
                 await asyncio.sleep(1.5)
                 await self.sendStopTrial(websocket=websocket, session_id=session_id, trialName=trialName, trialId=trialId, trialType=trialType)
-                # TODO: Add check that the files are correctly saved.
-                toastMsg = {
-                    "command": "Toast",
-                    "type": "Success",
-                    "content": f"succesfully finished recording {trialType}"
-                }
-                #await manager.send_personal_message(json.dumps(toastMsg), websocket=websocket)
+                if trialType == 'neutral':
+                    toastMsg = {
+                        "command": "Toast",
+                        "type": "Info",
+                        "content": f"Finished recording. Subject can relax"
+                    }
+                    await manager.send_personal_message(json.dumps(toastMsg), websocket=websocket)
             
             else: #If dynamic, just send to start and the user sends to stop through web app.
 
@@ -197,14 +221,20 @@ class sessionManager:
 
         # Run the trial locally TODO: Add some kind of check here or maybe a "try" to prevent crashes :)
         res = None
-        print("Checking for avaiable GPU")
-        gpu_id = await self.wait_for_gpu() #
-        print(f"processing trial: {trialNames}, with id: {trialId}. Type: {trialType} with gpu: {gpu_id}")
+        if trialType != "calibration": #GPU only neededd for dynamic and neutral trials.
+            print("Checking for avaiable GPU")
+            if trialType == "dynamic":
+                self.processingTrials[trialId] = "queued"
+                await self.sendUpdatedTrials(websocket=websocket, session_id=sessionId)
+            
+            await self.wait_for_gpu() #
+        print(f"processing trial: {trialNames}, with id: {trialId}. Type: {trialType}")
         self.isProcessing = True
         try:
-
-            
-            res = await asyncio.to_thread(runLocalTrial, str(session.getID()), trialNames, trialId, trialType=trialType, dataDir=fileManager.base_directory)
+            if trialType == "dynamic":
+                self.processingTrials[trialId] = "processing"
+                await self.sendUpdatedTrials(websocket=websocket, session_id=sessionId)
+            res = await asyncio.to_thread(runLocalTrial, sessionId, trialNames, trialId, trialType=trialType, dataDir=fileManager.base_directory)
             if res!=None:
                 print("Succesfully processed trial")
                 successMsg = {
@@ -216,17 +246,12 @@ class sessionManager:
                 await manager.send_personal_message(json.dumps(successMsg), websocket)
                 # Handle "dynamic" trial type
                 if trialType == "dynamic":
-                    trials = fileManager.find_trials(session=Session(session_uuid=sessionId))
-
-                    # Prepare and send JSON message
-                    jsonMsg = {
-                        "command": "sessionTrials",
-                        "content": trials,
-                        "session": sessionId
-                    }
-                    await manager.send_personal_message(json.dumps(jsonMsg), websocket)
+                    self.processingTrials.pop(trialId)
+                    await self.sendUpdatedTrials(websocket=websocket, session_id=sessionId)
         except Exception as inst:
             print(f"Error: {type(inst)}! Args: {inst.args} ")
+            self.processingTrials[trialId] = "Error"
+            await self.sendUpdatedTrials(websocket=websocket, session_id=sessionId)
             print(inst)
             toastMsg = {
                 "command": "Toast",
@@ -698,9 +723,9 @@ async def handle_web_message(websocket, message_json, command, active_session: S
         elif command == "get_session_trials":
             isTest = message_json.get("isTest")
             if isTest:
-                trials = fileManager.find_trials(session=Session(session_uuid="Giota"))
+                trials = sessionManager.get_trials(session=Session(session_uuid="Giota"))
             else:
-                trials = fileManager.find_trials(session=active_session)
+                trials = sessionManager.get_trials(session=active_session)
             jsonMsg = {
                 "command": "sessionTrials",
                 "content": trials,
@@ -905,10 +930,14 @@ if __name__=="__main__":
     print(os.listdir())
     print(f"Hostname: {hostname}")
 
+    sessionManager.processingTrials["Dynamic_3"] = "processing"
+    sessionManager.processingTrials["Dynamic_1"] = "queued"
+
+
     fileManager.cleanEmptySessions()
     #ip_address = socket.gethostbyname(hostname) #"192.168.0.48"#socket.gethostbyname(hostname)
-    ip_address = "192.168.0.2"
-    #ip_address = "130.229.135.163" # ubuntu computer
+    #ip_address = "192.168.0.2"
+    ip_address = "130.229.135.163" # ubuntu computer
     #ip_address = "192.168.50.9" Landet//
     print(f"IP Address: {ip_address}")
 

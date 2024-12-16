@@ -327,7 +327,7 @@ class FileManager:
             
             # Set initial entry in the dictionary
             trial_dict[trial] = {
-                "processed": trial in processed_trials,
+                "processed": "True" if trial in processed_trials else "False",
                 "uuid": None,
                 "trialName": trial,
             }
