@@ -251,7 +251,8 @@ class sessionManager:
         except Exception as inst:
             print(f"Error: {type(inst)}! Args: {inst.args} ")
             self.processingTrials[trialId] = "Error"
-            await self.sendUpdatedTrials(websocket=websocket, session_id=sessionId)
+            if trialType == "dynamic":
+                await self.sendUpdatedTrials(websocket=websocket, session_id=sessionId)
             print(inst)
             toastMsg = {
                 "command": "Toast",
