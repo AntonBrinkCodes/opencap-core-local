@@ -18,3 +18,4 @@ boto3                       # Latest version should work
 fastapi>=0.75.0             # Updated to the latest compatible version
 mangum                      # Latest version should work
 uvicorn>=0.22.0             # Updated to the latest compatible version
+python-multipart
