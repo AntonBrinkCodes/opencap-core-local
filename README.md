@@ -6,10 +6,10 @@ The advantage is that no data has to be sent to other servers. The hardware requ
 ## Installation
 1. Follow the steps below for Running the pipeline locally. A good idea is to check if you can locally reprocess using the pipeline but with data collected from app.opencap.ai.
 
-2. Follow the instructions to run the [custom web-app](https://github.com/AntonBrinkCodes/localcap-viewer/tree/main) and install the mobile application [LocalCap](https://github.com/AntonBrinkCodes/LocalCap/tree/main)
-   
-3. run `openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -nodes` in the Local folder to create certificates for secure websockets.
+2. Follow the instructions to run the [custom web-app](https://github.com/AntonBrinkCodes/localcap-viewer/tree/main) and install the mobile application [LocalCap](https://github.com/AntonBrinkCodes/LocalCap/tree/main) on your iPad / iPhone devices.
 
+3. change directory to Examples and Run `python -m pip install -r localRequirements.txt`
+   
 ## Usage
 Open localServer.py and set your IP and port to host over.
 

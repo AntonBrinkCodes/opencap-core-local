@@ -936,9 +936,10 @@ if __name__=="__main__":
 
 
     fileManager.cleanEmptySessions()
-    #ip_address = socket.gethostbyname(hostname) #"192.168.0.48"#socket.gethostbyname(hostname)
-    #ip_address = "192.168.0.2"
-    ip_address = "130.229.135.163" # ubuntu computer
+
+    ip_address = socket.gethostbyname(hostname) #"192.168.0.48"#socket.gethostbyname(hostname)
+    #ip_address = "192.168.0.2" WFH
+    #ip_address = "130.229.141.43" # ubuntu computer
     #ip_address = "192.168.50.9" Landet//
     print(f"IP Address: {ip_address}")
 
