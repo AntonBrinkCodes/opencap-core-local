@@ -56,6 +56,7 @@ class Sex(Enum):
             "other": cls.other,
             "non-binary": cls.other,
             "nb": cls.other,
+            "prefer-not-respond": cls.other,
         }
         if normalized_str in mapping:
             return mapping[normalized_str]
@@ -98,8 +99,8 @@ class Subject:
         return Subject(
             name=data['name'],
             sex=Sex.from_string(data['gender']) if data.get('gender') else None,
-            height=data['height'],
-            weight=data['mass'],
+            height=float(data['height']),
+            weight=float(data['mass']),
             birth_year = data['birth_year'],
             id = uuid.UUID(data['id'])
         )
@@ -187,7 +188,7 @@ class Session:
             camera (str): The camera model.
             idx (int): The index of the camera.
         """
-        self.iphoneModel[f'cam{idx}'] = camera
+        self.iphoneModel[f'Cam{idx}'] = camera
 
     def add_dynamic_trial(self, trial: Trial):
         """
