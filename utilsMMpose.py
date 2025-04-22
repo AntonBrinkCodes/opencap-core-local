@@ -9,6 +9,7 @@ try:
     has_mmdet = True
 except (ImportError, ModuleNotFoundError):
     print("Error importing from mmdet.apis")
+    print(mmdet.__version__)
     has_mmdet = False
     
 from mmpose_data import CustomVideoDataset
