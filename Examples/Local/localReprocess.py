@@ -75,7 +75,7 @@ if __name__=="__main__":
 
     poseDetector = 'OpenPose' #OpenPose or hrnet
 
-    resolutionPoseDetection = '1x736_2scales'
+    resolutionPoseDetection = '1x736'#'1x736_2scales'
 
     extrinsicTrial = False
     genericFolderNames = True
