@@ -5,7 +5,8 @@ import mmdet
 # from tqdm import tqdm
 from mmpose_utils import process_mmdet_results, frame_iter, concat, convert_instance_to_frame
 try:
-    from mmdet.apis import inference_detector, init_detector
+    #used to be from mmdet.apis
+    from mmdet import inference_detector, init_detector
     has_mmdet = True
 except (ImportError, ModuleNotFoundError):
     print("Error importing from mmdet.apis")
