@@ -77,9 +77,9 @@ if __name__=="__main__":
 
     resolutionPoseDetection = '1x736_2scales'
 
-    #extrinsicTrial = True
+    extrinsicTrial = False
     genericFolderNames = True
-    #scaleModel = False
+    scaleModel = False
 
     sessionType = "calibration" # Calibration, static, or dynamic. assumes dynamic if anything else
 
