@@ -1,7 +1,7 @@
 import cv2
 import pickle
 import torch
-
+import mmdet
 # from tqdm import tqdm
 from mmpose_utils import process_mmdet_results, frame_iter, concat, convert_instance_to_frame
 try:
