@@ -83,6 +83,7 @@ if __name__=="__main__":
 
     sessionType = "calibration" # Calibration, static, or dynamic. assumes dynamic if anything else
 
+    os.chdir('..')
     if sessionType == "calibration":
          # Get session directory and delete previous calibration files output
         data_dir = getDataDirectory(isDocker=False)
@@ -94,7 +95,7 @@ if __name__=="__main__":
     elif sessionType == "static" or sessionType=="neutral":
         scaleModel = True
 
-    os.chdir('..')
+    #os.chdir('..')
 
     print(extrinsicTrial)
     main(session_name, trial_Names, dynamic_trialNames, cameras_to_use=['all'],
