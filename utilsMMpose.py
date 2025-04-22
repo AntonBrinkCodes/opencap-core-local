@@ -8,6 +8,7 @@ try:
     from mmdet.apis import inference_detector, init_detector
     has_mmdet = True
 except (ImportError, ModuleNotFoundError):
+    print("Error importing from mmdet.apis")
     has_mmdet = False
     
 from mmpose_data import CustomVideoDataset
