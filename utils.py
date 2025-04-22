@@ -277,10 +277,12 @@ def downloadVideosFromServer(session_id,trial_id, isDocker=True,
 def deleteCalibrationFiles(session_path, deleteRecorded = True):
     print("Running deleteCalibrationFiles")
     calImagePath = os.path.join(session_path,'CalibrationImages')
+    print(f"removing {calImagePath}?")
     if os.path.exists(calImagePath):
         print(f"removing {calImagePath}")
         shutil.rmtree(calImagePath)
-    
+    else:
+        print(f"Nope, {calImagePath} does not exist :(")
     # Delete camera directories
     camDirs = glob.glob(os.path.join(session_path,'Videos','Cam*'))
     
