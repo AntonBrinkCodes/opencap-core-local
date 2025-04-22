@@ -8,9 +8,9 @@ try:
     #used to be from mmdet.apis
     from mmdet.apis import inference_detector, init_detector
     has_mmdet = True
-except (ImportError, ModuleNotFoundError):
-    print("Error importing from mmdet.apis")
-    print(ImportError)
+except (ImportError, ModuleNotFoundError) as e:
+    print("Error importing from mmdet.apis:")
+    print(e)
     print(mmdet.__version__)
     has_mmdet = False
     
