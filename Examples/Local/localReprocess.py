@@ -81,7 +81,7 @@ if __name__=="__main__":
     genericFolderNames = True
     #scaleModel = False
 
-    sessionType = "Calibration" # Calibration, static, or dynamic. assumes dynamic if anything else
+    sessionType = "calibration" # Calibration, static, or dynamic. assumes dynamic if anything else
 
     if sessionType == "calibration":
          # Get session directory and delete previous calibration files output
