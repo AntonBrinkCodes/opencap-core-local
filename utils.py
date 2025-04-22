@@ -1481,7 +1481,7 @@ def delete_multiple_element(list_object, indices):
             list_object.pop(idx)
 
 def getVideoExtension(pathFileWithoutExtension):
-    
+    print(pathFileWithoutExtension)
     pathVideoDir = os.path.split(pathFileWithoutExtension)[0]
     videoName = os.path.split(pathFileWithoutExtension)[1]
     for file in os.listdir(pathVideoDir):
