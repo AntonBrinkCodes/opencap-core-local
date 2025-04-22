@@ -77,13 +77,22 @@ if __name__=="__main__":
 
     resolutionPoseDetection = '1x736_2scales'
 
-    extrinsicTrial = True
+    #extrinsicTrial = True
     genericFolderNames = True
-    scaleModel = False
+    #scaleModel = False
 
     sessionType = "Calibration" # Calibration, static, or dynamic. assumes dynamic if anything else
 
+    if sessionType == "calibration":
+         # Get session directory and delete previous calibration files output
+        data_dir = getDataDirectory(isDocker=False)
+        session_path = os.path.join(data_dir,'Data',session_name)
+        print(f"session_path is: {session_path}")    
+        deleteCalibrationFiles(session_path=session_path, deleteRecorded=False)
 
+        extrinsicTrial = True
+    elif sessionType == "static" or sessionType=="neutral":
+        scaleModel = True
 
     os.chdir('..')
 
