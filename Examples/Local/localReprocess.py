@@ -64,7 +64,7 @@ def runLocalTrial(sessionId: str, trialNames, trialId, trialType="dynamic", pose
 
 
 if __name__=="__main__":
-    session_name = "burpee_test" #"4cf4bca5-7cd0-4db8-af11-5d39d485dba8" # aka session_ids in reprocessSessions.py
+    session_name = "burpee" #"4cf4bca5-7cd0-4db8-af11-5d39d485dba8" # aka session_ids in reprocessSessions.py
 
     calib_id = "dynamic"#"36598d50-4fd8-406d-8808-4e9df3cd0e84" # None (auto-selected trial), [] (skip), or string of specific trial_id
     static_id = "ac82774d-b679-4a90-bce1-b3b768532503" # None (auto-selected trial), [] (skip), or string of specific trial_id
