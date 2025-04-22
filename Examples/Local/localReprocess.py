@@ -70,7 +70,7 @@ if __name__=="__main__":
     static_id = "ac82774d-b679-4a90-bce1-b3b768532503" # None (auto-selected trial), [] (skip), or string of specific trial_id
     dynamic_trialNames = "Dynamic_2"#"afca93fd-9753-4bea-9130-5fdcf151d9f0" # None (all dynamic trials), [] (skip), or list of trial names.
     # OBS!!! Above are CaSE Sensitive. dynamic_trialNames are the names of the video files (a uuid)
-    trial_Names = "dynamic_2" # "calibration for extrinsic trials." neutral for static trials.
+    trial_Names = "calibration" # "calibration for extrinsic trials." neutral for static trials.
     # Trial name for dynamic trials
 
     poseDetector = 'openpose'
