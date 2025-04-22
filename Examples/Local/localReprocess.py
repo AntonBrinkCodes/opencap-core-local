@@ -77,7 +77,7 @@ if __name__=="__main__":
 
     resolutionPoseDetection = '1x736_2scales'
 
-    extrinsicTrial = False
+    extrinsicTrial = True
     genericFolderNames = True
     scaleModel = False
 
