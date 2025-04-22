@@ -290,6 +290,7 @@ def deleteCalibrationFiles(session_path, deleteRecorded = True):
         trialNames = [tName for tName in dirContents if os.path.isdir(os.path.join(inputDir,tName))]
         for tName in trialNames:
             if os.path.exists(os.path.join(inputDir,tName,'extrinsicImage0.png')):
+                print(f"Deleting extrinsicImage fron {inputDir}")
                 extrinsicTrialName = tName
                 extrinsicFileFound = True
     
