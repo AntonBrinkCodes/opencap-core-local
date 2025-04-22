@@ -278,6 +278,7 @@ def deleteCalibrationFiles(session_path, deleteRecorded = True):
     print("Running deleteCalibrationFiles")
     calImagePath = os.path.join(session_path,'CalibrationImages')
     if os.path.exists(calImagePath):
+        print(f"removing {calImagePath}")
         shutil.rmtree(calImagePath)
     
     # Delete camera directories
