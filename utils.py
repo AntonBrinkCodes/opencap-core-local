@@ -275,6 +275,7 @@ def downloadVideosFromServer(session_id,trial_id, isDocker=True,
 
 
 def deleteCalibrationFiles(session_path, deleteRecorded = True):
+    print("Running deleteCalibrationFiles")
     calImagePath = os.path.join(session_path,'CalibrationImages')
     if os.path.exists(calImagePath):
         shutil.rmtree(calImagePath)
