@@ -10,6 +10,7 @@ try:
     has_mmdet = True
 except (ImportError, ModuleNotFoundError):
     print("Error importing from mmdet.apis")
+    print(ImportError)
     print(mmdet.__version__)
     has_mmdet = False
     
