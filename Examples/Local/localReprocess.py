@@ -68,9 +68,9 @@ if __name__=="__main__":
 
     calib_id = "dynamic"#"36598d50-4fd8-406d-8808-4e9df3cd0e84" # None (auto-selected trial), [] (skip), or string of specific trial_id
     static_id = "ac82774d-b679-4a90-bce1-b3b768532503" # None (auto-selected trial), [] (skip), or string of specific trial_id
-    dynamic_trialNames = "Test"#"afca93fd-9753-4bea-9130-5fdcf151d9f0" # None (all dynamic trials), [] (skip), or list of trial names.
+    dynamic_trialNames = "bcc3d551-9977-454c-ad2a-3cc687656cba"#"afca93fd-9753-4bea-9130-5fdcf151d9f0" # None (all dynamic trials), [] (skip), or list of trial names. 
     # OBS!!! Above are CaSE Sensitive. dynamic_trialNames are the names of the video files (a uuid)
-    trial_Names = "bcc3d551-9977-454c-ad2a-3cc687656cba" # "calibration for extrinsic trials." neutral for static trials.
+    trial_Names = "Test"#calibration for extrinsic trials." neutral for static trials. NB: Name of the folder the trial are in actually,....
     # Trial name for dynamic trials
 
     poseDetector = 'openpose'
