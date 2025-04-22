@@ -64,16 +64,16 @@ def runLocalTrial(sessionId: str, trialNames, trialId, trialType="dynamic", pose
 
 
 if __name__=="__main__":
-    session_name = "bf7c0f50-28d0-4721-b31b-68efa14dc108" #"4cf4bca5-7cd0-4db8-af11-5d39d485dba8" # aka session_ids in reprocessSessions.py
+    session_name = "burpee_test" #"4cf4bca5-7cd0-4db8-af11-5d39d485dba8" # aka session_ids in reprocessSessions.py
 
     calib_id = "dynamic"#"36598d50-4fd8-406d-8808-4e9df3cd0e84" # None (auto-selected trial), [] (skip), or string of specific trial_id
     static_id = "ac82774d-b679-4a90-bce1-b3b768532503" # None (auto-selected trial), [] (skip), or string of specific trial_id
-    dynamic_trialNames = "bcc3d551-9977-454c-ad2a-3cc687656cba"#"afca93fd-9753-4bea-9130-5fdcf151d9f0" # None (all dynamic trials), [] (skip), or list of trial names. 
+    dynamic_trialNames = "600b7a36-5f4a-4a35-8912-58488b6012c6"#"afca93fd-9753-4bea-9130-5fdcf151d9f0" # None (all dynamic trials), [] (skip), or list of trial names. 
     # OBS!!! Above are CaSE Sensitive. dynamic_trialNames are the names of the video files (a uuid)
-    trial_Names = "Test"#calibration for extrinsic trials." neutral for static trials. NB: Name of the folder the trial are in actually,....
+    trial_Names = "Burpee_1" #calibration for extrinsic trials." neutral for static trials. NB: Name of the folder the trial are in actually,....
     # Trial name for dynamic trials
 
-    poseDetector = 'openpose'
+    poseDetector = 'hrnet' #OpenPose or hrnet
 
     resolutionPoseDetection = '1x736_2scales'
 
@@ -96,12 +96,12 @@ if __name__=="__main__":
         scaleModel = True
 
     #os.chdir('..')
-
+    
     print(extrinsicTrial)
     main(session_name, trial_Names, dynamic_trialNames, cameras_to_use=['all'],
              intrinsicsFinalFolder='Deployed', isDocker=False,
              extrinsicsTrial=extrinsicTrial,
-             poseDetector='OpenPose', resolutionPoseDetection=resolutionPoseDetection,
+             poseDetector=poseDetector, resolutionPoseDetection=resolutionPoseDetection,
              scaleModel=scaleModel, genericFolderNames = genericFolderNames)
 
 # ScaleModel probably should only be true on calibration trial?
