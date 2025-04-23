@@ -100,6 +100,7 @@ def getMMposeDirectory(isDocker=False):
         mmposeDirectory = "/home/clarkadmin/Documents/MyRepositories/MoVi_analysis/model_ckpts"
     else:
         mmposeDirectory = ''
+    print(f" mmpose directory is {mmposeDirectory}")
     return mmposeDirectory
 
 def loadCameraParameters(filename):
