@@ -98,6 +98,8 @@ def getMMposeDirectory(isDocker=False):
     # Paths to OpenPose folder for local testing.
     if computername == "clarkadmin-MS-7996":
         mmposeDirectory = "/home/clarkadmin/Documents/MyRepositories/MoVi_analysis/model_ckpts"
+    elif computername == None:
+        mmposeDirectory = "/home/anton/opencap-core-local/mmpose"
     else:
         mmposeDirectory = ''
     print(f" mmpose directory is {mmposeDirectory}")
