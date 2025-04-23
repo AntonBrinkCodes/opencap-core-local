@@ -94,11 +94,11 @@ def getOpenPoseDirectory(isDocker=False):
 
 def getMMposeDirectory(isDocker=False):
     computername = socket.gethostname()
-    print(f"computername is {computername}")
+    print(f"computername for mmpose is {computername}")
     # Paths to OpenPose folder for local testing.
     if computername == "clarkadmin-MS-7996":
         mmposeDirectory = "/home/clarkadmin/Documents/MyRepositories/MoVi_analysis/model_ckpts"
-    elif computername == None:
+    elif computername == "moveability-lab":
         mmposeDirectory = "/home/anton/opencap-core-local/mmpose"
     else:
         mmposeDirectory = ''
