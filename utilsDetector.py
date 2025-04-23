@@ -341,6 +341,7 @@ def runMMposeVideo(
             sys.path.append(os.path.join(c_path, 'mmpose'))
             from utilsMMpose import detection_inference, pose_inference
             # Run human detection.
+            print(f"path to mmpose is {pathMMpose}")
             pathModelCkptPerson = os.path.join(pathMMpose, model_ckpt_person)
             bboxPath = os.path.join(pathOutputBox, trialPrefix + '.pkl')
             full_model_config_person = os.path.join(c_path, 'mmpose',
