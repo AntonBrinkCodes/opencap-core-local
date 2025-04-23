@@ -42,7 +42,7 @@ def detection_inference(model_config, model_ckpt, video_path, bbox_path,
 
     Using mmdet to detect the human.
     """
-
+    print(f"MmPose pathis: {model_ckpt}")
     det_model = init_detector(
         model_config, model_ckpt, device=device.lower())
 
