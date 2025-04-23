@@ -73,7 +73,7 @@ if __name__=="__main__":
     trial_Names = "Burpee_1" #calibration for extrinsic trials." neutral for static trials. NB: Name of the folder the trial are in actually,....
     # Trial name for dynamic trials
 
-    poseDetector = 'hrnet' #OpenPose or hrnet
+    poseDetector = 'OpenPose' #OpenPose or hrnet
 
     resolutionPoseDetection = '1x736_2scales'#'1x736_2scales'
 
