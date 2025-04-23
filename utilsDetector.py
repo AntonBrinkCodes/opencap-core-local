@@ -252,7 +252,7 @@ def runOpenPoseCMD(pathOpenPose, resolutionPoseDetection, cameraDirectory,
 # %%
 def runMMposeVideo(
         cameraDirectory, fileName, pathMMpose, trialName,
-        generateVideo=False, bbox_thr=0.8, #Should generateVideo but trying if it works without !!
+        generateVideo=True, bbox_thr=0.8, #Should generateVideo but trying if it works without !!
         model_config_person='faster_rcnn_r50_fpn_coco.py',
         model_ckpt_person='faster_rcnn_r50_fpn_1x_coco_20200130-047c8118.pth',                  
         model_config_pose='hrnet_w48_coco_wholebody_384x288_dark_plus.py',
