@@ -845,19 +845,21 @@ async def handle_mobile_message(websocket, message_json, command, active_session
     if command == "mobile_connected" and active_session:
         print("MOBILE CONNECTED")
         camera_model = str(message_json.get("content"))
+        camera_maxframerate = str(message_json.get("max_frame_rate"))
         camera_index = manager.find_websocket_index(websocket)
         active_session.iphoneModel[f"Cam{camera_index}"] = camera_model
         message = {
             "command": "mobile_connected",
             "content": camera_index,
-            "session": session_id
+            "session": session_id,
+            'maxFrameRate': camera_maxframerate #(inform webapp of the maxframerate of this device)
             }
         json_message = json.dumps(message)
         await manager.broadcast(json_message, websocket)
  
         answer = {
             "command": "new_camera_idx",
-            "trialType": "", #Required by
+            "trialType": "", #Required by phone
             "camera_idx": camera_index,
             "session": session_id,
         }
