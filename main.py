@@ -314,14 +314,14 @@ def main(sessionName, trialName, trial_id, cameras_to_use=['all'],
         # Get rotation angles from motion capture environment to OpenSim.
         # Space-fixed are lowercase, Body-fixed are uppercase. 
         checkerBoardMount = sessionMetadata['checkerBoard']['placement']
-        if checkerBoardMount == 'backWall' or checkerBoardMount == 'Perpendicular':
+        if checkerBoardMount == 'backWall' or checkerBoardMount == 'Perpendicular' or checkerBoardMount == 'backwall':
              # Detect if checkerboard is upside down.
              upsideDownChecker = isCheckerboardUpsideDown(CamParamDict)
              if upsideDownChecker:
                  rotationAngles = {'y':-90}
              else:
                  rotationAngles = {'y':90, 'z':180}
-        elif checkerBoardMount == 'ground' or checkerBoardMount == 'Lying':
+        elif checkerBoardMount == 'ground' or checkerBoardMount == 'Lying' or checkerBoardMount == 'Ground':
             rotationAngles = {'x':90, 'y':90}
         else:
             raise Exception('checkerBoard placement value in\
