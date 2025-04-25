@@ -687,7 +687,8 @@ async def handle_web_message(websocket, message_json, command, active_session: S
                 rows = int(message_json.get("rows"))
                 cols = int(message_json.get("cols"))
                 square_size = float(message_json.get("squareSize"))
-                placement = message_json.get("placement")
+                placement = str(message_json.get("placement"))
+                print(f"placement is: {placement} and is of type {type(placement)}")
                 trialId = message_json.get("trialId")
                 active_session.set_checkerboard_params(rows, cols, square_size, placement)
                 fileManager.save_session_metadata(active_session)
@@ -829,7 +830,10 @@ async def handle_web_message(websocket, message_json, command, active_session: S
         elif command == "save_subject":
             subject = Subject.from_dict(message_json.get("content"))
             sessionManager.saveSubject(subject=subject)
-
+        elif command == "set_framerate":
+            framerate = message_json.get("framerate")
+            response = {"command": "set_framerate", "trialType": "", "max_frame_rate": framerate}
+            await manager.broadcast(json.dumps(response), websocket) # Send to mobiles to change frame rate :)
         elif command == "ping":
             pongMsg = {
                 command: "pong"
