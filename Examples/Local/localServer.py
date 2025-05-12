@@ -64,7 +64,7 @@ class sessionManager:
         for key, subdict in trials.items():
             print(subdict.get("uuid"))
             if subdict.get("uuid") in self.processingTrials:
-                print("found uuid match in giota!")
+                #print("found uuid match in giota!")
                 subdict["processed"] = self.processingTrials[subdict["uuid"]]
         
         print(trials)
