@@ -695,8 +695,10 @@ async def handle_web_message(websocket, message_json, command, active_session: S
 
             elif trialType == "neutral":
                 subject = Subject.from_dict(message_json.get("subject"))
+                sessionName = message_json.get("sessionName")
                 active_session.set_subject(subject)
                 trialId = message_json.get("trialId")
+                active_session.set_name(sessionName)
                 fileManager.save_session_metadata(active_session)
 
             elif trialType == "dynamic":

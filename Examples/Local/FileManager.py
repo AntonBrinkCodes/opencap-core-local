@@ -349,6 +349,7 @@ class FileManager:
         return trial_dict
     
     def get_visualizer_videos(self, session: Session, trialName: str) -> List:
+        
         video_list = []
         visualizer_video_path = os.path.join(self.base_directory, str(session.uuid), "VisualizerVideos", trialName)
         if os.path.isdir(visualizer_video_path):

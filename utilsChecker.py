@@ -2637,6 +2637,7 @@ def triangulateMultiviewVideo(CameraParamDict,keypointDict,imageScaleFactor=1,
             if len(inputPaths) > 0:
                 inputPath = inputPaths[0]
             else:
+                print(f"Could not find {inputPaths} path. Using InputMedia for visualizer videos instead")
                 inputPaths = glob.glob(os.path.join(CameraDirectories[camName],'InputMedia*',trialName,trialID + '*'))
                 inputPath = inputPaths[0]
             
