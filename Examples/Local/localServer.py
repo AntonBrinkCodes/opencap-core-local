@@ -832,7 +832,7 @@ async def handle_web_message(websocket, message_json, command, active_session: S
             sessionManager.saveSubject(subject=subject)
         elif command == "set_framerate":
             framerate = message_json.get("framerate")
-            response = {"command": "set_framerate", "trialType": "", "max_frame_rate": framerate}
+            response = {"command": "set_framerate", "trialType": "", "max_frame_rate": framerate, "session": session_id}
             print(f"Sending to set framerate as {framerate}")
             await manager.broadcast(json.dumps(response), websocket) # Send to mobiles to change frame rate :)
         elif command == "ping":
