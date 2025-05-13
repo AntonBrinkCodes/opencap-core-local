@@ -146,6 +146,7 @@ class FileManager:
                         # Extract specific lines or fields (modify as per your requirements)
                         # Assuming the YAML file has fields like 'session_name' and 'created_date'
                         session_info = {
+                            "sessionName": metadata.get("sessionName", ""),
                             "subjectName": metadata.get("subjectName", ""),
                             "sessionDate": metadata.get("sessionDate", ""),
                             "sessionID": metadata.get("sessionID", ""),
