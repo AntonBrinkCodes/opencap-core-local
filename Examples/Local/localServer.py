@@ -30,6 +30,16 @@ import socket
 class CustomError(Exception):
     pass
 
+# Class to save info to put in dict in order to queue processing trials
+class ProcessTrial:
+    def __init__(self):
+        #websocket: WebSocket, session: Session, trialId: str, trialType: Optional[str] = "dynamic", isTest=False,  trialNames: Optional[str] = "")
+        self.session: Session
+        self.websocket: WebSocket
+        self.trialId: str
+        self.trialType: str
+        self.trialName: str
+        self.timeAdded: time
 
 class sessionManager:
     def __init__(self):
@@ -37,7 +47,28 @@ class sessionManager:
         self.activeSession: Optional[Session] = None
         self.isProcessing = False
         self.processingTrials = {} # Dict with key: uuid as a string, and values are either: 'processing' or 'queued'
+        self.processQueue = {} # Dict for queueing the processing trials
+
+    #Checks the processQueue for the next trial to run.
+    #Should prioritize Neutral if they exist
+    def checkQueue(self) -> ProcessTrial:
+        print("Checking queue...")
+        return self.get_oldest_trial(self.processQueue)
     
+    def get_oldest_trial(trials: Dict[str, ProcessTrial]) -> Optional[ProcessTrial]:
+        if not trials:
+            return None
+
+        neutral_trials = [t for t in trials.values() if t.trialType == "neutral"]
+
+        if neutral_trials:
+            # Return the neutral trial with the oldest timeAdded
+            return min(neutral_trials, key=lambda t: t.timeAdded)
+
+        # Otherwise return the oldest overall
+        return min(trials.values(), key=lambda t: t.timeAdded)
+
+
     def addSession(self, session: Session):
         self.sessions.append(session)
         self.activeSession = session
@@ -253,6 +284,8 @@ class sessionManager:
             self.processingTrials[trialId] = "Error"
             if trialType == "dynamic":
                 await self.sendUpdatedTrials(websocket=websocket, session_id=sessionId)
+            if trialType == "neutral":
+                self.processingTrials.pop(trialId)
             print(inst)
             toastMsg = {
                 "command": "Toast",
@@ -942,8 +975,8 @@ if __name__=="__main__":
     print(os.listdir())
     print(f"Hostname: {hostname}")
 
-    sessionManager.processingTrials["Dynamic_3"] = "processing"
-    sessionManager.processingTrials["Dynamic_1"] = "queued"
+    #sessionManager.processingTrials["Dynamic_3"] = "processing"
+    #sessionManager.processingTrials["Dynamic_1"] = "queued"
 
 
     fileManager.cleanEmptySessions()
