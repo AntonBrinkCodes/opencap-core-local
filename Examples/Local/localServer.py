@@ -11,7 +11,7 @@ from FileManager import FileManager
 import os
 import pickle 
 import threading
-import time
+import datetime
 import asyncio
 from localReprocess import runLocalTrial
 from fastapi.responses import FileResponse
@@ -30,16 +30,48 @@ import socket
 class CustomError(Exception):
     pass
 
-# Class to save info to put in dict in order to queue processing trials
 class ProcessTrial:
-    def __init__(self):
-        #websocket: WebSocket, session: Session, trialId: str, trialType: Optional[str] = "dynamic", isTest=False,  trialNames: Optional[str] = "")
-        self.session: Session
-        self.websocket: WebSocket
-        self.trialId: str
-        self.trialType: str
-        self.trialName: str
-        self.timeAdded: time
+    """
+    Represents a trial within a session, including metadata and websocket connection.
+
+    Attributes:
+        session (Session): The session this trial belongs to.
+        websocket (WebSocket): WebSocket for communication during the trial.
+        trialId (str): Unique identifier for the trial.
+        trialType (str): Type of the trial (e.g., "dynamic", "neutral").
+        trialName (str): A descriptive name for the trial.
+        timeAdded (datetime): Timestamp when the trial was created.
+    """
+
+    def __init__(
+        self,
+        session: Session,
+        websocket: WebSocket,
+        trialId: str,
+        trialType: str = "dynamic",
+        trialName: str = "burpees",
+        timeAdded: Optional[datetime] = None,
+        isTest: bool = False
+    ):
+        """
+        Initializes a new instance of the ProcessTrial class.
+
+        Args:
+            session (Session): The session the trial belongs to.
+            websocket (WebSocket): The websocket to communicate with.
+            trialId (str): Unique ID of the trial.
+            trialType (str, optional): Type of trial. Defaults to "dynamic".
+            trialName (str, optional): Human-readable trial name. Defaults to "burpees".
+            timeAdded (datetime, optional): Time the trial was added. Defaults to now if not provided.
+            isTest (Bool, optional): If the trial is just a test trial.
+        """
+        self.session = session
+        self.websocket = websocket
+        self.trialId = trialId
+        self.trialType = trialType
+        self.trialName = trialName
+        self.timeAdded = timeAdded or datetime.now()
+        self.isTest = isTest
 
 class sessionManager:
     def __init__(self):
@@ -47,11 +79,11 @@ class sessionManager:
         self.activeSession: Optional[Session] = None
         self.isProcessing = False
         self.processingTrials = {} # Dict with key: uuid as a string, and values are either: 'processing' or 'queued'
-        self.processQueue = {} # Dict for queueing the processing trials
+        self.processQueue = Dict[str, ProcessTrial] # Dict for queueing the processing trials
 
     #Checks the processQueue for the next trial to run.
     #Should prioritize Neutral if they exist
-    def checkQueue(self) -> ProcessTrial:
+    def checkQueue(self) -> Optional[ProcessTrial]:
         print("Checking queue...")
         return self.get_oldest_trial(self.processQueue)
     
@@ -253,12 +285,15 @@ class sessionManager:
         # Run the trial locally TODO: Add some kind of check here or maybe a "try" to prevent crashes :)
         res = None
         if trialType != "calibration": #GPU only neededd for dynamic and neutral trials.
-            print("Checking for avaiable GPU")
+            print("Checking for available GPU")
+            self.processQueue[trialId] = ProcessTrial(websocket = websocket, session = session, trialId = trialId, trialname = trialNames, trialType = trialType)
             if trialType == "dynamic":
                 self.processingTrials[trialId] = "queued"
                 await self.sendUpdatedTrials(websocket=websocket, session_id=sessionId)
             
-            await self.wait_for_gpu() #
+            if self.isProcessing: # Already added trial to processQueue and sent the information to web server
+                return
+            
         print(f"processing trial: {trialNames}, with id: {trialId}. Type: {trialType}")
         self.isProcessing = True
         try:
@@ -295,6 +330,10 @@ class sessionManager:
             await manager.send_personal_message(json.dumps(toastMsg), websocket)
         finally:
             self.isProcessing = False
+            nextTrial = self.checkQueue
+            if nextTrial != None:
+                self.processTrial(websocket=nextTrial.websocket, session=nextTrial.session, trialId= nextTrial.trialId,
+                                 trialType=nextTrial.trialType, trialNames = nextTrial.trialName, isTest=nextTrial.isTest)
 
     
 class ConnectionInfo:
