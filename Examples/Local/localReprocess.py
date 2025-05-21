@@ -12,7 +12,7 @@ import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
 
 from main import main
-from utils import deleteCalibrationFiles
+from utils import deleteCalibrationFiles, deleteStaticFiles
 from utils import getDataDirectory
 
 
@@ -52,6 +52,7 @@ def runLocalTrial(sessionId: str, trialNames, trialId, trialType="dynamic", pose
 
         extrinsicTrial = True
     elif trialType == "static" or trialType=="neutral":
+
         scaleModel = True
 
 
@@ -93,6 +94,9 @@ if __name__=="__main__":
 
         extrinsicTrial = True
     elif sessionType == "static" or sessionType=="neutral":
+        data_dir = getDataDirectory(isDocker=False)
+        session_path = os.path.join(data_dir,'Data',session_name)
+        deleteStaticFiles(session_path=session_path)
         scaleModel = True
 
     #os.chdir('..')
