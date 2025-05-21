@@ -320,7 +320,7 @@ def deleteStaticFiles(session_path,staticTrialName='neutral'):
     openSimDir = os.path.join(session_path,'OpenSimData')
     
     # This is a hack, but os.walk doesn't work on attached server drives
-    for camDir in camDirs:
+    """for camDir in camDirs:
         mediaDirs = glob.glob(os.path.join(camDir,'*'))
         for medDir in mediaDirs:
             try:
@@ -328,7 +328,7 @@ def deleteStaticFiles(session_path,staticTrialName='neutral'):
                 _,camName = os.path.split()
                 print('deleting ' + camName + '/' + medDir + '/' + staticTrialName)
             except:
-                pass
+                pass"""
             
     for mkrDir in markerDirs:
         mkrFiles = glob.glob(os.path.join(mkrDir,'*'))

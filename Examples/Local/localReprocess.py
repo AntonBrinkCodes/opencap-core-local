@@ -52,6 +52,11 @@ def runLocalTrial(sessionId: str, trialNames, trialId, trialType="dynamic", pose
 
         extrinsicTrial = True
     elif trialType == "static" or trialType=="neutral":
+        session_name = sessionId 
+        data_dir = getDataDirectory(isDocker=False)
+        session_path = os.path.join(data_dir,'Data',session_name)
+        print(f"session_path is: {session_path}")    
+        deleteStaticFiles(session_path=session_path, staticTrialName=trialNames)
         scaleModel = True
 
 
