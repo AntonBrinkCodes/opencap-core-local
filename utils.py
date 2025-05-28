@@ -334,6 +334,7 @@ def deleteStaticFiles(session_path,staticTrialName='neutral'):
     for mkrDir in markerDirs:
         mkrFiles = glob.glob(os.path.join(mkrDir,'*'))
         for mkrFile in mkrFiles:
+            print(f"mkrFile is: {mkrFile}")
             if staticTrialName in mkrFile:
                 os.remove(mkrFile)
                 _,fName = os.split(mkrFile)
