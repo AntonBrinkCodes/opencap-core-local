@@ -367,6 +367,7 @@ def runMMposeVideo(
     # https://github.com/stanfordnmbl/opencap-core/pull/100/files.
     # We here identify these cases and re-run post processing. 
     else:
+        print("pickle file already exists. using that.")
         open_file = open(ppPklPath, "rb")
         frames = pickle.load(open_file)
         open_file.close()
