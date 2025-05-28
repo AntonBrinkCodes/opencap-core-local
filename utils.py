@@ -316,20 +316,21 @@ def deleteStaticFiles(session_path,staticTrialName='neutral'):
         
     vidDir = os.path.join(session_path,'Videos')
     camDirs = glob.glob(os.path.join(vidDir,'Cam*'))
+    #outputklDirs = glob.glob(os.path.join(camDirs,'OutputPkl_*'))
     markerDirs = glob.glob(os.path.join(session_path,'MarkerData'))
     openSimDir = os.path.join(session_path,'OpenSimData')
     
     # This is a hack, but os.walk doesn't work on attached server drives
     # Removed from local reprocessing because we re-record the videos which replaces them anyway
-    """ for camDir in camDirs:
-        mediaDirs = glob.glob(os.path.join(camDir,'*'))
-        for medDir in mediaDirs:
+    for camDir in camDirs:
+        outputklDirs = glob.glob(os.path.join(camDir,'OutputPkl_*'))
+        for outputDir in outputklDirs:
             try:
-                shutil.rmtree(os.path.join(camDir,medDir,staticTrialName))
+                shutil.rmtree(os.path.join(camDir,outputDir,staticTrialName))
                 _,camName = os.path.split()
-                print('deleting ' + camName + '/' + medDir + '/' + staticTrialName)
+                print('deleting ' + camName + '/' + outputDir + '/' + staticTrialName)
             except:
-                pass """
+                pass 
             
     for mkrDir in markerDirs:
         mkrFiles = glob.glob(os.path.join(mkrDir,'*'))
