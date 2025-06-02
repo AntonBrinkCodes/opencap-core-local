@@ -146,6 +146,7 @@ class FileManager:
                         # Extract specific lines or fields (modify as per your requirements)
                         # Assuming the YAML file has fields like 'session_name' and 'created_date'
                         session_info = {
+                            "sessionName": metadata.get("sessionName", ""),
                             "subjectName": metadata.get("subjectName", ""),
                             "sessionDate": metadata.get("sessionDate", ""),
                             "sessionID": metadata.get("sessionID", ""),
@@ -349,6 +350,7 @@ class FileManager:
         return trial_dict
     
     def get_visualizer_videos(self, session: Session, trialName: str) -> List:
+        
         video_list = []
         visualizer_video_path = os.path.join(self.base_directory, str(session.uuid), "VisualizerVideos", trialName)
         if os.path.isdir(visualizer_video_path):

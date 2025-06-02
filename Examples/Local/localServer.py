@@ -30,6 +30,16 @@ import socket
 class CustomError(Exception):
     pass
 
+# Class to save info to put in dict in order to queue processing trials
+class ProcessTrial:
+    def __init__(self):
+        #websocket: WebSocket, session: Session, trialId: str, trialType: Optional[str] = "dynamic", isTest=False,  trialNames: Optional[str] = "")
+        self.session: Session
+        self.websocket: WebSocket
+        self.trialId: str
+        self.trialType: str
+        self.trialName: str
+        self.timeAdded: time
 
 class sessionManager:
     def __init__(self):
@@ -37,7 +47,28 @@ class sessionManager:
         self.activeSession: Optional[Session] = None
         self.isProcessing = False
         self.processingTrials = {} # Dict with key: uuid as a string, and values are either: 'processing' or 'queued'
+        self.processQueue = {} # Dict for queueing the processing trials
+
+    #Checks the processQueue for the next trial to run.
+    #Should prioritize Neutral if they exist
+    def checkQueue(self) -> ProcessTrial:
+        print("Checking queue...")
+        return self.get_oldest_trial(self.processQueue)
     
+    def get_oldest_trial(trials: Dict[str, ProcessTrial]) -> Optional[ProcessTrial]:
+        if not trials:
+            return None
+
+        neutral_trials = [t for t in trials.values() if t.trialType == "neutral"]
+
+        if neutral_trials:
+            # Return the neutral trial with the oldest timeAdded
+            return min(neutral_trials, key=lambda t: t.timeAdded)
+
+        # Otherwise return the oldest overall
+        return min(trials.values(), key=lambda t: t.timeAdded)
+
+
     def addSession(self, session: Session):
         self.sessions.append(session)
         self.activeSession = session
@@ -64,7 +95,7 @@ class sessionManager:
         for key, subdict in trials.items():
             print(subdict.get("uuid"))
             if subdict.get("uuid") in self.processingTrials:
-                print("found uuid match in giota!")
+                #print("found uuid match in giota!")
                 subdict["processed"] = self.processingTrials[subdict["uuid"]]
         
         print(trials)
@@ -253,6 +284,8 @@ class sessionManager:
             self.processingTrials[trialId] = "Error"
             if trialType == "dynamic":
                 await self.sendUpdatedTrials(websocket=websocket, session_id=sessionId)
+            if trialType == "neutral":
+                self.processingTrials.pop(trialId)
             print(inst)
             toastMsg = {
                 "command": "Toast",
@@ -687,15 +720,18 @@ async def handle_web_message(websocket, message_json, command, active_session: S
                 rows = int(message_json.get("rows"))
                 cols = int(message_json.get("cols"))
                 square_size = float(message_json.get("squareSize"))
-                placement = message_json.get("placement")
+                placement = str(message_json.get("placement"))
+                print(f"placement is: {placement} and is of type {type(placement)}")
                 trialId = message_json.get("trialId")
                 active_session.set_checkerboard_params(rows, cols, square_size, placement)
                 fileManager.save_session_metadata(active_session)
 
             elif trialType == "neutral":
                 subject = Subject.from_dict(message_json.get("subject"))
+                sessionName = message_json.get("sessionName")
                 active_session.set_subject(subject)
                 trialId = message_json.get("trialId")
+                active_session.set_name(sessionName)
                 fileManager.save_session_metadata(active_session)
 
             elif trialType == "dynamic":
@@ -785,6 +821,11 @@ async def handle_web_message(websocket, message_json, command, active_session: S
                 "content": videos
             }
             await manager.send_personal_message(json.dumps(message), websocket=websocket)
+        elif command == "set_framerate":
+            framerate = int(message_json.get("framerate"))
+            response = {"command": "set_framerate", "trialType": "", "max_frame_rate": framerate, "session": str(active_session.uuid)}
+            print(f"Sending to set framerate as {framerate}")
+            await manager.broadcast(json.dumps(response), websocket) # Send to mobiles to change frame rate :)
 
         else:
             toastMsg = {
@@ -795,6 +836,7 @@ async def handle_web_message(websocket, message_json, command, active_session: S
             await manager.send_personal_message(
                 json.dumps(toastMsg), websocket
             )
+
 
     else:
         if command == "newSession":
@@ -829,7 +871,7 @@ async def handle_web_message(websocket, message_json, command, active_session: S
         elif command == "save_subject":
             subject = Subject.from_dict(message_json.get("content"))
             sessionManager.saveSubject(subject=subject)
-
+        
         elif command == "ping":
             pongMsg = {
                 command: "pong"
@@ -845,19 +887,21 @@ async def handle_mobile_message(websocket, message_json, command, active_session
     if command == "mobile_connected" and active_session:
         print("MOBILE CONNECTED")
         camera_model = str(message_json.get("content"))
+        camera_maxframerate = str(message_json.get("max_frame_rate"))
         camera_index = manager.find_websocket_index(websocket)
         active_session.iphoneModel[f"Cam{camera_index}"] = camera_model
         message = {
             "command": "mobile_connected",
             "content": camera_index,
-            "session": session_id
+            "session": session_id,
+            'maxFrameRate': camera_maxframerate #(inform webapp of the maxframerate of this device)
             }
         json_message = json.dumps(message)
         await manager.broadcast(json_message, websocket)
  
         answer = {
             "command": "new_camera_idx",
-            "trialType": "", #Required by
+            "trialType": "", #Required by phone
             "camera_idx": camera_index,
             "session": session_id,
         }
@@ -931,8 +975,8 @@ if __name__=="__main__":
     print(os.listdir())
     print(f"Hostname: {hostname}")
 
-    sessionManager.processingTrials["Dynamic_3"] = "processing"
-    sessionManager.processingTrials["Dynamic_1"] = "queued"
+    #sessionManager.processingTrials["Dynamic_3"] = "processing"
+    #sessionManager.processingTrials["Dynamic_1"] = "queued"
 
 
     fileManager.cleanEmptySessions()

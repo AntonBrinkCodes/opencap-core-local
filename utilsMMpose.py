@@ -1,13 +1,17 @@
 import cv2
 import pickle
 import torch
-
+import mmdet
 # from tqdm import tqdm
 from mmpose_utils import process_mmdet_results, frame_iter, concat, convert_instance_to_frame
 try:
+    #used to be from mmdet.apis
     from mmdet.apis import inference_detector, init_detector
     has_mmdet = True
-except (ImportError, ModuleNotFoundError):
+except (ImportError, ModuleNotFoundError) as e:
+    print("Error importing from mmdet.apis:")
+    print(e)
+    print(mmdet.__version__)
     has_mmdet = False
     
 from mmpose_data import CustomVideoDataset
@@ -38,6 +42,8 @@ def detection_inference(model_config, model_ckpt, video_path, bbox_path,
 
     Using mmdet to detect the human.
     """
+    print(f"MmPose pathis: {model_ckpt}")
+    print(f"video path is: {video_path}")
 
     det_model = init_detector(
         model_config, model_ckpt, device=device.lower())

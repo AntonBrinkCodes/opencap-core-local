@@ -266,6 +266,7 @@ class Session:
             'subjectName': self.subject.name,
             'subjectBirthyear': self.subject.birth_year,
             'sessionDate': self.createdAt.strftime("%Y-%m-%d"),
+            'sessionName': self.name,
             'mass_kg': self.subject.mass,
             'sessionID': str(self.getID()),
             'height_m': self.subject.height,

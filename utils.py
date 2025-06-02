@@ -94,12 +94,15 @@ def getOpenPoseDirectory(isDocker=False):
 
 def getMMposeDirectory(isDocker=False):
     computername = socket.gethostname()
-    
+    print(f"computername for mmpose is {computername}")
     # Paths to OpenPose folder for local testing.
     if computername == "clarkadmin-MS-7996":
         mmposeDirectory = "/home/clarkadmin/Documents/MyRepositories/MoVi_analysis/model_ckpts"
+    elif computername == "moveability-lab":
+        mmposeDirectory = "/home/anton/opencap-core-local/mmpose"
     else:
         mmposeDirectory = ''
+    print(f" mmpose directory is {mmposeDirectory}")
     return mmposeDirectory
 
 def loadCameraParameters(filename):
@@ -275,10 +278,14 @@ def downloadVideosFromServer(session_id,trial_id, isDocker=True,
 
 
 def deleteCalibrationFiles(session_path, deleteRecorded = True):
+    print("Running deleteCalibrationFiles")
     calImagePath = os.path.join(session_path,'CalibrationImages')
+    print(f"removing {calImagePath}?")
     if os.path.exists(calImagePath):
+        print(f"removing {calImagePath}")
         shutil.rmtree(calImagePath)
-    
+    else:
+        print(f"Nope, {calImagePath} does not exist :(")
     # Delete camera directories
     camDirs = glob.glob(os.path.join(session_path,'Videos','Cam*'))
     
@@ -290,6 +297,7 @@ def deleteCalibrationFiles(session_path, deleteRecorded = True):
         trialNames = [tName for tName in dirContents if os.path.isdir(os.path.join(inputDir,tName))]
         for tName in trialNames:
             if os.path.exists(os.path.join(inputDir,tName,'extrinsicImage0.png')):
+                print(f"Deleting extrinsicImage fron {inputDir}")
                 extrinsicTrialName = tName
                 extrinsicFileFound = True
     
@@ -308,23 +316,26 @@ def deleteStaticFiles(session_path,staticTrialName='neutral'):
         
     vidDir = os.path.join(session_path,'Videos')
     camDirs = glob.glob(os.path.join(vidDir,'Cam*'))
+    #outputklDirs = glob.glob(os.path.join(camDirs,'OutputPkl_*'))
     markerDirs = glob.glob(os.path.join(session_path,'MarkerData'))
     openSimDir = os.path.join(session_path,'OpenSimData')
     
     # This is a hack, but os.walk doesn't work on attached server drives
+    # Removed from local reprocessing because we re-record the videos which replaces them anyway
     for camDir in camDirs:
-        mediaDirs = glob.glob(os.path.join(camDir,'*'))
-        for medDir in mediaDirs:
+        outputklDirs = glob.glob(os.path.join(camDir,'OutputPkl_*'))
+        for outputDir in outputklDirs:
             try:
-                shutil.rmtree(os.path.join(camDir,medDir,staticTrialName))
+                shutil.rmtree(os.path.join(camDir,outputDir,staticTrialName))
                 _,camName = os.path.split()
-                print('deleting ' + camName + '/' + medDir + '/' + staticTrialName)
+                print('deleting ' + camName + '/' + outputDir + '/' + staticTrialName)
             except:
-                pass
+                pass 
             
     for mkrDir in markerDirs:
         mkrFiles = glob.glob(os.path.join(mkrDir,'*'))
         for mkrFile in mkrFiles:
+            print(f"mkrFile is: {mkrFile}")
             if staticTrialName in mkrFile:
                 os.remove(mkrFile)
                 _,fName = os.split(mkrFile)
@@ -1476,7 +1487,7 @@ def delete_multiple_element(list_object, indices):
             list_object.pop(idx)
 
 def getVideoExtension(pathFileWithoutExtension):
-    
+    print(pathFileWithoutExtension)
     pathVideoDir = os.path.split(pathFileWithoutExtension)[0]
     videoName = os.path.split(pathFileWithoutExtension)[1]
     for file in os.listdir(pathVideoDir):
