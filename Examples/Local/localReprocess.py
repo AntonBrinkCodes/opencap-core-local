@@ -106,8 +106,8 @@ if __name__=="__main__":
     #os.chdir('..')
     
     print(extrinsicTrial)
-    cameras_to_use=['Cam1', 'Cam2', 'Cam3']
-    main(session_name, trial_Names, dynamic_trialNames, cameras_to_use=['all'],
+    cameras_to_use=['Cam1', 'Cam2', 'Cam3'] #['all']
+    main(session_name, trial_Names, dynamic_trialNames, cameras_to_use=cameras_to_use,
              intrinsicsFinalFolder='Deployed', isDocker=False,
              extrinsicsTrial=extrinsicTrial,
              poseDetector=poseDetector, resolutionPoseDetection=resolutionPoseDetection,
