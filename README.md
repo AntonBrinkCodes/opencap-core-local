@@ -13,7 +13,7 @@ The advantage is that no data has to be sent to other servers. The hardware requ
 5. change directory to Examples and Run `python -m pip install -r localRequirements.txt`
 
    N.B: The localRequirements.txt has not been updated for a while and may be missing some files.
-   There is a environment.yml file in the Examples folder that can be used with `conda env create -f environment.yml` to create the environment. Currently working with CUDA 12.4.
+   There is a .yml file in the Examples/Local folder that can be used with `conda env create -f localEnvironment.yml` to create the environment. Currently working with CUDA 12.4.
 
 6. If needed add paths to getDataDirectory, getOpenPoseDirectory and getMMposeDirectory functions in utils.py.
    
