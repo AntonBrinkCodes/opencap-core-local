@@ -9,6 +9,11 @@ The advantage is that no data has to be sent to other servers. The hardware requ
 2. Follow the instructions to run the [custom web-app](https://github.com/AntonBrinkCodes/localcap-viewer/tree/main) and install the mobile application [LocalCap](https://github.com/AntonBrinkCodes/LocalCap/tree/main) on your iPad / iPhone devices.
 
 3. change directory to Examples and Run `python -m pip install -r localRequirements.txt`
+
+   N.B: The localRequirements.txt has not been updated for a while and may be missing some files.
+   There is a environment.yml file in the Examples folder that can be used with `conda env create -f environment.yml` to create the environment. Currently working with CUDA 12.4.
+
+4. If needed add paths to getDataDirectory, getOpenPoseDirectory and getMMposeDirectory functions in utils.py.
    
 ## Usage
 Open localServer.py and set your IP and port to host over.
