@@ -787,7 +787,7 @@ async def handle_web_message(websocket, message_json, command, active_session: S
         elif command == "download_session":
             #try:
             # Get chunk size and info egarding download. Send to web app
-            print("zipped file")
+            print(f"zipping file...{active_session.uuid}")
             start_message = {
                     "command": "download_start",
                 }
@@ -795,6 +795,7 @@ async def handle_web_message(websocket, message_json, command, active_session: S
             dataPath = fileManager.send_session_zip(session_id=str(active_session.uuid))
             fileName = os.path.basename(dataPath)
             
+            print(f"zipped as {fileName}")
             # open the zipped file
             # Assuming you're sending this message via a WebSocket
             download_link = f"http://{ip_address}:8080/download/{fileName}"
