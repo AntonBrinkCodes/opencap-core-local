@@ -5,7 +5,8 @@ The advantage is that no data has to be sent to other servers. The hardware requ
 
 ## Local Installation
 1. Follow the ["regular" steps further below](#installation) for Running the pipeline locally. A good idea is to check if you can locally reprocess using the pipeline but with data collected from app.opencap.ai.
-   N.B. When running the local pipeline you will create a different environment in the steps below.
+
+   N.B: When running the local pipeline you will create a different environment in the steps below.
 
 3. Follow the instructions to run the [custom web-app](https://github.com/AntonBrinkCodes/localcap-viewer/tree/main) and install the mobile application [LocalCap](https://github.com/AntonBrinkCodes/LocalCap/tree/main) on your iPad / iPhone devices.
    
