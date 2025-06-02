@@ -260,7 +260,7 @@ def main(sessionName, trialName, trial_id, cameras_to_use=['all'],
                 extension = getVideoExtension(pathVideoWithoutExtension)
                 extrinsicPath = os.path.join(camDir, 'InputMedia', trialName, 
                                              trial_id + extension) 
-                print(extrinsicPath)
+                print(f"extrinsic path is: {extrinsicPath}")
                 print(os.path.exists(extrinsicPath))                              
                 # Modify intrinsics if camera view is rotated
                 CamParams = rotateIntrinsics(CamParams,extrinsicPath)

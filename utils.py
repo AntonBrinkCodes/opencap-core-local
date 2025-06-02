@@ -320,8 +320,7 @@ def deleteStaticFiles(session_path,staticTrialName='neutral'):
     markerDirs = glob.glob(os.path.join(session_path,'MarkerData'))
     openSimDir = os.path.join(session_path,'OpenSimData')
     
-    # This is a hack, but os.walk doesn't work on attached server drives
-    # Removed from local reprocessing because we re-record the videos which replaces them anyway
+    # deleting output pickle files from local reprocessing but not videos. Videos are replaced by new videos anyway.
     for camDir in camDirs:
         outputklDirs = glob.glob(os.path.join(camDir,'OutputPkl_*'))
         for outputDir in outputklDirs:
