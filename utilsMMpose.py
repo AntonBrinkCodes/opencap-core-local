@@ -76,12 +76,12 @@ def pose_inference(model_config, model_ckpt, video_path, bbox_path, pkl_path,
     """Run pose inference on custom video dataset"""
 
     # init model
+    model_name = model_config.split("/")[1].split(".")[0]
     if model is None: 
         model = init_pose_model(model_config, model_ckpt, device)
-        model_name = model_config.split("/")[1].split(".")[0]
         print("Initializing {} Model".format(model_name))
     else:
-        print(f"Model already initalized.. name: {model_config.split("/")[1].split(".")[0]}")
+        print("Model already initalized.. name: {}".format(model_name))
     # build data pipeline
     test_pipeline = init_test_pipeline(model)
 
