@@ -110,7 +110,7 @@ if __name__=="__main__":
     #os.chdir('..')
     
     print(extrinsicTrial)
-    cameras_to_use=['all']
+    cameras_to_use=['Cam1', 'Cam2', 'Cam3'] # ['Cam1', 'Cam3'], or ['all'] <- example :)
     
     main(session_id, trial_Names, dynamic_trialNames, cameras_to_use=cameras_to_use,
              intrinsicsFinalFolder='Deployed', isDocker=False,
@@ -118,8 +118,7 @@ if __name__=="__main__":
              poseDetector=poseDetector, resolutionPoseDetection=resolutionPoseDetection,
              scaleModel=scaleModel, genericFolderNames = genericFolderNames)
 
-# ScaleModel probably should only be true on calibration trial?
-# extrinsicsTrial should be True on "Neutral". Which is probably to get extrinsics..
+
 
 
 
