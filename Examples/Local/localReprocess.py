@@ -116,7 +116,7 @@ if __name__=="__main__":
              intrinsicsFinalFolder='Deployed', isDocker=False,
              extrinsicsTrial=extrinsicTrial,
              poseDetector=poseDetector, resolutionPoseDetection=resolutionPoseDetection,
-             scaleModel=scaleModel, genericFolderNames = genericFolderNames)
+             scaleModel=scaleModel, genericFolderNames = genericFolderNames, forceRedoPoseEstimation=True)
 
 
 
