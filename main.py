@@ -41,7 +41,7 @@ def main(sessionName, trialName, trial_id, cameras_to_use=['all'],
          dataDir=None, overwriteAugmenterModel=False,
          filter_frequency='default', overwriteFilterFrequency=False,
          scaling_setup='upright_standing_pose', overwriteScalingSetup=False,
-         overwriteCamerasToUse=False):
+         overwriteCamerasToUse=False, forceRedoPoseEstimation=False):
 
     # %% High-level settings.
     # Camera calibration.
@@ -380,7 +380,7 @@ def main(sessionName, trialName, trial_id, cameras_to_use=['all'],
                     trialName, CamParamDict=CamParamDict, 
                     resolutionPoseDetection=resolutionPoseDetection, 
                     generateVideo=generateVideo, cams2Use=camerasToUse_c,
-                    poseDetector=poseDetector, bbox_thr=bbox_thr)
+                    poseDetector=poseDetector, bbox_thr=bbox_thr, forceRedoPoseEstimation = forceRedoPoseEstimation)
             trialRelativePath += videoExtension
         except Exception as e:
             if len(e.args) == 2: # specific exception

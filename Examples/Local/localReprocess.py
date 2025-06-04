@@ -111,7 +111,7 @@ if __name__=="__main__":
              intrinsicsFinalFolder='Deployed', isDocker=False,
              extrinsicsTrial=extrinsicTrial,
              poseDetector=poseDetector, resolutionPoseDetection=resolutionPoseDetection,
-             scaleModel=scaleModel, genericFolderNames = genericFolderNames)
+             scaleModel=scaleModel, genericFolderNames = genericFolderNames, forceRedoPoseEstimation=True)
 
 # ScaleModel probably should only be true on calibration trial?
 # extrinsicsTrial should be True on "Neutral". Which is probably to get extrinsics..
