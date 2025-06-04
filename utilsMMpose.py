@@ -36,7 +36,7 @@ def get_dataset_info():
 
 # %%
 def detection_inference(model_config, model_ckpt, video_path, bbox_path,
-                        device='cuda:0', det_cat_id=1):
+                        device='cuda:0', det_cat_id=1, det_model= None):
     
     """Visualize the demo images.
 
@@ -45,9 +45,10 @@ def detection_inference(model_config, model_ckpt, video_path, bbox_path,
     print(f"MmPose pathis: {model_ckpt}")
     print(f"video path is: {video_path}")
 
-    det_model = init_detector(
-        model_config, model_ckpt, device=device.lower())
-
+    if det_model is None:
+        det_model = init_detector(
+            model_config, model_ckpt, device=device.lower())
+    
     cap = cv2.VideoCapture(video_path)
     assert cap.isOpened(), f'Faild to load video file {video_path}'
 
@@ -65,18 +66,22 @@ def detection_inference(model_config, model_ckpt, video_path, bbox_path,
     output_file = bbox_path
     pickle.dump(output, open(str(output_file), 'wb'))
     cap.release()
+
+    return det_model
     
 # %%
 def pose_inference(model_config, model_ckpt, video_path, bbox_path, pkl_path,
                    video_out_path, device='cuda:0', batch_size=64,
-                   bbox_thr=0.95, visualize=True, save_results=True):
+                   bbox_thr=0.95, visualize=True, save_results=True, model=None):
     """Run pose inference on custom video dataset"""
 
     # init model
-    model = init_pose_model(model_config, model_ckpt, device)
-    model_name = model_config.split("/")[1].split(".")[0]
-    print("Initializing {} Model".format(model_name))
-
+    if model is None: 
+        model = init_pose_model(model_config, model_ckpt, device)
+        model_name = model_config.split("/")[1].split(".")[0]
+        print("Initializing {} Model".format(model_name))
+    else:
+        print(f"Model already initalized.. name: {model_config.split("/")[1].split(".")[0]}")
     # build data pipeline
     test_pipeline = init_test_pipeline(model)
 
@@ -142,3 +147,5 @@ def pose_inference(model_config, model_ckpt, video_path, bbox_path, pkl_path,
                                                show=False)
             videoWriter.write(vis_img)
         videoWriter.release()
+    
+    return model

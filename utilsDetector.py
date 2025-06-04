@@ -17,7 +17,7 @@ def runPoseDetector(CameraDirectories, trialRelativePath, pathPoseDetector,
                     trialName,
                     CamParamDict=None, resolutionPoseDetection='default',
                     generateVideo=True, cams2Use=['all'],
-                    poseDetector='OpenPose', bbox_thr=0.8):
+                    poseDetector='OpenPose', bbox_thr=0.8, forcePoseInference = False):
     
     # Create list of cameras.
     if cams2Use[0] == 'all':
@@ -25,6 +25,7 @@ def runPoseDetector(CameraDirectories, trialRelativePath, pathPoseDetector,
     else:
         cameras2Use = cams2Use
     
+    print(f"Cameras to use are: {cameras2Use}")
     CameraDirectories_selectedCams = {}
     CamParamList_selectedCams = []
     for cam in cameras2Use:
@@ -37,7 +38,9 @@ def runPoseDetector(CameraDirectories, trialRelativePath, pathPoseDetector,
                                              trialRelativePath)
     extension = getVideoExtension(pathVideoWithoutExtension)            
     trialRelativePath += extension
-        
+    
+    full_model_detector = None
+    full_model_inference = None
     for camName in CameraDirectories_selectedCams:
         cameraDirectory = CameraDirectories_selectedCams[camName]
         print('Running {} for {}'.format(poseDetector, camName))
@@ -47,9 +50,12 @@ def runPoseDetector(CameraDirectories, trialRelativePath, pathPoseDetector,
                 resolutionPoseDetection=resolutionPoseDetection,
                 generateVideo=generateVideo)
         elif poseDetector == 'mmpose':
-            runMMposeVideo(
+            #Trying to return the detector and inference models to hopefully not have to rerun these each time.
+           full_model_detector, full_model_inference = runMMposeVideo(
                 cameraDirectory,trialRelativePath,pathPoseDetector, trialName,
-                generateVideo=generateVideo, bbox_thr=bbox_thr)
+                generateVideo=generateVideo, bbox_thr=bbox_thr, 
+                full_model_detector=full_model_detector, full_model_inference=full_model_inference, 
+                forcePoseInference=forcePoseInference)
             
     return extension
             
@@ -257,6 +263,9 @@ def runMMposeVideo(
         model_ckpt_person='faster_rcnn_r50_fpn_1x_coco_20200130-047c8118.pth',                  
         model_config_pose='hrnet_w48_coco_wholebody_384x288_dark_plus.py',
         model_ckpt_pose='hrnet_w48_coco_wholebody_384x288_dark-f5726563_20200918.pth',
+        full_model_detector = None,
+        full_model_inference = None,
+        forcePoseInference = False
         ):
     
     trialPrefix, _ = os.path.splitext(os.path.basename(fileName))
@@ -302,7 +311,7 @@ def runMMposeVideo(
     pklPath = os.path.join(pathOutputPkl, trialPrefix + '.pkl')
     ppPklPath = os.path.join(pathOutputPkl, trialPrefix + '_pp.pkl')
     # Run pose detector if this file doesn't exist in outputs
-    if not os.path.exists(ppPklPath):
+    if not os.path.exists(ppPklPath) or forcePoseInference:
         if config("DOCKERCOMPOSE", cast=bool, default=False):
             vid_path_tmp = "/data/tmp-video.mov"
             vid_path = "/data/video_mmpose.mov"
@@ -346,8 +355,8 @@ def runMMposeVideo(
             bboxPath = os.path.join(pathOutputBox, trialPrefix + '.pkl')
             full_model_config_person = os.path.join(c_path, 'mmpose',
                                                     model_config_person)
-            detection_inference(full_model_config_person, pathModelCkptPerson,
-                                videoFullPath, bboxPath)        
+            full_model_detector = detection_inference(full_model_config_person, pathModelCkptPerson,
+                                videoFullPath, bboxPath, det_model = full_model_detector)        
             
             # Run pose detection.     
             pathModelCkptPose = os.path.join(pathMMpose, model_ckpt_pose)
@@ -355,9 +364,9 @@ def runMMposeVideo(
                                         trialPrefix + 'withKeypoints.mp4')
             full_model_config_pose = os.path.join(c_path, 'mmpose',
                                                   model_config_pose)
-            pose_inference(full_model_config_pose, pathModelCkptPose, 
+            full_model_inference = pose_inference(full_model_config_pose, pathModelCkptPose, 
                             videoFullPath, bboxPath, pklPath, videoOutPath, 
-                            bbox_thr=bbox_thr, visualize=generateVideo)
+                            bbox_thr=bbox_thr, visualize=generateVideo, model = full_model_inference)
             
         # Post-process data to have OpenPose-like file structure.        
         arrangeMMposePkl(pklPath, ppPklPath)
@@ -375,6 +384,8 @@ def runMMposeVideo(
         if not isData:
             os.rename(ppPklPath, pklPath)
             arrangeMMposePkl(pklPath, ppPklPath)
+
+    return full_model_detector, full_model_inference
 
 # %%
 def arrangeMMposePkl(poseInferencePklPath, outputPklPath):
