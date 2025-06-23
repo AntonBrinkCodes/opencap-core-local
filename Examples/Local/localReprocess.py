@@ -44,9 +44,9 @@ def runLocalTrial(sessionId: str, trialNames, trialId, trialType="dynamic", pose
 
     if trialType == "calibration":
          # Get session directory and delete previous calibration files output
-        session_name = sessionId 
+        session_id = sessionId 
         data_dir = getDataDirectory(isDocker=False)
-        session_path = os.path.join(data_dir,'Data',session_name)
+        session_path = os.path.join(data_dir,'Data',session_id)
         print(f"session_path is: {session_path}")    
         deleteCalibrationFiles(session_path=session_path, deleteRecorded=False)
 
@@ -69,12 +69,12 @@ def runLocalTrial(sessionId: str, trialNames, trialId, trialType="dynamic", pose
 
 
 if __name__=="__main__":
-    session_name = "27332dae-e4a6-40bb-8c58-2a34d5d3a0e4" #"4cf4bca5-7cd0-4db8-af11-5d39d485dba8" # aka session_ids in reprocessSessions.py
+    session_id = "27332dae-e4a6-40bb-8c58-2a34d5d3a0e4" #"4cf4bca5-7cd0-4db8-af11-5d39d485dba8" # aka session_ids in reprocessSessions.py
 
     calib_id = "dynamic"#"36598d50-4fd8-406d-8808-4e9df3cd0e84" # None (auto-selected trial), [] (skip), or string of specific trial_id
     static_id = "ac82774d-b679-4a90-bce1-b3b768532503" # None (auto-selected trial), [] (skip), or string of specific trial_id
-    dynamic_trialNames = "26964f1a-6eb0-44f1-ae28-fbe80d0e3fbc"#"afca93fd-9753-4bea-9130-5fdcf151d9f0" # None (all dynamic trials), [] (skip), or list of trial names. 
-    # OBS!!! Above are CaSE Sensitive. dynamic_trialNames are the names of the video files (a uuid)
+    trial_id = "26964f1a-6eb0-44f1-ae28-fbe80d0e3fbc"#"afca93fd-9753-4bea-9130-5fdcf151d9f0" # None (all dynamic trials), [] (skip), or list of trial names. 
+    # OBS!!! Above are CaSE Sensitive. trial_id are the names of the video files (a uuid)
     trial_Names = "s2_burpee_jump_forward" #calibration for extrinsic trials." neutral for static trials. NB: Name of the folder the trial are in actually,....
     # Trial name for dynamic trials
 
@@ -92,14 +92,14 @@ if __name__=="__main__":
     if sessionType == "calibration":
          # Get session directory and delete previous calibration files output
         data_dir = getDataDirectory(isDocker=False)
-        session_path = os.path.join(data_dir,'Data',session_name)
+        session_path = os.path.join(data_dir,'Data',session_id)
         print(f"session_path is: {session_path}")    
         deleteCalibrationFiles(session_path=session_path, deleteRecorded=False)
 
         extrinsicTrial = True
     elif sessionType == "static" or sessionType=="neutral":
         data_dir = getDataDirectory(isDocker=False)
-        session_path = os.path.join(data_dir,'Data',session_name)
+        session_path = os.path.join(data_dir,'Data',session_id)
         deleteStaticFiles(session_path=session_path)
         scaleModel = True
 
@@ -107,7 +107,7 @@ if __name__=="__main__":
     
     print(extrinsicTrial)
     cameras_to_use=['Cam1', 'Cam2', 'Cam3'] #['all']
-    main(session_name, trial_Names, dynamic_trialNames, cameras_to_use=cameras_to_use,
+    main(session_id, trial_Names, trial_id, cameras_to_use=cameras_to_use,
              intrinsicsFinalFolder='Deployed', isDocker=False,
              extrinsicsTrial=extrinsicTrial,
              poseDetector=poseDetector, resolutionPoseDetection=resolutionPoseDetection,
