@@ -50,7 +50,7 @@ class ProcessTrial:
         trialId: str,
         trialType: str = "dynamic",
         trialName: str = "burpees",
-        timeAdded: Optional[datetime] = None,
+        timeAdded: datetime = None,
         isTest: bool = False
     ):
         """
