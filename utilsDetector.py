@@ -17,7 +17,8 @@ def runPoseDetector(CameraDirectories, trialRelativePath, pathPoseDetector,
                     trialName,
                     CamParamDict=None, resolutionPoseDetection='default',
                     generateVideo=True, cams2Use=['all'],
-                    poseDetector='OpenPose', bbox_thr=0.8):
+                    poseDetector='OpenPose', bbox_thr=0.8, forceRedoPoseEstimation=False ):
+         
     
     # Create list of cameras.
     if cams2Use[0] == 'all':
@@ -45,17 +46,17 @@ def runPoseDetector(CameraDirectories, trialRelativePath, pathPoseDetector,
             runOpenPoseVideo(
                 cameraDirectory,trialRelativePath,pathPoseDetector, trialName,
                 resolutionPoseDetection=resolutionPoseDetection,
-                generateVideo=generateVideo)
+                generateVideo=generateVideo, forceRedoPoseEstimation = forceRedoPoseEstimation)
         elif poseDetector == 'mmpose':
             runMMposeVideo(
                 cameraDirectory,trialRelativePath,pathPoseDetector, trialName,
-                generateVideo=generateVideo, bbox_thr=bbox_thr)
+                generateVideo=generateVideo, bbox_thr=bbox_thr, forceRedoPoseEstimation = forceRedoPoseEstimation)
             
     return extension
             
 # %%
 def runOpenPoseVideo(cameraDirectory,fileName,pathOpenPose, trialName,
-                     resolutionPoseDetection='default', generateVideo=True):
+                     resolutionPoseDetection='default', generateVideo=True, forceRedoPoseEstimation=False):
     
     trialPrefix, _ = os.path.splitext(os.path.basename(fileName)) 
     videoFullPath = os.path.normpath(os.path.join(cameraDirectory, fileName))
@@ -109,7 +110,7 @@ def runOpenPoseVideo(cameraDirectory,fileName,pathOpenPose, trialName,
 
     # Run OpenPose if this file doesn't exist in outputs
     ppPklPath = os.path.join(pathOutputPkl, trialPrefix + '_pp.pkl')   
-    if not os.path.exists(ppPklPath):
+    if not os.path.exists(ppPklPath) or forceRedoPoseEstimation:
         print("path does not already exists...")
         c_path = os.getcwd()
         command = runOpenPoseCMD(
@@ -257,6 +258,7 @@ def runMMposeVideo(
         model_ckpt_person='faster_rcnn_r50_fpn_1x_coco_20200130-047c8118.pth',                  
         model_config_pose='hrnet_w48_coco_wholebody_384x288_dark_plus.py',
         model_ckpt_pose='hrnet_w48_coco_wholebody_384x288_dark-f5726563_20200918.pth',
+        forceRedoPoseEstimation = False
         ):
     
     trialPrefix, _ = os.path.splitext(os.path.basename(fileName))
@@ -302,7 +304,7 @@ def runMMposeVideo(
     pklPath = os.path.join(pathOutputPkl, trialPrefix + '.pkl')
     ppPklPath = os.path.join(pathOutputPkl, trialPrefix + '_pp.pkl')
     # Run pose detector if this file doesn't exist in outputs
-    if not os.path.exists(ppPklPath):
+    if not os.path.exists(ppPklPath) or forceRedoPoseEstimation:
         if config("DOCKERCOMPOSE", cast=bool, default=False):
             vid_path_tmp = "/data/tmp-video.mov"
             vid_path = "/data/video_mmpose.mov"

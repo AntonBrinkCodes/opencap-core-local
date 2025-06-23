@@ -17,7 +17,7 @@ from utils import getDataDirectory
 
 
 def runLocalTrial(sessionId: str, trialNames, trialId, trialType="dynamic", poseDetector='hrnet', genericFolderNames=True, cameras_to_use=['all'],
-                  resolutionPoseDetection='default', dataDir = None) -> bool:
+                  resolutionPoseDetection='default', dataDir = None, forceRedoPoseEstimation = False) -> bool:
     '''
     Runs the trial Locally.
 
@@ -63,7 +63,7 @@ def runLocalTrial(sessionId: str, trialNames, trialId, trialType="dynamic", pose
     main(sessionId, trialNames, trialId, cameras_to_use=cameras_to_use,
          intrinsicsFinalFolder='Deployed', isDocker=False,
           extrinsicsTrial=extrinsicTrial, poseDetector=poseDetector, resolutionPoseDetection=resolutionPoseDetection,
-           scaleModel=scaleModel, genericFolderNames=genericFolderNames )
+           scaleModel=scaleModel, genericFolderNames=genericFolderNames, forceRedoPoseEstimation=forceRedoPoseEstimation )
     
     return True
 
@@ -87,7 +87,7 @@ if __name__=="__main__":
     scaleModel = False
 
     sessionType = "dynamic" # Calibration, static, or dynamic. assumes dynamic if anything else
-
+    forceRedoPoseEstimation = False #If pose estimation is performed for this poseestimatior and resolution, default is to use that result. This forces it to rerun if true
     os.chdir('..')
     if sessionType == "calibration":
          # Get session directory and delete previous calibration files output
@@ -111,7 +111,7 @@ if __name__=="__main__":
              intrinsicsFinalFolder='Deployed', isDocker=False,
              extrinsicsTrial=extrinsicTrial,
              poseDetector=poseDetector, resolutionPoseDetection=resolutionPoseDetection,
-             scaleModel=scaleModel, genericFolderNames = genericFolderNames)
+             scaleModel=scaleModel, genericFolderNames = genericFolderNames, forceRedoPoseEstimation=True)
 
 # ScaleModel probably should only be true on calibration trial?
 # extrinsicsTrial should be True on "Neutral". Which is probably to get extrinsics..
