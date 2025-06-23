@@ -85,7 +85,7 @@ class sessionManager:
     #Should prioritize Neutral if they exist
     def checkQueue(self) -> Optional[ProcessTrial]:
         print("Checking queue...")
-        return self.get_oldest_trial(self, self.processQueue)
+        return self.get_oldest_trial(self.processQueue)
     
     def get_oldest_trial(self, trials: dict) -> Optional[ProcessTrial]:
         if not trials:
