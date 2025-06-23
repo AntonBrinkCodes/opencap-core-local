@@ -78,8 +78,8 @@ class sessionManager:
         self.sessions: List[Session] = []
         self.activeSession: Optional[Session] = None
         self.isProcessing = False
-        self.processingTrials = {} # Dict with key: uuid as a string, and values are either: 'processing' or 'queued'
-        self.processQueue = Dict[str, ProcessTrial] # Dict for queueing the processing trials
+        self.processingTrials = {} # Dict with key: uuid as a string, and values are either: 'processing' or 'queued'. Info in this is shared to webapp.
+        self.processQueue = Dict[str, ProcessTrial] # Dict for queueing the processing trials. 
 
     #Checks the processQueue for the next trial to run.
     #Should prioritize Neutral if they exist
