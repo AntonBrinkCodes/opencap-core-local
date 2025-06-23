@@ -310,7 +310,7 @@ class sessionManager:
             if trialType == "dynamic":
                 self.processingTrials[trialId] = "processing"
                 await self.sendUpdatedTrials(websocket=websocket, session_id=sessionId)
-            res = await asyncio.to_thread(runLocalTrial, sessionId, trialNames, trialId, trialType=trialType, dataDir=fileManager.base_directory)
+            res = await asyncio.to_thread(runLocalTrial, sessionId, trialNames, trialId, trialType=trialType, dataDir=fileManager.base_directory, poseDetector = poseDetector, cameras_to_use = cameras_to_use)
             if res!=None:
                 print("Succesfully processed trial")
                 successMsg = {
@@ -748,7 +748,11 @@ async def handle_web_message(websocket, message_json, command, active_session: S
             is_test = message_json.get("isTest")
             trialId = message_json.get("trialId")
             should_mirror = message_json.get("shouldMirror") # DEBUG!
+
+            # To implement below:
             cameras_to_use = message_json.get("cameras_to_use")
+            forceRedoPoseEstimation = message_json.get("forceRedoPoseEstimation")
+            poseDetector = message_json.get("poseDetector")
             print(f"Debug: {cameras_to_use} should currently be None")
             if should_mirror:
                 if trialType == "calibration":
@@ -761,7 +765,7 @@ async def handle_web_message(websocket, message_json, command, active_session: S
             print("processing trial: ")
 
 
-            await sessionManager.processTrial(websocket=websocket, session=active_session, trialId=trialId, trialType=trialType, isTest=is_test, trialNames=trialName)
+            await sessionManager.processTrial(websocket=websocket, session=active_session, trialId=trialId, trialType=trialType, isTest=is_test, trialNames=trialName, poseDetector=poseDetector, cameras_to_use=cameras_to_use)
 
         elif command == "start_recording":
             trialType = message_json.get("trialType")
