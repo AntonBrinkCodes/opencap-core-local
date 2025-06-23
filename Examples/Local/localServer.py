@@ -79,7 +79,7 @@ class sessionManager:
         self.activeSession: Optional[Session] = None
         self.isProcessing = False
         self.processingTrials = {} # Dict with key: uuid as a string, and values are either: 'processing' or 'queued'. Info in this is shared to webapp.
-        self.processQueue = Dict[str, ProcessTrial] # Dict for queueing the processing trials. 
+        self.processQueue = dict[str, ProcessTrial] = {} # Dict for queueing the processing trials. 
 
     #Checks the processQueue for the next trial to run.
     #Should prioritize Neutral if they exist
@@ -87,7 +87,7 @@ class sessionManager:
         print("Checking queue...")
         return self.get_oldest_trial(self.processQueue)
     
-    def get_oldest_trial(trials: Dict[str, ProcessTrial]) -> Optional[ProcessTrial]:
+    def get_oldest_trial(trials: dict[str, ProcessTrial]) -> Optional[ProcessTrial]:
         if not trials:
             return None
 
