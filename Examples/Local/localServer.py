@@ -334,7 +334,8 @@ class sessionManager:
             await manager.send_personal_message(json.dumps(toastMsg), websocket)
         finally:
             self.isProcessing = False
-            self.processQueue.pop(trialId) # Remove from queue
+            if trialType != "calibration":
+                self.processQueue.pop(trialId) # Remove from queue
             nextTrial = self.checkQueue
             if nextTrial != None:
                 self.processTrial(websocket=nextTrial.websocket, session=nextTrial.session, trialId= nextTrial.trialId,
