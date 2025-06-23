@@ -87,7 +87,7 @@ class sessionManager:
         print("Checking queue...")
         return self.get_oldest_trial(self.processQueue)
     
-    def get_oldest_trial(trials: Dict[str, ProcessTrial]) -> Optional[ProcessTrial]:
+    def get_oldest_trial(trials: dict) -> Optional[ProcessTrial]:
         if not trials:
             return None
 
