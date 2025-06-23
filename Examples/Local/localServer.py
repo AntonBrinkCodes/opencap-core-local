@@ -311,7 +311,7 @@ class sessionManager:
                 self.processingTrials[trialId] = "processing"
                 await self.sendUpdatedTrials(websocket=websocket, session_id=sessionId)
             print(f"cameras to use is: {cameras_to_use}")
-            res = await asyncio.to_thread(runLocalTrial, sessionId, trialNames, trialId, trialType=trialType, dataDir=fileManager.base_directory, poseDetector = poseDetector, cameras_to_use = cameras_to_use)
+            res = await asyncio.to_thread(runLocalTrial, sessionId, trialNames, trialId, trialType=trialType, dataDir=fileManager.base_directory)
             if res!=None:
                 print("Succesfully processed trial")
                 successMsg = {
