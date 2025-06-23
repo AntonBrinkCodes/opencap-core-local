@@ -11,7 +11,7 @@ from FileManager import FileManager
 import os
 import pickle 
 import threading
-import datetime
+from datetime import datetime
 import asyncio
 from localReprocess import runLocalTrial
 from fastapi.responses import FileResponse
