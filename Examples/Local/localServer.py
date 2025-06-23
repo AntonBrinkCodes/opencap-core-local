@@ -51,7 +51,10 @@ class ProcessTrial:
         trialType: str = "dynamic",
         trialName: str = "burpees",
         timeAdded: datetime = None,
-        isTest: bool = False
+        isTest: bool = False,
+        forceRedoPoseEstimation: bool = False,
+        poseDetector = "hrnet",
+        cameras_to_use = ["all"]
     ):
         """
         Initializes a new instance of the ProcessTrial class.
@@ -71,7 +74,10 @@ class ProcessTrial:
         self.trialType = trialType
         self.trialName = trialName
         self.timeAdded = timeAdded or datetime.now()
-        self.isTest = isTest
+        self.isTest = isTest,
+        self.forceRedoPoseEstimation = forceRedoPoseEstimation,
+        self.poseDetector = poseDetector,
+        self.cameras_to_use = cameras_to_use
 
 class sessionManager:
     def __init__(self):
@@ -245,7 +251,7 @@ class sessionManager:
         while self.isProcessing:
             await asyncio.sleep(interval)
     
-    async def processTrial(self, websocket: WebSocket, session: Session, trialId: str, trialType: Optional[str] = "dynamic", isTest=False,  trialNames: Optional[str] = ""):
+    async def processTrial(self, websocket: WebSocket, session: Session, trialId: str, trialType: Optional[str] = "dynamic", isTest=False,  trialNames: Optional[str] = "", cameras_to_use: [str] = ["all"], poseDetector = "hrnet"):
         """
         Process a trial based on the given session, trial type, and testing flag.
 
@@ -290,7 +296,7 @@ class sessionManager:
             if trialId in self.processQueue.keys():
                 print(f"Processing {trialNames} from queue")
             else: 
-                self.processQueue[trialId] = ProcessTrial(websocket = websocket, session = session, trialId = trialId, trialName = trialNames, trialType = trialType) # Add to queue
+                self.processQueue[trialId] = ProcessTrial(websocket = websocket, session = session, trialId = trialId, trialName = trialNames, trialType = trialType, poseDetector=poseDetector, cameras_to_use=cameras_to_use) # Add to queue
             if trialType == "dynamic":
                 self.processingTrials[trialId] = "queued"
                 await self.sendUpdatedTrials(websocket=websocket, session_id=sessionId)
@@ -340,7 +346,7 @@ class sessionManager:
             print(f"next trial is: {nextTrial} and is type: {type(nextTrial)}")
             if nextTrial != None:
                 self.processTrial(websocket=nextTrial.websocket, session=nextTrial.session, trialId= nextTrial.trialId,
-                                 trialType=nextTrial.trialType, trialNames = nextTrial.trialName, isTest=nextTrial.isTest)
+                                 trialType=nextTrial.trialType, trialNames = nextTrial.trialName, isTest=nextTrial.isTest, cameras_to_use=cameras_to_use, poseDetector=poseDetector)
 
     
 class ConnectionInfo:
@@ -737,13 +743,13 @@ async def handle_web_message(websocket, message_json, command, active_session: S
     if active_session:
 
         if command == 'process_trial':
-            print("processing trial: ")
             trialType = message_json.get("trialType")
             trialName = message_json.get("trialName")
             is_test = message_json.get("isTest")
             trialId = message_json.get("trialId")
             should_mirror = message_json.get("shouldMirror") # DEBUG!
-
+            cameras_to_use = message_json.get("cameras_to_use")
+            print(f"Debug: {cameras_to_use} should currently be None")
             if should_mirror:
                 if trialType == "calibration":
                     active_session.add_camera(camera=active_session.iphoneModel["Cam0"], idx=1)
