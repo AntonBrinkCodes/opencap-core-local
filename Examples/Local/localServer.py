@@ -336,7 +336,7 @@ class sessionManager:
             self.isProcessing = False
             if trialType != "calibration":
                 self.processQueue.pop(trialId) # Remove from queue
-            nextTrial = self.checkQueue
+            nextTrial = self.checkQueue()
             print(f"next trial is: {nextTrial} and is type: {type(nextTrial)}")
             if nextTrial != None:
                 self.processTrial(websocket=nextTrial.websocket, session=nextTrial.session, trialId= nextTrial.trialId,
