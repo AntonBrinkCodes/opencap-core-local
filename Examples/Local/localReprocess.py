@@ -58,6 +58,7 @@ def runLocalTrial(sessionId: str, trialNames, trialId, trialType="dynamic", pose
         print(f"staticTrialname = {trialNames}")
         deleteStaticFiles(session_path=session_path, staticTrialName=trialNames)
         scaleModel = True
+        forceRedoPoseEstimation = True
 
 
     main(sessionId, trialNames, trialId, cameras_to_use=cameras_to_use,
