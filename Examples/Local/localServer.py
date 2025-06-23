@@ -287,7 +287,7 @@ class sessionManager:
         
         if trialType != "calibration": #GPU only neededd for dynamic and neutral trials.
             print("Checking for available GPU")
-            if trialId in self.processQueue:
+            if trialId in self.processQueue.keys():
                 print(f"Processing {trialNames} from queue")
             else: 
                 self.processQueue[trialId] = ProcessTrial(websocket = websocket, session = session, trialId = trialId, trialName = trialNames, trialType = trialType) # Add to queue
