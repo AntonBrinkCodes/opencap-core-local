@@ -284,10 +284,10 @@ class sessionManager:
 
         # Run the trial locally TODO: Add some kind of check here or maybe a "try" to prevent crashes :)
         res = None
-        thisTrial = ProcessTrial(websocket = websocket, session = session, trialId = trialId, trialName = trialNames, trialType = trialType)
+        
         if trialType != "calibration": #GPU only neededd for dynamic and neutral trials.
             print("Checking for available GPU")
-            self.processQueue[trialId] = thisTrial # Add to queue
+            self.processQueue[trialId] = ProcessTrial(websocket = websocket, session = session, trialId = trialId, trialName = trialNames, trialType = trialType)ial # Add to queue
             if trialType == "dynamic":
                 self.processingTrials[trialId] = "queued"
                 await self.sendUpdatedTrials(websocket=websocket, session_id=sessionId)
@@ -331,7 +331,7 @@ class sessionManager:
             await manager.send_personal_message(json.dumps(toastMsg), websocket)
         finally:
             self.isProcessing = False
-            self.processQueue.pop(thisTrial) # Remove from queue
+            self.processQueue.pop(trialId) # Remove from queue
             nextTrial = self.checkQueue
             if nextTrial != None:
                 self.processTrial(websocket=nextTrial.websocket, session=nextTrial.session, trialId= nextTrial.trialId,
