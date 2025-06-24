@@ -254,14 +254,14 @@ class sessionManager:
             await asyncio.sleep(interval)
     
     #TODO: Clean up this and processTrial. Probably these can be the same function..
-    async def reProcessTrial(self, websocket: WebSocket, session: Session, trialId: str, trialType: Optional[str] = "dynamic", trialNames: Optional[str] = "", cameras_to_use: [str] = ["all"], poseDetector = "hrnet", resolution = "default"):
+    async def reProcessTrial(self, websocket: WebSocket, session: Session, trialId: str, trialType: Optional[str] = "dynamic", trialNames: Optional[str] = "", cameras_to_use: [str] = ["all"], poseDetector = "hrnet", resolution = "default", forceRedoPoseEstimation = False):
         # Initialize session ID
         sessionId = str(session.getID())
         res = None
         if trialId in self.processQueue.keys():
                 print(f"Processing {trialNames} from queue")
         else: 
-            self.processQueue[trialId] = ProcessTrial(websocket = websocket, session = session, trialId = trialId, trialName = trialNames, trialType = trialType, poseDetector=poseDetector, cameras_to_use=cameras_to_use, resolutionPoseDetection = resolution, cameras_to_use = cameras_to_use) # Add to queue
+            self.processQueue[trialId] = ProcessTrial(websocket = websocket, session = session, trialId = trialId, trialName = trialNames, trialType = trialType, poseDetector=poseDetector, cameras_to_use=cameras_to_use, resolutionPoseDetection = resolution, forceRedoPoseEstimation= forceRedoPoseEstimation) # Add to queue
         if trialType == "dynamic":
             self.processingTrials[trialId] = "queued"
             await self.sendUpdatedTrials(websocket=websocket, session_id=sessionId)
@@ -276,7 +276,7 @@ class sessionManager:
                 self.processingTrials[trialId] = "processing"
                 await self.sendUpdatedTrials(websocket=websocket, session_id=sessionId)
             print(f"cameras to use is: {cameras_to_use}")
-            res = await asyncio.to_thread(runLocalTrial, sessionId, trialNames, trialId, trialType=trialType, dataDir=fileManager.base_directory, cameras_to_use = cameras_to_use, resolutionPoseDetection = )
+            res = await asyncio.to_thread(runLocalTrial, sessionId, trialNames, trialId, trialType=trialType, dataDir=fileManager.base_directory, cameras_to_use = cameras_to_use, psoeDetector = poseDetector, resolutionPoseDetection = resolution, forceRedoPoseEstimation = forceRedoPoseEstimation )
             if res!=None:
                 print("Succesfully processed trial")
                 successMsg = {
