@@ -348,7 +348,8 @@ class FileManager:
                     trial_dict[trial]['uuid'] = mov_files[0].rsplit(".",1)[0]
             
             # Backup
-            if trial_dict[trial]['uuid'] == "":
+            if trial_dict[trial]['uuid'] == None:
+                print("UUID WAS FOUND AS EMPTY")
                 backup_trial_path = os.path.join(backup_folder_path, trial)
                 if os.path.isdir(backup_trial_path):
                     # Find the .mov file in the trial directory
