@@ -262,9 +262,9 @@ class sessionManager:
                 print(f"Processing {trialNames} from queue")
         else: 
             self.processQueue[trialId] = ProcessTrial(websocket = websocket, session = session, trialId = trialId, trialName = trialNames, trialType = trialType, poseDetector=poseDetector, cameras_to_use=cameras_to_use, resolutionPoseDetection = resolution, forceRedoPoseEstimation= forceRedoPoseEstimation) # Add to queue
-        if trialType == "dynamic":
-            self.processingTrials[trialId] = "queued"
-            await self.sendUpdatedTrials(websocket=websocket, session_id=sessionId)
+
+        self.processingTrials[trialId] = "queued"
+        await self.sendUpdatedTrials(websocket=websocket, session_id=sessionId)
         
         if self.isProcessing: # Already added trial to processQueue and sent the information to web server
             return
@@ -309,7 +309,7 @@ class sessionManager:
             nextTrial = self.checkQueue()
             print(f"next trial is: {nextTrial} and is type: {type(nextTrial)}")
             if nextTrial != None:
-                self.reProcessTrial(websocket=nextTrial.websocket, session=nextTrial.session, trialId= nextTrial.trialId,
+                await self.reProcessTrial(websocket=nextTrial.websocket, session=nextTrial.session, trialId= nextTrial.trialId,
                                  trialType=nextTrial.trialType, trialNames = nextTrial.trialName, isTest=nextTrial.isTest, cameras_to_use=cameras_to_use, 
                                  poseDetector=poseDetector, resolution=nextTrial.resolutionPoseDetection)
 
@@ -410,7 +410,7 @@ class sessionManager:
             nextTrial = self.checkQueue()
             print(f"next trial is: {nextTrial} and is type: {type(nextTrial)}")
             if nextTrial != None:
-                self.reProcessTrial(websocket=nextTrial.websocket, session=nextTrial.session, trialId= nextTrial.trialId,
+                await self.reProcessTrial(websocket=nextTrial.websocket, session=nextTrial.session, trialId= nextTrial.trialId,
                                  trialType=nextTrial.trialType, trialNames = nextTrial.trialName, isTest=nextTrial.isTest, cameras_to_use=cameras_to_use, 
                                  poseDetector=poseDetector, resolution=nextTrial.resolutionPoseDetection)
 
