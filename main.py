@@ -380,7 +380,7 @@ def main(sessionName, trialName, trial_id, cameras_to_use=['all'],
                     trialName, CamParamDict=CamParamDict, 
                     resolutionPoseDetection=resolutionPoseDetection, 
                     generateVideo=generateVideo, cams2Use=camerasToUse_c,
-                    poseDetector=poseDetector, bbox_thr=bbox_thr, forceRedoPoseEstimation=False))
+                    poseDetector=poseDetector, bbox_thr=bbox_thr, forceRedoPoseEstimation=False)
             trialRelativePath += videoExtension
         except Exception as e:
             if len(e.args) == 2: # specific exception
