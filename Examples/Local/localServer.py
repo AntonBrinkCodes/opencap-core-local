@@ -826,6 +826,17 @@ async def handle_web_message(websocket, message_json, command, active_session: S
                 "session": str(active_session.uuid)
             }
             await manager.send_personal_message(message=json.dumps(jsonMsg), websocket=websocket)
+        
+        elif command == "get_max_video_count":
+
+            videoCount = fileManager.get_session_max_cameras(session=active_session)
+
+            print(f"DEBUG - Max videoCount for this session is {videoCount}")
+            jsonMsg = {
+                "command" : "maxVidCount",
+                "content": videoCount
+            }
+            await manager.send_personal_message(message = json.dumps(jsonMsg), websocket= websocket)
 
         elif command == "get_visualizer":
             trialName = message_json.get("trialName")

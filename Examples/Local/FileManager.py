@@ -358,6 +358,10 @@ class FileManager:
             video_list = [os.path.join(visualizer_video_path, file) for file in files]
         return video_list
 
+    def get_session_max_cameras(self, session: Session) -> int:
+        video_path = os.path.join(self.base_directory, str(session.uuid), "Videos")
+        count = len(os.listdir(video_path))
+        return count
     
     def zip_session_folder(self, session_id: str) -> str:
         # Path to the session folder
