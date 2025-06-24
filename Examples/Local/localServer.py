@@ -767,6 +767,21 @@ async def handle_web_message(websocket, message_json, command, active_session: S
 
 
             await sessionManager.processTrial(websocket=websocket, session=active_session, trialId=trialId, trialType=trialType, isTest=is_test, trialNames=trialName, poseDetector=poseDetector, cameras_to_use=cameras_to_use)
+        elif command == "reprocess_trial":
+            trialType = message_json.get("trialType")
+            trialName = message_json.get("trialName")
+            trialId = message_json.get("trialId")
+
+            forceRedoPoseEstimation = bool(message_json.get("forceRedoPoseEstimation") == "true")
+            cameras_to_use = message_json.get("cameras_to_use")
+            poseDetector = message_json.get("poseEstimator")
+            resolution = message_json.get("resolution")
+
+            print(f"[DEBUG] Trial Info - Type: {trialType}, Name: {trialName}, ID: {trialId}, "
+                f"Force Redo: {forceRedoPoseEstimation}, Cameras: {cameras_to_use}, "
+                f"Pose Estimator: {poseDetector}, Resolution: {resolution}")
+
+            # await sessionManager.reProcessTrial() make this function!            
 
         elif command == "start_recording":
             trialType = message_json.get("trialType")
