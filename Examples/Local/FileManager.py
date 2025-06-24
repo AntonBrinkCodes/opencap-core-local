@@ -312,6 +312,7 @@ class FileManager:
             }
         """
         trials_folder_path = os.path.join(self.base_directory, str(session.uuid), 'Videos', 'Cam0', 'InputMedia') #Cam0 always exists
+        backup_folder_path = os.path.join(self.base_directory, str(session.uuid), 'Videos', 'Cam1', 'InputMedia') #If for some reason Cam0 would not exist (happened once)
         processed_trials_folder_path = os.path.join(self.base_directory, str(session.uuid), 'VisualizerJsons')
         # Should add also for visualizerVideos.
         trials = get_folders_in_path(trials_folder_path)
@@ -345,7 +346,18 @@ class FileManager:
                 if mov_files:
                     # Store the first .mov file found (or modify as needed if there are multiple)
                     trial_dict[trial]['uuid'] = mov_files[0].rsplit(".",1)[0]
-
+            
+            # Backup
+            if trial_dict[trial]['uuid'] == "":
+                backup_trial_path = os.path.join(backup_folder_path, trial)
+                if os.path.isdir(backup_trial_path):
+                    # Find the .mov file in the trial directory
+                    mov_files = [file for file in os.listdir(backup_trial_path) if file.lower().endswith('.mov')]
+                    if mov_files:
+                        print("backup mov files: ", mov_files)
+                    # Store the first .mov file found (or modify as needed if there are multiple)
+                        trial_dict[trial]['uuid'] = mov_files[0].rsplit(".",1)[0]
+                    
         # Return the final dictionary
         return trial_dict
     

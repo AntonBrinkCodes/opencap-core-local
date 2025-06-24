@@ -171,6 +171,8 @@ def runOpenPoseCMD(pathOpenPose, resolutionPoseDetection, cameraDirectory,
     command = None
     if resolutionPoseDetection == 'default':
         cmd_hr = ' '
+    elif resolutionPoseDetection == "1x368":
+        cmd_hr = ' '
     elif resolutionPoseDetection == '1x1008_4scales':
         if horizontal:
             cmd_hr = ' --net_resolution "1008x-1" --scale_number 4 --scale_gap 0.25 '
