@@ -286,9 +286,8 @@ class sessionManager:
                 }
                 await manager.send_personal_message(json.dumps(successMsg), websocket)
                 # Handle "dynamic" trial type
-                if trialType == "dynamic":
-                    self.processingTrials.pop(trialId)
-                    await self.sendUpdatedTrials(websocket=websocket, session_id=sessionId)
+                self.processingTrials.pop(trialId)
+                await self.sendUpdatedTrials(websocket=websocket, session_id=sessionId)
         except Exception as inst:
             print(f"Error: {type(inst)}! Args: {inst.args} ")
             self.processingTrials[trialId] = "Error"
