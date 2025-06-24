@@ -310,8 +310,9 @@ class sessionManager:
             nextTrial = self.checkQueue()
             print(f"next trial is: {nextTrial} and is type: {type(nextTrial)}")
             if nextTrial != None:
-                self.processTrial(websocket=nextTrial.websocket, session=nextTrial.session, trialId= nextTrial.trialId,
-                                 trialType=nextTrial.trialType, trialNames = nextTrial.trialName, isTest=nextTrial.isTest, cameras_to_use=cameras_to_use, poseDetector=poseDetector)
+                self.reProcessTrial(websocket=nextTrial.websocket, session=nextTrial.session, trialId= nextTrial.trialId,
+                                 trialType=nextTrial.trialType, trialNames = nextTrial.trialName, isTest=nextTrial.isTest, cameras_to_use=cameras_to_use, 
+                                 poseDetector=poseDetector, resolution=nextTrial.resolutionPoseDetection)
 
 
 
@@ -410,8 +411,9 @@ class sessionManager:
             nextTrial = self.checkQueue()
             print(f"next trial is: {nextTrial} and is type: {type(nextTrial)}")
             if nextTrial != None:
-                self.processTrial(websocket=nextTrial.websocket, session=nextTrial.session, trialId= nextTrial.trialId,
-                                 trialType=nextTrial.trialType, trialNames = nextTrial.trialName, isTest=nextTrial.isTest, cameras_to_use=cameras_to_use, poseDetector=poseDetector)
+                self.reProcessTrial(websocket=nextTrial.websocket, session=nextTrial.session, trialId= nextTrial.trialId,
+                                 trialType=nextTrial.trialType, trialNames = nextTrial.trialName, isTest=nextTrial.isTest, cameras_to_use=cameras_to_use, 
+                                 poseDetector=poseDetector, resolution=nextTrial.resolutionPoseDetection)
 
     
 class ConnectionInfo:
