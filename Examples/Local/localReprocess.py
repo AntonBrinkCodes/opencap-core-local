@@ -17,7 +17,7 @@ from utils import getDataDirectory
 
 
 def runLocalTrial(sessionId: str, trialNames, trialId, trialType="dynamic", poseDetector='hrnet', genericFolderNames=True, cameras_to_use=['all'],
-                  resolutionPoseDetection='default', dataDir = None) -> bool:
+                  resolutionPoseDetection='default', dataDir = None,  forceRedoPoseEstimation = False) -> bool:
     '''
     Runs the trial Locally.
 
@@ -58,12 +58,14 @@ def runLocalTrial(sessionId: str, trialNames, trialId, trialType="dynamic", pose
         print(f"session_path is: {session_path}")    
         deleteStaticFiles(session_path=session_path, staticTrialName=trialNames)
         scaleModel = True
+        forceRedoPoseEstimation = True
+
 
 
     main(sessionId, trialNames, trialId, cameras_to_use=cameras_to_use,
          intrinsicsFinalFolder='Deployed', isDocker=False,
           extrinsicsTrial=extrinsicTrial, poseDetector=poseDetector, resolutionPoseDetection=resolutionPoseDetection,
-           scaleModel=scaleModel, genericFolderNames=genericFolderNames )
+           scaleModel=scaleModel, genericFolderNames=genericFolderNames , forceRedoPoseEstimation=forceRedoPoseEstimation)
     
     return True
 
@@ -85,6 +87,7 @@ if __name__=="__main__":
     extrinsicTrial = False
     genericFolderNames = True
     scaleModel = False
+    forceRedoPoseEstimation = False
 
     sessionType = "dynamic" # Calibration, static, or dynamic. assumes dynamic if anything else
 
@@ -102,15 +105,16 @@ if __name__=="__main__":
         session_path = os.path.join(data_dir,'Data',session_name)
         deleteStaticFiles(session_path=session_path)
         scaleModel = True
+        forceRedoPoseEstimation = True
+
 
     #os.chdir('..')
-    
     print(extrinsicTrial)
     main(session_name, trial_Names, dynamic_trialNames, cameras_to_use=['all'],
              intrinsicsFinalFolder='Deployed', isDocker=False,
              extrinsicsTrial=extrinsicTrial,
              poseDetector=poseDetector, resolutionPoseDetection=resolutionPoseDetection,
-             scaleModel=scaleModel, genericFolderNames = genericFolderNames)
+             scaleModel=scaleModel, genericFolderNames = genericFolderNames, forceRedoPoseEstimation=forceRedoPoseEstimation)
 
 # ScaleModel probably should only be true on calibration trial?
 # extrinsicsTrial should be True on "Neutral". Which is probably to get extrinsics..

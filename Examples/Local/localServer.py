@@ -54,7 +54,8 @@ class ProcessTrial:
         isTest: bool = False,
         forceRedoPoseEstimation: bool = False,
         poseDetector = "hrnet",
-        cameras_to_use = ["all"]
+        cameras_to_use = ["all"],
+        resolutionPoseDetection = "default"
     ):
         """
         Initializes a new instance of the ProcessTrial class.
@@ -77,7 +78,8 @@ class ProcessTrial:
         self.isTest = isTest,
         self.forceRedoPoseEstimation = forceRedoPoseEstimation,
         self.poseDetector = poseDetector,
-        self.cameras_to_use = cameras_to_use
+        self.cameras_to_use = cameras_to_use,
+        self.resolutionPoseDetection = resolutionPoseDetection or "default"
 
 class sessionManager:
     def __init__(self):
@@ -251,6 +253,68 @@ class sessionManager:
         while self.isProcessing:
             await asyncio.sleep(interval)
     
+    #TODO: Clean up this and processTrial. Probably these can be the same function..
+    async def reProcessTrial(self, websocket: WebSocket, session: Session, trialId: str, trialType: Optional[str] = "dynamic", trialNames: Optional[str] = "", cameras_to_use: [str] = ["all"], poseDetector = "hrnet", resolution = "default"):
+        # Initialize session ID
+        sessionId = str(session.getID())
+        res = None
+        if trialId in self.processQueue.keys():
+                print(f"Processing {trialNames} from queue")
+        else: 
+            self.processQueue[trialId] = ProcessTrial(websocket = websocket, session = session, trialId = trialId, trialName = trialNames, trialType = trialType, poseDetector=poseDetector, cameras_to_use=cameras_to_use, resolutionPoseDetection = resolution, cameras_to_use = cameras_to_use) # Add to queue
+        if trialType == "dynamic":
+            self.processingTrials[trialId] = "queued"
+            await self.sendUpdatedTrials(websocket=websocket, session_id=sessionId)
+        
+        if self.isProcessing: # Already added trial to processQueue and sent the information to web server
+            return
+
+        print(f"Reprocessing trial: {trialNames}, with id: {trialId}. Type: {trialType}")
+        self.isProcessing = True
+        try:
+            if trialType == "dynamic":
+                self.processingTrials[trialId] = "processing"
+                await self.sendUpdatedTrials(websocket=websocket, session_id=sessionId)
+            print(f"cameras to use is: {cameras_to_use}")
+            res = await asyncio.to_thread(runLocalTrial, sessionId, trialNames, trialId, trialType=trialType, dataDir=fileManager.base_directory, cameras_to_use = cameras_to_use, resolutionPoseDetection = )
+            if res!=None:
+                print("Succesfully processed trial")
+                successMsg = {
+                    "command": "process_succeded",
+                    "trialType": trialType,
+                    "trialId": trialId,
+                    "session": sessionId
+                }
+                await manager.send_personal_message(json.dumps(successMsg), websocket)
+                # Handle "dynamic" trial type
+                if trialType == "dynamic":
+                    self.processingTrials.pop(trialId)
+                    await self.sendUpdatedTrials(websocket=websocket, session_id=sessionId)
+        except Exception as inst:
+            print(f"Error: {type(inst)}! Args: {inst.args} ")
+            self.processingTrials[trialId] = "Error"
+            if trialType == "dynamic":
+                await self.sendUpdatedTrials(websocket=websocket, session_id=sessionId)
+            if trialType == "neutral":
+                self.processingTrials.pop(trialId)
+            print(inst)
+            toastMsg = {
+                "command": "Toast",
+                "type": "Error",
+                "content": f"Error from server: {inst}"
+            }
+            await manager.send_personal_message(json.dumps(toastMsg), websocket)
+        finally:
+            self.isProcessing = False
+            self.processQueue.pop(trialId) # Remove from queue
+            nextTrial = self.checkQueue()
+            print(f"next trial is: {nextTrial} and is type: {type(nextTrial)}")
+            if nextTrial != None:
+                self.processTrial(websocket=nextTrial.websocket, session=nextTrial.session, trialId= nextTrial.trialId,
+                                 trialType=nextTrial.trialType, trialNames = nextTrial.trialName, isTest=nextTrial.isTest, cameras_to_use=cameras_to_use, poseDetector=poseDetector)
+
+
+
     async def processTrial(self, websocket: WebSocket, session: Session, trialId: str, trialType: Optional[str] = "dynamic", isTest=False,  trialNames: Optional[str] = "", cameras_to_use: [str] = ["all"], poseDetector = "hrnet"):
         """
         Process a trial based on the given session, trial type, and testing flag.
