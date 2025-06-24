@@ -772,7 +772,7 @@ async def handle_web_message(websocket, message_json, command, active_session: S
             trialName = message_json.get("trialName")
             trialId = message_json.get("trialId")
 
-            forceRedoPoseEstimation = bool(message_json.get("forceRedoPoseEstimation") == "true")
+            forceRedoPoseEstimation = bool(message_json.get("forceRedoPoseEstimation"))
             cameras_to_use = message_json.get("cameras_to_use")
             poseDetector = message_json.get("poseEstimator")
             resolution = message_json.get("resolution")
