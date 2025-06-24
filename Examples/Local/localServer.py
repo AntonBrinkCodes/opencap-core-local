@@ -254,7 +254,7 @@ class sessionManager:
             await asyncio.sleep(interval)
     
     #TODO: Clean up this and processTrial. Probably these can be the same function..
-    async def reProcessTrial(self, websocket: WebSocket, session: Session, trialId: str, trialType: Optional[str] = "dynamic", trialNames: Optional[str] = "", cameras_to_use: [str] = ["all"], poseDetector = "hrnet", resolution = "default", forceRedoPoseEstimation = False):
+    async def reProcessTrial(self, websocket: WebSocket, session: Session, trialId: str, trialType: Optional[str] = "dynamic", trialNames: Optional[str] = "", cameras_to_use: [str] = ["all"], poseDetector = "hrnet", resolution = "default", forceRedoPoseEstimation = False, isTest = False):
         # Initialize session ID
         sessionId = str(session.getID())
         res = None
@@ -272,9 +272,8 @@ class sessionManager:
         print(f"Reprocessing trial: {trialNames}, with id: {trialId}. Type: {trialType}")
         self.isProcessing = True
         try:
-            if trialType == "dynamic":
-                self.processingTrials[trialId] = "processing"
-                await self.sendUpdatedTrials(websocket=websocket, session_id=sessionId)
+            self.processingTrials[trialId] = "processing"
+            await self.sendUpdatedTrials(websocket=websocket, session_id=sessionId)
             print(f"cameras to use is: {cameras_to_use}")
             res = await asyncio.to_thread(runLocalTrial, sessionId, trialNames, trialId, trialType=trialType, dataDir=fileManager.base_directory, cameras_to_use = cameras_to_use, poseDetector = poseDetector, resolutionPoseDetection = resolution, forceRedoPoseEstimation = forceRedoPoseEstimation )
             if res!=None:
